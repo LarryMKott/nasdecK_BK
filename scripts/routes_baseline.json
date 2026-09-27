@@ -1,0 +1,300 @@
+{
+  "source": "/vol1/1000/apps/zcode/nasdash/app.py",
+  "generated_by": "scripts/extract_routes.py（正则静态抽取，不 import）",
+  "route_count": 58,
+  "routes": [
+    {
+      "path": "/",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "path": "/api/alerts",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "path": "/api/alerts/config",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "path": "/api/alerts/test",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "path": "/api/all",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "path": "/api/diagnostics",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "path": "/api/disks",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "path": "/api/disks/rename",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "path": "/api/disks/selftest",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "path": "/api/disks/selftest/abort",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "path": "/api/disks/selftest/history",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "path": "/api/docker",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "path": "/api/errors/clear",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "path": "/api/errors/test",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "path": "/api/fan/control",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "path": "/api/fan/disk_temp",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "path": "/api/fan/fcs",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "path": "/api/fan/history",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "path": "/api/fan/labels",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "path": "/api/fan/pwm_mode",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "path": "/api/fan/rules",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "path": "/api/fan/set",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "path": "/api/fan/status",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "path": "/api/fan/sys_temp",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "path": "/api/fan/temps",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "path": "/api/history",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "path": "/api/me",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "path": "/api/metrics",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "path": "/api/network",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "path": "/api/network/wol",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "path": "/api/ports",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "path": "/api/ports/appicon",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "path": "/api/ports/release",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "path": "/api/raid",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "path": "/api/raid/cc",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "path": "/api/raid/cc/schedule",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "path": "/api/raid/copyback",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "path": "/api/raid/hotspare",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "path": "/api/raid/locate",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "path": "/api/report",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "path": "/api/storage",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "path": "/api/system",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "path": "/api/version",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "path": "/manual",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "path": "/ui/images/<path:filename>",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "path": "/vue",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "path": "/vue/",
+      "methods": [
+        "GET"
+      ]
+    }
+  ]
+}
