@@ -9,6 +9,9 @@
 运行：./test.sh  （自动建 .venv 装 flask+pytest 并跑）
 """
 import app as app
+from backend import shell
+from backend.fans import enumerate as fans_enumerate
+from backend.fans import fcs as fcs_mod
 import json
 
 
@@ -213,7 +216,7 @@ def _fan_enum_harness(monkeypatch, hwmap):
                 return list(hwmap.keys())
             return []
 
-    monkeypatch.setattr(app, "_glob", FakeGlob())
+    monkeypatch.setattr(fans_enumerate, "_glob", FakeGlob())  # 拆分后 _glob 随 _enumerate_fans 归 fans/enumerate
 
     def fake_exists(path):
         m = _re.search(r"/(hwmon\d+)/(pwm|fan)(\d+)(_input)?$", path)
@@ -276,13 +279,13 @@ def test_detect_storage_controllers_includes_non_whitelisted_vendor(monkeypatch)
         "01:00.0 RAID bus controller: Areca Technology Corp. ARC-1882 SAS/SATA RAID Controller\n"
         "02:00.0 Non-Volatile memory controller: Samsung Electronics Co Ltd NVMe SSD Controller\n"
     )
-    monkeypatch.setattr(app, "run_cmd", lambda cmd, *a, **k: out if "lspci" in cmd else "")
+    monkeypatch.setattr(shell, "run_cmd", lambda cmd, *a, **k: out if "lspci" in cmd else "")
     cs = app.detect_storage_controllers()
     assert any("Areca" in c["model"] for c in cs)
     assert any(c["is_hba"] for c in cs)
     # 仍正确识别 MegaRAID
     mega_out = "03:00.0 RAID bus controller: Broadcom / LSI MegaRAID SAS 9271-8i\n"
-    monkeypatch.setattr(app, "run_cmd", lambda cmd, *a, **k: mega_out if "lspci" in cmd else "")
+    monkeypatch.setattr(shell, "run_cmd", lambda cmd, *a, **k: mega_out if "lspci" in cmd else "")
     cs2 = app.detect_storage_controllers()
     assert cs2 and cs2[0]["is_megaraid"]
 
@@ -299,8 +302,8 @@ def test_get_disks_includes_multi_letter_sata_names(monkeypatch):
 
     monkeypatch.setattr(app.glob, "glob", fake_glob)
     # lsblk / smartctl 在测试环境无真实硬件，返回空即可（代码已容错）
-    monkeypatch.setattr(app, "run_cmd", lambda *a, **k: "")
-    monkeypatch.setattr(app, "sudo_cmd", lambda *a, **k: "")
+    monkeypatch.setattr(shell, "run_cmd", lambda *a, **k: "")
+    monkeypatch.setattr(shell, "sudo_cmd", lambda *a, **k: "")
     disks = app.get_disks()
     devs = [d["dev"] for d in disks]
     assert "sdaa" in devs and "sdab" in devs
@@ -464,7 +467,7 @@ def test_fan_stop_ext_service_calls_systemctl_and_pkill(monkeypatch):
     calls = []
     def fake_sudo(cmd, *a, **k):
         calls.append(list(cmd)); return ""
-    monkeypatch.setattr(app, "sudo_cmd", fake_sudo)
+    monkeypatch.setattr(shell, "sudo_cmd", fake_sudo)
     app._fan_stop_ext_service()
     assert ["systemctl", "stop", "pwm-fancontrol"] in calls
     assert ["pkill", "-f", "pwm-fancontrol"] in calls
@@ -473,14 +476,14 @@ def test_fan_start_ext_service_calls_systemctl_start(monkeypatch):
     calls = []
     def fake_sudo(cmd, *a, **k):
         calls.append(list(cmd)); return ""
-    monkeypatch.setattr(app, "sudo_cmd", fake_sudo)
+    monkeypatch.setattr(shell, "sudo_cmd", fake_sudo)
     app._fan_start_ext_service()
     assert ["systemctl", "start", "pwm-fancontrol"] in calls
 
 def test_fan_ext_service_helpers_survive_sudo_failure(monkeypatch):
     def fake_sudo(cmd, *a, **k):
         raise RuntimeError("no systemctl on this box")
-    monkeypatch.setattr(app, "sudo_cmd", fake_sudo)
+    monkeypatch.setattr(shell, "sudo_cmd", fake_sudo)
     # 必须不抛异常（best-effort）
     app._fan_stop_ext_service()
     app._fan_start_ext_service()
@@ -490,8 +493,8 @@ def test_fan_ext_service_helpers_survive_sudo_failure(monkeypatch):
 def test_fcs_disable_stops_disables_and_sets_flag(monkeypatch):
     calls = []
     flag = {}
-    monkeypatch.setattr(app, "sudo_cmd", lambda cmd, *a, **k: (calls.append(list(cmd)), "")[1])
-    monkeypatch.setattr(app, "_set_fcs_disabled", lambda v: flag.__setitem__("v", v))
+    monkeypatch.setattr(shell, "sudo_cmd", lambda cmd, *a, **k: (calls.append(list(cmd)), "")[1])
+    monkeypatch.setattr(fcs_mod, "_set_fcs_disabled", lambda v: flag.__setitem__("v", v))
     app._fcs_disable()
     assert ["systemctl", "disable", "--now", "pwm-fancontrol"] in calls
     assert flag.get("v") is True
@@ -499,8 +502,8 @@ def test_fcs_disable_stops_disables_and_sets_flag(monkeypatch):
 def test_fcs_enable_enables_and_clears_flag(monkeypatch):
     calls = []
     flag = {}
-    monkeypatch.setattr(app, "sudo_cmd", lambda cmd, *a, **k: (calls.append(list(cmd)), "")[1])
-    monkeypatch.setattr(app, "_set_fcs_disabled", lambda v: flag.__setitem__("v", v))
+    monkeypatch.setattr(shell, "sudo_cmd", lambda cmd, *a, **k: (calls.append(list(cmd)), "")[1])
+    monkeypatch.setattr(fcs_mod, "_set_fcs_disabled", lambda v: flag.__setitem__("v", v))
     app._fcs_enable()
     assert ["systemctl", "enable", "--now", "pwm-fancontrol"] in calls
     assert flag.get("v") is False
@@ -508,8 +511,8 @@ def test_fcs_enable_enables_and_clears_flag(monkeypatch):
 def test_fan_start_respects_user_disabled(monkeypatch):
     """用户永久禁用 FCS 后，nasdash 交还自动温控时不再把 FCS 拉起来。"""
     calls = []
-    monkeypatch.setattr(app, "sudo_cmd", lambda cmd, *a, **k: (calls.append(list(cmd)), "")[1])
-    monkeypatch.setattr(app, "_fcs_disabled", lambda: True)
+    monkeypatch.setattr(shell, "sudo_cmd", lambda cmd, *a, **k: (calls.append(list(cmd)), "")[1])
+    monkeypatch.setattr(fcs_mod, "_fcs_disabled", lambda: True)
     app._fan_start_ext_service()
     assert calls == []
 
@@ -518,20 +521,20 @@ def test_fcs_disable_survives_sudo_failure(monkeypatch):
     def boom(*a, **k):
         raise RuntimeError("no systemctl on this box")
     flag = {}
-    monkeypatch.setattr(app, "sudo_cmd", boom)
-    monkeypatch.setattr(app, "_set_fcs_disabled", lambda v: flag.__setitem__("v", v))
+    monkeypatch.setattr(shell, "sudo_cmd", boom)
+    monkeypatch.setattr(fcs_mod, "_set_fcs_disabled", lambda v: flag.__setitem__("v", v))
     app._fcs_disable()  # 不抛异常
     assert flag.get("v") is True
 
 def test_fcs_status_shape(monkeypatch):
     # _fcs_status 用一条 `systemctl show` 同时取 ActiveState/UnitFileState
-    monkeypatch.setattr(app, "run_cmd", lambda cmd, *a, **k: "ActiveState=active\nUnitFileState=enabled\n")
-    monkeypatch.setattr(app, "_fcs_disabled", lambda: False)
+    monkeypatch.setattr(shell, "run_cmd", lambda cmd, *a, **k: "ActiveState=active\nUnitFileState=enabled\n")
+    monkeypatch.setattr(fcs_mod, "_fcs_disabled", lambda: False)
     s = app._fcs_status()
     assert s["installed"] is True and s["enabled"] is True
     assert s["running"] is True and s["disabled_by_user"] is False
     # 未安装：输出为空串
-    monkeypatch.setattr(app, "run_cmd", lambda cmd, *a, **k: "")
+    monkeypatch.setattr(shell, "run_cmd", lambda cmd, *a, **k: "")
     assert app._fcs_status()["installed"] is False
 
 def test_fan_page_has_ctrl_toggle():
@@ -556,7 +559,7 @@ def test_legacy_page_retired():
     assert not os.path.exists("templates/index.html"), "旧页 templates/index.html 应已删除"
     assert os.path.exists("templates/vue/index.html"), "Vue 构建产物 templates/vue/index.html 必须存在"
     assert not hasattr(app, "_render_legacy_panel"), "旧页渲染函数应已删除"
-    rules = {str(r.rule) for r in app.app.url_map.iter_rules()}
+    rules = set(app.app.openapi()["paths"])  # FastAPI：openapi schema 平铺全部路由 path
     for bad in ("/legacy", "/legacy/"):
         assert bad not in rules, f"{bad} 回滚路由应已移除"
     assert "/" in rules and "/vue/" in rules, "主入口 / 与 /vue/ 必须保留"
@@ -564,10 +567,9 @@ def test_legacy_page_retired():
 
 def test_vue_missing_page_is_readable_fallback():
     """构建产物缺失时的兜底页应返回 500 且带可读中文提示（不再是白屏）。"""
-    with app.app.test_request_context("/"):
-        resp = app._vue_missing_page()
+    resp = app._vue_missing_page()  # FastAPI 版为纯函数，无需请求上下文
     assert resp.status_code == 500
-    body = resp.get_data(as_text=True)
+    body = resp.body.decode()
     assert "界面资源缺失" in body
 
 
@@ -579,9 +581,8 @@ def test_build_health_report_contains_all_sections():
               "system", "storage", "docker", "fans", "alerts"):
         assert k in rep, f"report 缺字段 {k}"
     assert isinstance(rep["fans"], list)
-    # HTML 渲染包含所有章节标题（make_response 需请求上下文）
-    with app.app.test_request_context('/'):
-        html = app._render_report_html(rep).get_data(as_text=True)
+    # HTML 渲染包含所有章节标题（FastAPI 版为纯函数返回 HTMLResponse）
+    html = app._render_report_html(rep).body.decode()
     # 只断言「与硬件无关、必然出现」的章节；阵列卡（硬件）/ 显卡 / 传感器—电压 / 存储拓扑
     # 等按机器实际情况条件输出，不在此列。
     for sec in ["计算机摘要", "活动告警", "运行日志（诊断）", "系统", "主板 / BIOS", "内存",
