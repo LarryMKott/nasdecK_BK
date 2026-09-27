@@ -64,14 +64,15 @@ import time
 from fastapi import APIRouter, Depends, Request
 
 from backend.gateway import require_admin
-from backend.web.deps import _jr, json_body
+from backend.web.deps import _jr, json_body, json_body_as
+from backend.web.schemas import FanSetRequest, FanPwmModeRequest, FanControlRequest, FanDiskTempConfigRequest, FanSysTempConfigRequest, FanRulesRequest, FanFcsRequest, FanLabelsRequest
 
 router = APIRouter()
 
 
 
 @router.post("/api/fan/set")
-def api_fan_set(request: Request, payload: dict = Depends(json_body), _admin = Depends(require_admin)):
+def api_fan_set(request: Request, payload: dict = Depends(json_body_as(FanSetRequest)), _admin = Depends(require_admin)):
     """设置风扇转速：设目标 PWM（后台缓变线程平滑过渡）或恢复自动控温"""
     try:
         if not _FAN_CTRL_ENABLED:
@@ -138,7 +139,7 @@ def api_fan_set(request: Request, payload: dict = Depends(json_body), _admin = D
     return _jr({"ok": True, "mode": "manual", "pwm": pct, "raw": raw, "aliased": len(_keys) > 1})
 
 @router.post("/api/fan/pwm_mode")
-def api_fan_pwm_mode(request: Request, payload: dict = Depends(json_body), _admin = Depends(require_admin)):
+def api_fan_pwm_mode(request: Request, payload: dict = Depends(json_body_as(FanPwmModeRequest)), _admin = Depends(require_admin)):
     """切换风扇接口的调速信号类型：PWM(4pin 脉宽) ↔ DC(3pin 直流电压)。
 
     背景：3pin 风扇插在被设成 PWM 的接口上会一直全速——因为它没有 PWM 线，只认电压。
@@ -203,7 +204,7 @@ def api_fan_control_get():
     return _jr({"enabled": _FAN_CTRL_ENABLED})
 
 @router.post("/api/fan/control")
-def api_fan_control_set(request: Request, payload: dict = Depends(json_body), _admin = Depends(require_admin)):
+def api_fan_control_set(request: Request, payload: dict = Depends(json_body_as(FanControlRequest)), _admin = Depends(require_admin)):
     """开关风扇接管：关闭后 nasdash 不再根据温度自动调速。若飞牛自带风扇服务已配置，
     会交还它接管；否则保持当前转速、不再写 PWM。"""
     global _FAN_CTRL_ENABLED
@@ -332,7 +333,7 @@ def api_fan_disk_temp_get():
     })
 
 @router.post("/api/fan/disk_temp")
-def api_fan_disk_temp_set(request: Request, payload: dict = Depends(json_body), _admin = Depends(require_admin)):
+def api_fan_disk_temp_set(request: Request, payload: dict = Depends(json_body_as(FanDiskTempConfigRequest)), _admin = Depends(require_admin)):
     data = payload or {}
     cfg = _load_fan_disk_temp()
     if "disks" in data:
@@ -378,7 +379,7 @@ def api_fan_sys_temp_get():
     })
 
 @router.post("/api/fan/sys_temp")
-def api_fan_sys_temp_set(request: Request, payload: dict = Depends(json_body), _admin = Depends(require_admin)):
+def api_fan_sys_temp_set(request: Request, payload: dict = Depends(json_body_as(FanSysTempConfigRequest)), _admin = Depends(require_admin)):
     data = payload or {}
     cfg = _load_fan_sys_temp()
     if "source" in data:
@@ -445,7 +446,7 @@ def api_fan_rules_get():
     })
 
 @router.post("/api/fan/rules")
-def api_fan_rules_set(request: Request, payload: dict = Depends(json_body), _admin = Depends(require_admin)):
+def api_fan_rules_set(request: Request, payload: dict = Depends(json_body_as(FanRulesRequest)), _admin = Depends(require_admin)):
     """保存逐风扇温控规则覆盖。两种 body：
       整体覆盖：{"rules": {"<hwmon>::<idx>": {...}|null, ...}}
       单条设置：{"key": "<hwmon>::<idx>", "rule": {...}|null}
@@ -493,7 +494,7 @@ def api_fan_rules_set(request: Request, payload: dict = Depends(json_body), _adm
     return _jr({"ok": False, "error": "写配置失败"}), 500
 
 @router.post("/api/fan/fcs")
-def api_fan_fcs_post(request: Request, payload: dict = Depends(json_body), _admin = Depends(require_admin)):
+def api_fan_fcs_post(request: Request, payload: dict = Depends(json_body_as(FanFcsRequest)), _admin = Depends(require_admin)):
     """永久禁用 / 恢复 FanControlServer。body: {"action": "disable"|"enable"}。
     disable = systemctl stop + disable（重启不复活）+ 持久化标志；enable = enable + start。"""
     try:
@@ -540,7 +541,7 @@ def api_fan_history(request: Request):
         return _jr({"error": str(e), "points": []})
 
 @router.post("/api/fan/labels")
-def api_fan_labels_post(request: Request, payload: dict = Depends(json_body), _admin = Depends(require_admin)):
+def api_fan_labels_post(request: Request, payload: dict = Depends(json_body_as(FanLabelsRequest)), _admin = Depends(require_admin)):
     """保存风扇标注（合并模式：仅覆盖传入的通道，保留其余，防止单条保存清空全部）。"""
     try:
         data = payload or {}

@@ -23,7 +23,8 @@ import time
 from fastapi import APIRouter, Depends, Request
 
 from backend.gateway import require_admin
-from backend.web.deps import _jr, json_body
+from backend.web.deps import _jr, json_body, json_body_as
+from backend.web.schemas import DiskRenameRequest, DiskSelftestRequest, DiskSelftestAbortRequest
 
 router = APIRouter()
 
@@ -57,7 +58,7 @@ def api_disks(request: Request):
         return _jr({"error": str(e), "time": _panel_time()})
 
 @router.post("/api/disks/rename")
-def api_disks_rename(request: Request, payload: dict = Depends(json_body)):
+def api_disks_rename(request: Request, payload: dict = Depends(json_body_as(DiskRenameRequest))):
     """设置/清除运维自定义盘名（v2.3.0 3.8）。body: {key, name}；name 空串 = 清除。
 
     key 用 /api/disks 返回的 name_key（序列号优先，与缺陷趋势同源），
@@ -99,7 +100,7 @@ def api_disks_selftest_history(request: Request):
     return _jr({"ok": True, "history": hist})
 
 @router.post("/api/disks/selftest")
-def api_disks_selftest_post(request: Request, payload: dict = Depends(json_body), _admin = Depends(require_admin)):
+def api_disks_selftest_post(request: Request, payload: dict = Depends(json_body_as(DiskSelftestRequest)), _admin = Depends(require_admin)):
     """启动硬盘自检：type=long（SMART 长自检）/ badblocks（破坏性，仅独立盘）/ surface（只读表面扫描，所有盘）。"""
     try:
         data = payload or {}
@@ -139,7 +140,7 @@ def api_disks_selftest_post(request: Request, payload: dict = Depends(json_body)
         return _jr({"ok": False, "error": str(e)}), 500
 
 @router.post("/api/disks/selftest/abort")
-def api_disks_selftest_abort(request: Request, payload: dict = Depends(json_body), _admin = Depends(require_admin)):
+def api_disks_selftest_abort(request: Request, payload: dict = Depends(json_body_as(DiskSelftestAbortRequest)), _admin = Depends(require_admin)):
     """中止指定硬盘的自检任务。"""
     try:
         data = payload or {}

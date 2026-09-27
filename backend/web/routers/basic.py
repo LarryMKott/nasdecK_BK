@@ -11,7 +11,8 @@ import time
 from fastapi import APIRouter, Depends, Request
 
 from backend.gateway import require_admin
-from backend.web.deps import _jr, json_body
+from backend.web.deps import _jr, json_body, json_body_as
+from backend.web.schemas import ErrorsClearRequest, ErrorsTestRequest
 
 router = APIRouter()
 

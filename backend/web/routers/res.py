@@ -27,7 +27,8 @@ from fastapi import APIRouter, Depends, Request, Response
 from fastapi.responses import FileResponse
 
 from backend.gateway import require_admin
-from backend.web.deps import _jr, json_body
+from backend.web.deps import _jr, json_body, json_body_as
+from backend.web.schemas import NetworkWolRequest, PortsReleaseRequest
 
 router = APIRouter()
 
@@ -58,7 +59,7 @@ def api_docker():
         return _jr({"error": str(e), "time": _panel_time()})
 
 @router.post("/api/network/wol")
-def api_network_wol(request: Request, payload: dict = Depends(json_body)):
+def api_network_wol(request: Request, payload: dict = Depends(json_body_as(NetworkWolRequest))):
     """设置网卡 WOL（网络唤醒）开关（v2.3.0 3.2）。
     仅对硬件支持该能力的物理口开放；成功后写进配置，进程启动时回放一次以跨重启保留。
     作用面严格限于用户点的那张网卡，不做其它系统改动。"""
@@ -137,7 +138,7 @@ def api_ports_appicon(request: Request):
     return resp
 
 @router.post("/api/ports/release")
-def api_ports_release(request: Request, payload: dict = Depends(json_body)):
+def api_ports_release(request: Request, payload: dict = Depends(json_body_as(PortsReleaseRequest))):
     """释放端口占用：终止占用该端口的进程（SIGTERM 优雅终止）。
     安全边界：禁止 kill 系统关键进程（nasdash 自身 / PID1 / systemd / dockerd / sshd 等）与 fnOS 核心服务；
     其余进程由用户在前端二次确认后承担后果。"""

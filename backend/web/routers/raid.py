@@ -15,7 +15,8 @@ import time
 from fastapi import APIRouter, Depends, Request
 
 from backend.gateway import require_admin
-from backend.web.deps import _jr, json_body
+from backend.web.deps import _jr, json_body, json_body_as
+from backend.web.schemas import RaidLocateRequest, RaidCcRequest, RaidCcScheduleRequest, RaidHotspareRequest, RaidCopybackRequest
 
 router = APIRouter()
 
@@ -33,7 +34,7 @@ def api_raid():
         return _jr({"error": str(e), "time": _panel_time()})
 
 @router.post("/api/raid/locate")
-def api_raid_locate(request: Request, payload: dict = Depends(json_body)):
+def api_raid_locate(request: Request, payload: dict = Depends(json_body_as(RaidLocateRequest))):
     """物理盘定位（locate LED 闪烁）。仅当控制器/背板支持时可用（locate_supported）。"""
     try:
         body = payload or {}
@@ -59,7 +60,7 @@ def api_raid_locate(request: Request, payload: dict = Depends(json_body)):
 
 @router.get("/api/raid/cc")
 @router.post("/api/raid/cc")
-def api_raid_cc(request: Request, payload: dict = Depends(json_body)):
+def api_raid_cc(request: Request, payload: dict = Depends(json_body_as(RaidCcRequest))):
     """阵列卡一致性检查（Consistency Check）。
 
     仅对存在的硬件 RAID 逻辑盘（VD）执行；本机为 JBOD 直通时无 VD，接口直接返回明确错误（不崩溃）。
@@ -105,7 +106,7 @@ def api_raid_cc(request: Request, payload: dict = Depends(json_body)):
 
 @router.get("/api/raid/cc/schedule")
 @router.post("/api/raid/cc/schedule")
-def api_raid_cc_schedule(request: Request, payload: dict = Depends(json_body)):
+def api_raid_cc_schedule(request: Request, payload: dict = Depends(json_body_as(RaidCcScheduleRequest))):
     """一致性检查定时调度配置。
     GET：返回当前配置；POST {enabled, period, hour, minute, weekday, vd}：保存。
     配置本身与是否存在 VD 无关（保存合法）；真正触发由 _check_cc_schedule 按时执行，
@@ -134,7 +135,7 @@ def api_raid_cc_schedule(request: Request, payload: dict = Depends(json_body)):
 
 @router.get("/api/raid/hotspare")
 @router.post("/api/raid/hotspare")
-def api_raid_hotspare(request: Request, payload: dict = Depends(json_body)):
+def api_raid_hotspare(request: Request, payload: dict = Depends(json_body_as(RaidHotspareRequest))):
     """阵列卡热备盘分配（全局 GHS / 专用 DHS）。
     仅对存在的硬件 RAID 环境有效；本机 JBOD 直通无 VD 时接口返回明确错误（不崩溃）。
     - GET            ：返回当前热备盘列表（含类型 global/dedicated）
@@ -169,7 +170,7 @@ def api_raid_hotspare(request: Request, payload: dict = Depends(json_body)):
 
 @router.get("/api/raid/copyback")
 @router.post("/api/raid/copyback")
-def api_raid_copyback(request: Request, payload: dict = Depends(json_body)):
+def api_raid_copyback(request: Request, payload: dict = Depends(json_body_as(RaidCopybackRequest))):
     """阵列卡 CopyBack 自动换盘（监控 + 触发）。
     仅对硬件 RAID（存在 VD）环境有效；本机 JBOD 直通无 VD 时接口返回明确错误（不崩溃）。
     - GET                  ：返回自动 CopyBack 开关状态 + 当前正在/待换盘的盘

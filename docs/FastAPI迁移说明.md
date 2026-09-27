@@ -47,8 +47,9 @@ nasdash/
 │   ├── health/               # 硬盘健康分级 / 告警通知 / 健康报告+脱敏
 │   ├── schedule.py           # 阵列卡一致性检查定时调度
 │   ├── web/
-│   │   ├── app.py            # create_app()：FastAPI 组装 + 统一异常处理器
-│   │   ├── deps.py           # json_body 依赖（复刻 get_json(silent=True)）+ _jr 响应助手
+│   │   ├── app.py            # create_app()：FastAPI 组装 + 统一异常处理器 + OpenAPI 模型注入
+│   │   ├── deps.py           # json_body / json_body_as(模型) 依赖 + _jr 响应助手
+│   │   ├── schemas.py        # 22 个 Pydantic v2 请求模型（extra=allow 宽松契约）
 │   │   ├── staticpages.py    # / 、/vue、/ui/images、/manual（SSE→StreamingResponse）
 │   │   └── routers/          # 8 组路由器：basic / all / raid / disks / res / metrics / fans / alerts
 │   ├── daemon.py             # 后台线程唯一启动点（6 线程 + metrics 主循环 + 预热）
@@ -67,7 +68,7 @@ nasdash/
 |---|---|---|---|---|
 | 1 | 框架/服务器 | Flask + werkzeug dev server | FastAPI 0.100+ + uvicorn（ASGI） | 无（端口/监听方式不变） |
 | 2 | 钩子→依赖注入 | `@require_admin()` 装饰器 | `Depends(require_admin)` | 无（403 体逐字节一致 `{"ok":false,"error":...}`） |
-| 3 | 请求体 | `request.get_json(force=True, silent=True)` | `deps.json_body` 异步依赖预解析 | 无（同步端点经 anyio 线程池，语义复刻；非法 body 均静默为 None） |
+| 3 | 请求体 | `request.get_json(force=True, silent=True)` | `deps.json_body` / `json_body_as(模型)` 异步依赖预解析 | 行为不变；模型层仅做结构校验（字段级业务校验保留在路由内，400 文案契约不变），模型经 OpenAPI 注入展示 |
 | 4 | Query 参数 | `request.args.get(...)` | `request.query_params.get(...)` | 无 |
 | 5 | 响应 | `jsonify(x), code` | `_jr(x, code)`（JSONResponse 透传） | 无（出参不做模型过滤，逐字节兼容） |
 | 6 | SSE | `Response(stream_with_context(gen()))` | `StreamingResponse` | 无（chunked + X-Accel-Buffering: no 保留） |

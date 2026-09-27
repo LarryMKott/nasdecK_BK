@@ -21,7 +21,8 @@ import time
 from fastapi import APIRouter, Depends, Request
 
 from backend.gateway import require_admin
-from backend.web.deps import _jr, json_body
+from backend.web.deps import _jr, json_body, json_body_as
+from backend.web.schemas import AlertsConfigRequest
 
 router = APIRouter()
 
@@ -42,7 +43,7 @@ def api_alerts_config_get():
     return _jr(_load_alerts())
 
 @router.post("/api/alerts/config")
-def api_alerts_config_set(request: Request, payload: dict = Depends(json_body), _admin = Depends(require_admin)):
+def api_alerts_config_set(request: Request, payload: dict = Depends(json_body_as(AlertsConfigRequest)), _admin = Depends(require_admin)):
     data = payload or {}
     cfg = _load_alerts()
     if "enabled" in data:
