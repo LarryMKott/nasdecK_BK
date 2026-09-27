@@ -1,0 +1,46 @@
+# 本地打包/构建暂存目录（非源码）
+_app/
+_rebuild/
+
+# Python 缓存
+__pycache__/
+
+# 本地自测虚拟环境
+.venv/
+
+# 运行时日志
+debug.log
+
+# 本地起服务自测时生成的历史趋势库（运行时数据，非源码）
+history.db
+
+# 本地打包中间产物（app.tgz 由打包脚本重新生成，不入库）
+app.tgz
+
+# 构建产物 fpk（仅作 GitHub Release 资产，不入库；由 build.sh 重新生成）
+nasdash.fpk
+nasdash-release-*.fpk
+
+# 论坛发帖草稿等杂物（非源码）
+forum_post_*
+forum_reply_*
+
+sample_report.html
+
+# macOS 资源分叉文件（非源码，勿入库）
+.DS_Store
+nasdash-fnpack-*.fpk
+
+# 历史验证截图 / 临时核查表（自测产物，不进仓库）
+_verify_*.png
+优化核查表_2026-08-20.md
+
+# 真机目检截图（自测产物，不进仓库）
+shots/
+
+# Vue 工程依赖（本地安装，不入库；用 pnpm install 还原）
+frontend-vue/node_modules/
+frontend-vue/.vite/
+
+# ZCode 工作区工具目录（本机环境，不入库）
+.zcode/

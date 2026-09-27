@@ -1,0 +1,42 @@
+name: Build nasdash fpk
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Make build scripts executable
+        run: chmod +x build.sh scripts/verify.sh scripts/test.sh scripts/local_smoke.sh
+
+      - name: Python syntax check (app.py)
+        run: python3 -m py_compile app.py
+
+      - name: Parser unit tests (pytest)
+        run: ./scripts/test.sh
+
+      - name: Local smoke test (hardware may be absent -> WARN only)
+        run: ./scripts/local_smoke.sh
+        continue-on-error: true
+
+      - name: Build fpk + consistency verify
+        run: ./build.sh
+
+      - name: Upload fpk artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: nasdash-fpk
+          path: nasdash.fpk

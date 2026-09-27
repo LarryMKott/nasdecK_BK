@@ -1,0 +1,102 @@
+#!/bin/bash
+PID_FILE="${TRIM_PKGVAR}/app.pid"
+APP_DIR="${TRIM_APPDEST}"
+# 飞牛网关把 ui/config 的 gatewaySocket 相对【应用根目录】解析，而非 target/ 子目录。
+# fygo-browser(/vol1/@appcenter/fygo-browser/app.sock)、
+# Hermes(/vol1/@appcenter/trim.hermes/run/trim-hermes.sock) 均把 socket 建在根目录内。
+# 应用根目录 = 含 cmd/ 与 ui/ 的那一层。TRIM_APPDEST 通常即根目录；
+# 个别版本可能指向 target/ 子目录，此时根为其父目录。
+if [ -d "$APP_DIR/../cmd" ] && [ -d "$APP_DIR/../ui" ]; then
+    # TRIM_APPDEST 指向 target/ 子目录，根是父目录
+    APP_ROOT="$(cd "$APP_DIR/.." && pwd)"
+else
+    APP_ROOT="$APP_DIR"
+fi
+PYTHON=$(which python3 2>/dev/null || echo "/usr/bin/python3")
+LOG_FILE="${TRIM_PKGVAR}/app.log"
+
+# 打开方式：cgi 反代（对齐 fnpackup），不走飞牛统一网关入口。
+# 不再需要网关自愈/看门狗：cgi 模式下面板由飞牛内嵌 iframe 打开
+# /cgi/ThirdParty/.../index.cgi/，经 index.cgi 在本机转发到 127.0.0.1:9800；
+# 端口仅本机访问，飞牛无法清空此入口，无 404 风险。
+# 历史：2026-08-14 曾加 cmd/gw_watchdog.sh + self_heal_gateway 应对统一网关模式下
+# 飞牛周期性清空 entry 导致 404，改 cgi 模式后已无意义，2026-08-15 删除。
+
+case $1 in
+start)
+    if [ -f "$PID_FILE" ]; then
+        pid=$(cat "$PID_FILE" | tr -d '[:space:]')
+        if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+            echo "应用已在运行 (PID: $pid)" > "${TRIM_TEMP_LOGFILE}"
+            exit 0
+        fi
+        rm -f "$PID_FILE"
+    fi
+    # 自愈：飞牛靠 /app/app.py 软链做启动/健康检；uninstall 会删掉它而 install 不重建，
+    # 不补则 start 必报 10500。cmd/main 以 root 运行，此处自动重建软链。
+    if [ -f "$APP_DIR/app.py" ]; then
+        mkdir -p /app 2>/dev/null
+        ln -sf "$APP_DIR/app.py" /app/app.py 2>/dev/null
+    fi
+    # 加载风扇控制芯片驱动（按需，缺则忽略）：
+    # 新机(MSI B360M MORTAR)=NCT6797D 走 nct6775；旧机=IT87 走 it87。
+    # fnOS 默认不加载，须由 app 自启恢复风扇可见性。
+    modprobe nct6775 2>/dev/null || true
+    modprobe it87 2>/dev/null || true
+    # 兜底：WOL（网络唤醒）开关依赖 ethtool。安装阶段若 NAS 无外网会装不上，
+    # 这里每次启动幂等补一次（已存在则 command -v 直接命中，不产生开销）。
+    if ! command -v ethtool >/dev/null 2>&1; then
+        (apt-get install -y -qq ethtool || apk add ethtool || yum install -y ethtool) >> "$LOG_FILE" 2>&1 || true
+    fi
+    cd "$APP_DIR"
+    # cgi 反代模式：app 监听 127.0.0.1:9800 + unix socket（双重监听，
+    # 9800 供 index.cgi 反代；socket 供本地 self_test/直连健康检）。
+    rm -f "$APP_ROOT/app.sock" 2>/dev/null
+    export NAS_DASH_GATEWAY=1
+    export GATEWAY_PREFIX="/app/com.dashboard.nasdash"
+    export APP_SOCKET="$APP_ROOT/app.sock"
+    $PYTHON "$APP_DIR/app.py" > "$LOG_FILE" 2>&1 &
+    echo $! > "$PID_FILE"
+    # 轮询等待 app.sock 真正建立再返回：保持与原统一网关模式相同的健康检时序，
+    # 飞牛 appcenter 启动探测依赖此信号，否则可能报 10500 启动失败。
+    SOCK="$APP_ROOT/app.sock"
+    for i in $(seq 1 30); do
+        if [ -S "$SOCK" ]; then
+            break
+        fi
+        sleep 0.5
+    done
+    if kill -0 "$(cat "$PID_FILE" | tr -d '[:space:]')" 2>/dev/null; then
+        exit 0
+    else
+        echo "应用启动失败，请查看日志: $LOG_FILE" > "${TRIM_TEMP_LOGFILE}"
+        rm -f "$PID_FILE"
+        exit 1
+    fi
+    ;;
+stop)
+    if [ -f "$PID_FILE" ]; then
+        pid=$(cat "$PID_FILE" | tr -d '[:space:]')
+        if [ -n "$pid" ]; then
+            kill "$pid" 2>/dev/null
+            sleep 1
+            kill -9 "$pid" 2>/dev/null
+        fi
+        rm -f "$PID_FILE"
+    fi
+    exit 0
+    ;;
+status)
+    if [ -f "$PID_FILE" ]; then
+        pid=$(cat "$PID_FILE" | tr -d '[:space:]')
+        if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+            exit 0
+        fi
+        rm -f "$PID_FILE"
+    fi
+    exit 3
+    ;;
+*)
+    exit 1
+    ;;
+esac
