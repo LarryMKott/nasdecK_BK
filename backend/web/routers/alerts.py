@@ -1,3 +1,20 @@
+from backend.collectors.board import get_board
+from backend.collectors.board import get_memory_modules
+from backend.collectors.disks import get_disks
+from backend.collectors.dockermod import get_docker
+from backend.collectors.system import get_system
+from backend.health.alerts import _dispatch_notifications
+from backend.health.alerts import _evaluate_alerts
+from backend.health.alerts import _load_alerts
+from backend.health.alerts import _save_alerts
+from backend.health.report import _redact_report
+from backend.health.report import _render_report_html
+from backend.health.report import build_diagnostics
+from backend.health.report import build_health_report
+from backend.health.report import render_diagnostics_text
+from backend.version import APP_VERSION
+import time
+
 # -*- coding: utf-8 -*-
 # 本文件由 scripts/migration/build_routers.py 自 app.py 生成；函数体原样搬迁，
 # 仅改写 Flask 特有接口（装饰器/get_json/args/jsonify）为 FastAPI 等价物。

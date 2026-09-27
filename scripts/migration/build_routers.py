@@ -26,7 +26,7 @@ OUT = ROOT / "backend" / "web" / "routers"
 ROUTER_OF = {
     "api_me": "basic", "api_errors_clear": "basic", "api_errors_test": "basic",
     "api_version": "basic",
-    "api_all": "all",
+    "api_all": "all", "api_system": "all",
     "api_raid": "raid", "api_raid_locate": "raid", "api_raid_cc": "raid",
     "api_raid_cc_schedule": "raid", "api_raid_hotspare": "raid",
     "api_raid_copyback": "raid",
@@ -178,7 +178,7 @@ def main():
             # （显式 exists 检查保持原 send_file 缺文件走 except→404 的语义）
             text = text.replace(
                 "from fastapi import APIRouter, Depends, Request",
-                "from fastapi import APIRouter, Depends, Request, Response, FileResponse")
+                "from fastapi import APIRouter, Depends, Request, Response\nfrom fastapi.responses import FileResponse")
             # 特例：api_network 的 jsonify+自定义 Cache-Control 头 → _jr（JSONResponse 同样支持 .headers）
             text = text.replace(
                 'resp = jsonify({"nics": nics, "time": _panel_time()})',

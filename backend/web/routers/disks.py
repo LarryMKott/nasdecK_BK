@@ -1,3 +1,22 @@
+from backend.collectors.disks import DISK_TEST_JOBS
+from backend.collectors.disks import DISK_TEST_LOCK
+from backend.collectors.disks import _abort_badblocks
+from backend.collectors.disks import _abort_smart_long
+from backend.collectors.disks import _is_standalone_disk
+from backend.collectors.disks import _load_disk_test_history
+from backend.collectors.disks import _start_badblocks
+from backend.collectors.disks import _start_smart_long
+from backend.collectors.disks import get_disks
+from backend.collectors.raid import get_raid_card
+from backend.health.diskhealth import _disk_name_clean
+from backend.health.diskhealth import _disk_names_load
+from backend.health.diskhealth import _disk_names_path
+from backend.health.diskhealth import _enrich_disk_channels
+from backend.jsonstore import _save_json_file
+from backend.shell import _safe_token
+from backend.web.routers.helpers import _panel_time
+import time
+
 # -*- coding: utf-8 -*-
 # 本文件由 scripts/migration/build_routers.py 自 app.py 生成；函数体原样搬迁，
 # 仅改写 Flask 特有接口（装饰器/get_json/args/jsonify）为 FastAPI 等价物。

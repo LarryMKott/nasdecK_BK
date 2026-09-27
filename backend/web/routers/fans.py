@@ -1,3 +1,63 @@
+from backend.collectors.cputemp import _temp_snapshot_read
+from backend.collectors.disks import _disk_friendly_info
+from backend.collectors.disks import _list_all_disk_devs
+from backend.collectors.disks import get_disk_temps_cached
+from backend.collectors.gpu import _get_gpu_live
+from backend.fans.control import get_fan_status
+from backend.fans.enumerate import _FAN_SNAP
+from backend.fans.enumerate import _enumerate_fans
+from backend.fans.fcs import _FCS_TAKEN
+from backend.fans.fcs import _fan_ext_service_running
+from backend.fans.fcs import _fan_stop_ext_service
+from backend.fans.fcs import _fcs_board_cfg_cached
+from backend.fans.fcs import _fcs_disable
+from backend.fans.fcs import _fcs_enable
+from backend.fans.fcs import _fcs_has_board_config
+from backend.fans.fcs import _fcs_status_cached
+from backend.fans.hwmon import _FAN_ENABLE_CACHE
+from backend.fans.hwmon import _fan_read_pwm_mode
+from backend.fans.hwmon import _fan_release_to_idle
+from backend.fans.hwmon import _fan_set_pwm_mode
+from backend.fans.labels import _FAN_VOLT_ALLOWED
+from backend.fans.labels import _canon_label_key
+from backend.fans.labels import _consolidate_fan_labels
+from backend.fans.labels import _dedup_fan_names
+from backend.fans.labels import _fan_alias_members_of
+from backend.fans.labels import _fan_label_for
+from backend.fans.labels import _load_fan_labels
+from backend.fans.labels import _read_fan_drivers
+from backend.fans.labels import _replicate_aliases
+from backend.fans.labels import _save_fan_labels
+from backend.fans.modes import FAN_CONTROL_CFG
+from backend.fans.modes import _save_fan_mode
+from backend.fans.rules import NVME_START_TEMP
+from backend.fans.rules import _FAN_RULE_SOURCES
+from backend.fans.rules import _apply_temp_curve
+from backend.fans.rules import _disk_source_state
+from backend.fans.rules import _effective_fan_rules
+from backend.fans.rules import _fan_disk_temp_pwm
+from backend.fans.rules import _fan_read_sys_temp
+from backend.fans.rules import _fan_rule_pwm
+from backend.fans.rules import _fan_sys_temp_pwm
+from backend.fans.rules import _load_fan_disk_temp
+from backend.fans.rules import _load_fan_rules_raw
+from backend.fans.rules import _load_fan_sys_temp
+from backend.fans.rules import _save_fan_disk_temp
+from backend.fans.rules import _save_fan_rules
+from backend.fans.rules import _save_fan_sys_temp
+from backend.fans.rules import _validate_fan_rule
+from backend.history.db import _DB_PATH
+from backend.history.db import _db_lock
+from backend.history.db import _rename_history_fan
+from backend.jsonstore import _save_json_file
+from backend.state import FAN_LOCK
+from backend.state import FAN_TARGETS
+import json
+import os
+import sqlite3 as _sqlite3
+import threading as _threading
+import time
+
 # -*- coding: utf-8 -*-
 # 本文件由 scripts/migration/build_routers.py 自 app.py 生成；函数体原样搬迁，
 # 仅改写 Flask 特有接口（装饰器/get_json/args/jsonify）为 FastAPI 等价物。

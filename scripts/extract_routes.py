@@ -25,14 +25,25 @@ ROUTE_RE = re.compile(
 )
 
 
+def _legacy_source():
+    """旧版单文件 app.py 的源码文本。cutover 后 app.py 已是薄门面（无路由），
+    此时回退读 git 首个基线 commit（e9dcec4）里的原始文件。"""
+    text = APP_PY.read_text(encoding="utf-8")
+    if "@app.route(" in text:
+        return text
+    import subprocess
+    return subprocess.run(["git", "show", "e9dcec4:app.py"], capture_output=True,
+                          text=True, cwd=str(ROOT), check=True).stdout
+
+
 def extract_static():
     """正则静态抽取旧 app.py 的全部路由。返回 {(path, method)} 集合。"""
     pairs = set()
-    for line in APP_PY.read_text(encoding="utf-8").splitlines():
+    for line in _legacy_source().splitlines():
         m = ROUTE_RE.match(line.strip())
         if not m:
             continue
-        path = m.group(2)
+        path = re.sub(r"<path:([^>]+)>", r"{\1}", m.group(2))  # Flask 语法归一化为 FastAPI 风格
         methods = ["GET"]
         if m.group(3):
             methods = [x.strip().strip("\"'") for x in m.group(3).split(",") if x.strip()]
@@ -42,18 +53,18 @@ def extract_static():
 
 
 def extract_fastapi():
-    """导入新应用（app.py 门面），收集 FastAPI 实际注册的路由。"""
+    """导入新应用（app.py 门面），收集 FastAPI 实际注册的路由。
+
+    用 app.openapi() 枚举：新版 FastAPI 把 include_router 挂成 _IncludedRouter，
+    app.routes 上拿不到平铺的 path；openapi schema 天然平铺且不含 /docs 等框架路由。"""
     sys.path.insert(0, str(ROOT))
     import app as app_module  # noqa: 新版 app.py 为薄门面，import 无副作用
 
+    schema = app_module.app.openapi()
     pairs = set()
-    for route in app_module.app.routes:
-        path = getattr(route, "path", None)
-        methods = getattr(route, "methods", None)
-        if not path or not methods:
-            continue
-        for meth in methods:
-            if meth in ("HEAD", "OPTIONS"):  # FastAPI 自动派生，Flask 基线不含
+    for path, ops in schema.get("paths", {}).items():
+        for meth in ops:
+            if meth.startswith("_") or meth.lower() in ("head", "options"):
                 continue
             pairs.add((path, meth.upper()))
     return pairs

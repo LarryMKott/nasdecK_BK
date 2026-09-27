@@ -1,3 +1,10 @@
+from backend.errring import _ERR_RING
+from backend.gateway import get_gateway_user
+from backend.version import _VERSION_CHECK
+from backend.version import _check_latest_version
+import sys
+import time
+
 # -*- coding: utf-8 -*-
 # 本文件由 scripts/migration/build_routers.py 自 app.py 生成；函数体原样搬迁，
 # 仅改写 Flask 特有接口（装饰器/get_json/args/jsonify）为 FastAPI 等价物。
@@ -27,9 +34,9 @@ def api_errors_test():
     return _jr({"ok": True})
 
 @router.get("/api/me")
-def api_me():
+def api_me(request: Request):
     """返回当前网关登录用户，供前端展示登录身份。"""
-    return _jr(get_gateway_user())
+    return _jr(get_gateway_user(request))
 
 @router.get("/api/version")
 def api_version(request: Request):

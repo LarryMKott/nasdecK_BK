@@ -279,7 +279,7 @@
       ]
     },
     {
-      "path": "/ui/images/<path:filename>",
+      "path": "/ui/images/{filename}",
       "methods": [
         "GET"
       ]

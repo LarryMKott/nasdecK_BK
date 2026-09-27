@@ -1,3 +1,14 @@
+from backend.collectors.cpuusage import get_cpu_usage
+from backend.collectors.gpu import _get_gpu_live
+from backend.collectors.metrics import get_realtime_metrics
+from backend.history.db import _DB_PATH
+from backend.history.db import _db_lock
+from backend.web.routers.helpers import _disks_meta_map
+from backend.web.routers.helpers import get_live_mem
+import os
+import sqlite3 as _sqlite3
+import time
+
 # -*- coding: utf-8 -*-
 # 本文件由 scripts/migration/build_routers.py 自 app.py 生成；函数体原样搬迁，
 # 仅改写 Flask 特有接口（装饰器/get_json/args/jsonify）为 FastAPI 等价物。

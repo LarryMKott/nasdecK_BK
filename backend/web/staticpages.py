@@ -10,9 +10,11 @@
 - 资源路径锚点：原 os.path.dirname(__file__)（app.py 在应用根）→ paths.APP_DIR
 """
 import os
+import re
 
 from fastapi import APIRouter, Request
-from fastapi.responses import FileResponse, HTMLResponse, Response, StreamingResponse
+from fastapi.responses import (FileResponse, HTMLResponse, Response,
+                               StreamingResponse)
 
 from backend.paths import APP_DIR
 from backend.version import APP_VERSION
@@ -34,18 +36,18 @@ def _send_under(directory, filename):
     return FileResponse(full)
 
 
-@router.get("/ui/images/{filename:path}")
-def ui_images(filename: str):
-    """暴露 ui/images 下的静态图标，供页面内 <img> 引用。"""
-    return _send_under(_UI_IMAGES_DIR, filename)
-
-
 def _no_cache(resp):
     """原版三件套 no-cache 响应头（/ 与 /manual 共用）。"""
     resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
     resp.headers["Pragma"] = "no-cache"
     resp.headers["Expires"] = "0"
     return resp
+
+
+@router.get("/ui/images/{filename:path}")
+def ui_images(filename: str):
+    """暴露 ui/images 下的静态图标，供页面内 <img> 引用。"""
+    return _send_under(_UI_IMAGES_DIR, filename)
 
 
 def _vue_missing_page():
@@ -75,8 +77,7 @@ def _serve_vue_app():
     vue_index = os.path.join(_VUE_DIR, "index.html")
     if not os.path.isfile(vue_index):
         return _vue_missing_page()
-    resp = FileResponse(vue_index, media_type="text/html")
-    return _no_cache(resp)
+    return _no_cache(FileResponse(vue_index, media_type="text/html"))
 
 
 @router.get("/")
@@ -151,6 +152,7 @@ _MANUAL_CSS_EMBED = """
 .man-body .hl-red{ color:var(--danger); font-weight:500; }
 """
 
+
 def _md_inline(text):
     """行内：转义 HTML + **粗体** + `代码` + ==红色== + <mark>红色</mark>。
     红色标记给「本版本新增/修复」高亮用：App 内显示红色，GitHub 原生黄底高亮。"""
@@ -170,6 +172,7 @@ def _md_inline(text):
         text = text.replace('\x00M%d\x00' % i, '<span class="hl-red">%s</span>' % _m)
     text = re.sub(r'`([^`]+?)`', r'<code>\1</code>', text)
     return text
+
 
 def _render_markdown_stream(md):
     """流式版：逐行/逐块 yield HTML 片段，配合 /manual 的 chunked 响应边传边显。"""
@@ -250,8 +253,6 @@ def _render_markdown_stream(md):
         yield chunk
     for chunk in close_table():
         yield chunk
-
-import re  # noqa: E402  (_md_inline/_render_markdown_stream 使用)
 
 
 @router.get("/manual")

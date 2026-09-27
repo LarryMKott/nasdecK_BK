@@ -1,3 +1,14 @@
+from backend.collectors.disks import get_disks
+from backend.collectors.raid import get_raid_card
+from backend.schedule import _load_cc_schedule
+from backend.schedule import _raid_cc_vnum
+from backend.schedule import _save_cc_schedule
+from backend.shell import STORCLI
+from backend.shell import sudo_cmd
+from backend.web.routers.helpers import _panel_time
+import re
+import time
+
 # -*- coding: utf-8 -*-
 # 本文件由 scripts/migration/build_routers.py 自 app.py 生成；函数体原样搬迁，
 # 仅改写 Flask 特有接口（装饰器/get_json/args/jsonify）为 FastAPI 等价物。

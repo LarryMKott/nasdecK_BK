@@ -1,7 +1,30 @@
+from backend import shell
+
+from backend.collectors.dockermod import get_docker
+from backend.collectors.ports import _ICON_MIME
+from backend.collectors.ports import _PORT_PROTECTED
+from backend.collectors.ports import _app_icon_file
+from backend.collectors.ports import _app_ids
+from backend.collectors.ports import _proc_comm
+from backend.collectors.ports import get_listening_ports
+from backend.collectors.storage import get_storage
+from backend.collectors.storage import get_volume_map
+from backend.collectors.system import _SYSTEM_CACHE
+from backend.collectors.system import get_network_nics
+from backend.collectors.wol import _wol_apply
+from backend.collectors.wol import _wol_load_cfg
+from backend.collectors.wol import _wol_phy_name
+from backend.collectors.wol import _wol_save_cfg
+from backend.shell import sudo_cmd
+from backend.web.routers.helpers import _panel_time
+import os
+import time
+
 # -*- coding: utf-8 -*-
 # 本文件由 scripts/migration/build_routers.py 自 app.py 生成；函数体原样搬迁，
 # 仅改写 Flask 特有接口（装饰器/get_json/args/jsonify）为 FastAPI 等价物。
-from fastapi import APIRouter, Depends, Request, Response, FileResponse
+from fastapi import APIRouter, Depends, Request, Response
+from fastapi.responses import FileResponse
 
 from backend.gateway import require_admin
 from backend.web.deps import _jr, json_body
@@ -20,7 +43,7 @@ def api_storage():
             storage["volume_map"] = get_volume_map()
         except Exception as e:
             storage["volume_map"] = {"volumes": [], "loose": [], "error": str(e)}
-            _debug("volume_map failed: " + str(e))
+            shell.log("volume_map failed: " + str(e))
         return _jr({"storage": storage, "time": _panel_time(), "elapsed": round(time.time() - t0, 2)})
     except Exception as e:
         return _jr({"error": str(e), "time": _panel_time()})

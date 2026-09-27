@@ -1,7 +1,27 @@
+from backend.web.routers.helpers import _panel_time
+
+from backend.collectors.board import get_board
+from backend.collectors.board import get_memory_modules
+from backend.collectors.cpuusage import get_cpu_usage
+from backend.collectors.disks import get_disks
+from backend.collectors.dockermod import get_docker
+from backend.collectors.gpu import _get_gpu_live
+from backend.collectors.metrics import get_realtime_metrics
+from backend.collectors.raid import get_raid_card
+from backend.collectors.storage import get_storage
+from backend.collectors.system import get_system
+from backend.health.alerts import _evaluate_alerts
+from backend.health.diskhealth import _enrich_disk_channels
+from backend.version import APP_VERSION
+from backend.version import _fnos_version
+import time
+
 # -*- coding: utf-8 -*-
 # 本文件由 scripts/migration/build_routers.py 自 app.py 生成；函数体原样搬迁，
 # 仅改写 Flask 特有接口（装饰器/get_json/args/jsonify）为 FastAPI 等价物。
 from fastapi import APIRouter, Depends, Request
+
+from backend.version import _fnos_version
 
 from backend.gateway import require_admin
 from backend.web.deps import _jr, json_body
@@ -105,3 +125,36 @@ def api_all(request: Request):
     except Exception as e:
         result = {"error": str(e), "time": time.strftime("%Y-%m-%d %H:%M:%S")}
     return _jr(result)
+
+# 【补遗】api_system 在初版生成脚本中漏映射，从 git 基线（e9dcec4）手工迁移。
+# 板块独立接口：切换导航只拉当前板块，避免全量 /api/all。
+@router.get("/api/system")
+def api_system(request: Request):
+    """系统资源板块（CPU/内存/温度/风扇/GPU/网卡 + 主板/内存条），供 #system 与 #fan 按需刷新。"""
+    t0 = time.time()
+    try:
+        try:
+            board = get_board()
+        except Exception:
+            board = {"manufacturer": "", "product": "", "version": ""}
+        try:
+            memory_modules = get_memory_modules()
+        except Exception:
+            memory_modules = {"modules": [], "total_gb": 0, "slots": 0, "brand_summary": ""}
+        system = {**get_system(request.query_params.get("force") == "1"), "board": board, "memory_modules": memory_modules}
+        try:
+            system["cpu_usage"] = get_cpu_usage()
+        except Exception:
+            system["cpu_usage"] = None
+        # 阵列卡芯片温度（ROC Temperature），供「温度监控」tab 显示（get_raid_card 有 60s 缓存，开销极低）
+        try:
+            _raid = get_raid_card()
+            if isinstance(_raid, dict):
+                system["raid_temp"] = _raid.get("roc_temp")
+        except Exception:
+            system["raid_temp"] = None
+        # fnos_version 顶层暴露：旧版「关于」页的 fnOS 版本取自 /api/all 的 DATA，
+        # 现「关于」Vue 原生页只拉轻量的 /api/system，故在此补一项，避免为一条版本号拉全量 /api/all。
+        return _jr({"system": system, "fnos_version": _fnos_version(), "time": _panel_time(), "elapsed": round(time.time() - t0, 2)})
+    except Exception as e:
+        return _jr({"error": str(e), "time": _panel_time()})
