@@ -4,7 +4,7 @@
 
 飞牛OS（fnOS）NAS 硬件监控面板 —— FPK 应用包
 
-一个轻量级单文件 Flask Web 应用，通过 `storcli` / `smartctl` / `sensors` / `mdadm` / `lspci` / `ip` 等系统命令采集 NAS 硬件状态，以网页面板展示，免去每次 SSH 敲命令的麻烦。
+一个轻量级 FastAPI Web 应用（`backend/` 模块化包 + uvicorn 服务，历史趋势用 SQLAlchemy 2.x / SQLite 存储），通过 `storcli` / `smartctl` / `sensors` / `mdadm` / `lspci` / `ip` 等系统命令采集 NAS 硬件状态，以网页面板展示，免去每次 SSH 敲命令的麻烦。
 
 ## 预览
 
@@ -163,7 +163,7 @@
 
 ## 技术栈
 
-- Python 3 + Flask（单文件应用）
+- Python 3 + FastAPI（0.100+ / Pydantic v2）+ SQLAlchemy 2.x，`backend/` 模块化包，uvicorn 服务
 - storcli / smartctl / sensors / lspci / ip / mdadm 系统命令采集
 - 内联 HTML/CSS/JS 前端，无构建步骤
 - 标准 fnOS FPK 应用包格式

@@ -112,7 +112,8 @@ if os.path.exists(MANUAL):
     _mt = open(MANUAL, encoding="utf-8", errors="ignore").read()
     if f"v{cur}" in _mt:
         _residue.append(f"{MANUAL} 仍含旧版本号 v{cur}（请更新『本版本修复了什么』/正文）")
-for _f in ("app.py",):
+import glob as _globmod
+for _f in ["app.py"] + sorted(_globmod.glob("backend/**/*.py", recursive=True)):
     if os.path.exists(_f):
         _at = open(_f, encoding="utf-8", errors="ignore").read()
         if f'"{cur}"' in _at or f"'{cur}'" in _at:

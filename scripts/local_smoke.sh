@@ -11,26 +11,26 @@ if [ -x .venv/bin/python ] && .venv/bin/python -c "import flask" 2>/dev/null; th
 fi
 
 # 2) 语法检查（最高频、最该在本地拦住的类别）
-echo "[smoke] 1) 语法检查 app.py ..."
-if $PY -m py_compile app.py 2>/tmp/pycompile.err; then
-  echo "  OK: app.py 语法通过"
+echo "[smoke] 1) 语法检查 app.py + backend/ ..."
+if $PY -m compileall -q app.py backend 2>/tmp/pycompile.err; then
+  echo "  OK: app.py + backend/ 语法通过"
 else
-  echo "  FAIL: app.py 语法错误 ——"
+  echo "  FAIL: 语法错误 ——"
   cat /tmp/pycompile.err
   exit 1
 fi
 
 # 3) 若没有 flask，尝试建 .venv 安装（需网络）；装不上就跳过 Web 自测
-if ! $PY -c "import flask" 2>/dev/null; then
-  echo "[smoke] 未检测到 flask，尝试创建 .venv 并 pip install flask（需网络）..."
+if ! $PY -c "import fastapi, uvicorn, sqlalchemy" 2>/dev/null; then
+  echo "[smoke] 未检测到 fastapi/uvicorn，尝试创建 .venv 并按 requirements.txt 安装（需网络）..."
   if [ ! -x .venv/bin/python ]; then $PY -m venv .venv 2>/dev/null; fi
   if [ -x .venv/bin/python ]; then
-    .venv/bin/pip install -q flask 2>/dev/null && PY=.venv/bin/python
+    .venv/bin/pip install -q -r requirements.txt 2>/dev/null && PY=.venv/bin/python
   fi
 fi
 
-if ! $PY -c "import flask" 2>/dev/null; then
-  echo "[smoke] 跳过 Web 自测（无 flask 且无法安装）。可手动：pip install flask 后重跑。"
+if ! $PY -c "import fastapi, uvicorn, sqlalchemy" 2>/dev/null; then
+  echo "[smoke] 跳过 Web 自测（无 fastapi/uvicorn 且无法安装）。可手动：pip install -r requirements.txt 后重跑。"
   exit 0
 fi
 

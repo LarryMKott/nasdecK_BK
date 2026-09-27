@@ -22,8 +22,8 @@ jobs:
       - name: Make build scripts executable
         run: chmod +x build.sh scripts/verify.sh scripts/test.sh scripts/local_smoke.sh
 
-      - name: Python syntax check (app.py)
-        run: python3 -m py_compile app.py
+      - name: Python syntax check (app.py + backend/)
+        run: python3 -m compileall -q app.py backend
 
       - name: Parser unit tests (pytest)
         run: ./scripts/test.sh

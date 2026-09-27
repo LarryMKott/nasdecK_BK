@@ -28,7 +28,7 @@ command -v dmidecode >/dev/null 2>&1 || need_install+=("dmidecode")
 # （官方网络唤醒教程的第一步就是 apt-get install ethtool），故纳入自动安装。
 command -v ethtool >/dev/null 2>&1 || need_install+=("ethtool")
 command -v decode-dimms >/dev/null 2>&1 || need_install+=("i2c-tools")
-$PYTHON -c "import flask" 2>/dev/null || need_install+=("flask")
+$PYTHON -c "import fastapi, uvicorn, sqlalchemy" 2>/dev/null || need_install+=("webframework")
 
 if [ ${#need_install[@]} -gt 0 ]; then
     echo "[nasdash] 缺少依赖: ${need_install[@]}，开始安装..." >> "$LOG"
@@ -114,17 +114,14 @@ if [ ${#need_install[@]} -gt 0 ]; then
                 # 仅当 fpk 未携带 vendor/storcli 时作为兜底提示。
                 echo "[nasdash] storcli 未安装且内置包缺失。LSI 阵列卡用户可从 Broadcom 官网下载 storcli_*.deb 并安装；非 LSI 阵列卡可忽略此提示" >> "$LOG"
                 ;;
-            flask)
-                $PYTHON -m pip install --break-system-packages flask 2>>"$LOG" 1>/dev/null
-                if ! $PYTHON -c "import flask" 2>/dev/null; then
-                    $PYTHON -m pip install flask 2>>"$LOG" 1>/dev/null
-                fi
-                if ! $PYTHON -c "import flask" 2>/dev/null; then
-                    case "$PM" in
-                        apt) $APT_INSTALL python3-flask >>"$LOG" 2>&1 ;;
-                        yum|dnf) $PM install -y python3-flask >>"$LOG" 2>&1 ;;
-                        apk) apk add py3-flask >>"$LOG" 2>&1 ;;
-                    esac
+            webframework)
+                # FastAPI/uvicorn/SQLAlchemy 无系统源稳定包，统一 pip 安装（含依赖 Pydantic v2）
+                $PYTHON -m pip install --break-system-packages -r "$_APP_DIR/requirements.txt" 2>>"$LOG" 1>/dev/null \
+                    || $PYTHON -m pip install --break-system-packages fastapi uvicorn sqlalchemy 2>>"$LOG" 1>/dev/null \
+                    || $PYTHON -m pip install -r "$_APP_DIR/requirements.txt" 2>>"$LOG" 1>/dev/null \
+                    || $PYTHON -m pip install fastapi uvicorn sqlalchemy 2>>"$LOG" 1>/dev/null
+                if ! $PYTHON -c "import fastapi, uvicorn, sqlalchemy" 2>/dev/null; then
+                    echo "[nasdash] Web 框架依赖安装失败，请手动执行: $PYTHON -m pip install -r requirements.txt" >> "$LOG"
                 fi
                 ;;
         esac
