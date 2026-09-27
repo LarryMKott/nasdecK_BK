@@ -1,15 +1,52 @@
-# --split-- 以下内容自 app.py 原样搬迁（import 由 fix_imports.py 补齐）
+# -*- coding: utf-8 -*-
+"""静态页与操作手册路由（自 app.py L6426-6676 搬迁；Flask → FastAPI 改写）。
+
+【迁移差异】
+- send_from_directory → 自实现 _send_under()（FileResponse 无遍历防护，
+  这里保留原 Flask 的目录钳制语义：resolve 后必须仍在目标目录内）
+- make_response(html, code) → HTMLResponse / FileResponse（状态码与响应头一致）
+- Response(stream_with_context(gen())) → StreamingResponse（同步生成器
+  由 Starlette 在线程池迭代，chunked 语义不变）
+- 资源路径锚点：原 os.path.dirname(__file__)（app.py 在应用根）→ paths.APP_DIR
+"""
+import os
+
+from fastapi import APIRouter, Request
+from fastapi.responses import FileResponse, HTMLResponse, Response, StreamingResponse
+
 from backend.paths import APP_DIR
 from backend.version import APP_VERSION
-import os
-import re
+
+router = APIRouter()
+
+# 【配置点】静态资源目录（部署时位于应用根，即 APP_DIR 下）
+_UI_IMAGES_DIR = os.path.join(APP_DIR, "ui", "images")
+_VUE_DIR = os.path.join(APP_DIR, "templates", "vue")
 
 
-# ===================== 路由 =====================
-@app.route("/ui/images/<path:filename>")
-def ui_images(filename):
+def _send_under(directory, filename):
+    """send_from_directory 直译：目录钳制（防路径穿越）+ FileResponse。"""
+    full = os.path.abspath(os.path.join(directory, filename))
+    if not full.startswith(os.path.abspath(directory) + os.sep):
+        return Response(status_code=404)  # 越界路径（../ 等）
+    if not os.path.isfile(full):
+        return Response(status_code=404)
+    return FileResponse(full)
+
+
+@router.get("/ui/images/{filename:path}")
+def ui_images(filename: str):
     """暴露 ui/images 下的静态图标，供页面内 <img> 引用。"""
-    return send_from_directory(os.path.join(os.path.dirname(__file__), "ui", "images"), filename)
+    return _send_under(_UI_IMAGES_DIR, filename)
+
+
+def _no_cache(resp):
+    """原版三件套 no-cache 响应头（/ 与 /manual 共用）。"""
+    resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    resp.headers["Pragma"] = "no-cache"
+    resp.headers["Expires"] = "0"
+    return resp
+
 
 def _vue_missing_page():
     """兜底页：前端构建产物缺失时的可读提示（已无「回退旧页」这条退路）。
@@ -17,14 +54,14 @@ def _vue_missing_page():
     v2.3.0 第 11 步「旧页退休瘦身」起，旧版单页面板 templates/index.html 已删除。
     产物随仓库提交、正常安装不会缺失，这里只保证极端情况下不是一片白屏。
     """
-    resp = make_response(
+    resp = HTMLResponse(
         "<!DOCTYPE html><html lang='zh-CN'><head><meta charset='utf-8'>"
         "<title>nasdash - 资源缺失</title></head><body style=\"font:14px/1.8 -apple-system,'PingFang SC',sans-serif;"
         "max-width:560px;margin:80px auto;padding:0 24px\">"
         "<h2 style='font-size:18px'>界面资源缺失</h2>"
         "<p style='color:#646a73'>应用的前端文件没找到。请刷新页面重试；若一直如此，请在应用中心重新安装 nasdash。</p>"
         "</body></html>",
-        500,
+        status_code=500,
     )
     resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
     return resp
@@ -35,18 +72,14 @@ def _serve_vue_app():
 
     产物 `templates/vue/index.html` 已提交进仓库（无 Node 环境也能打包）。
     """
-    vue_dir = os.path.join(os.path.dirname(__file__), "templates", "vue")
-    vue_index = os.path.join(vue_dir, "index.html")
+    vue_index = os.path.join(_VUE_DIR, "index.html")
     if not os.path.isfile(vue_index):
         return _vue_missing_page()
-    resp = make_response(send_from_directory(vue_dir, "index.html"))
-    resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
-    resp.headers["Pragma"] = "no-cache"
-    resp.headers["Expires"] = "0"
-    return resp
+    resp = FileResponse(vue_index, media_type="text/html")
+    return _no_cache(resp)
 
 
-@app.route("/")
+@router.get("/")
 def index():
     """主入口：Vue 应用（11 个模块全部为原生页；第 11 步起已无旧页依赖）。"""
     return _serve_vue_app()
@@ -54,8 +87,8 @@ def index():
 
 # ===================== /vue/（阶段 1a 旧链接兼容） =====================
 # 阶段 2 起 /vue/ 与 / 同物，保留该路径只为让阶段 1a 的旧链接继续可用。
-@app.route("/vue")
-@app.route("/vue/")
+@router.get("/vue")
+@router.get("/vue/")
 def vue_pilot():
     return _serve_vue_app()
 
@@ -96,7 +129,7 @@ hr{ border:none; border-top:1px solid var(--border); margin:28px 0; }
 .topbar b{ color:var(--text); }
 .hl-red{ color:#dc2626; font-weight:500; }
 """
-# 应用内嵌版：去掉整页外壳/顶栏/定宽，宽度自适应面板；前端 request.args embed=1 时返回
+# 应用内嵌版：去掉整页外壳/顶栏/定宽，宽度自适应面板；前端 query embed=1 时返回
 _MANUAL_CSS_EMBED = """
 .man-body{ color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; line-height:1.75; max-width:100%; }
 .man-body h1{ font-size:24px; margin:0 0 8px; color:var(--text); }
@@ -218,18 +251,18 @@ def _render_markdown_stream(md):
     for chunk in close_table():
         yield chunk
 
-@app.route("/manual")
-def manual():
+import re  # noqa: E402  (_md_inline/_render_markdown_stream 使用)
+
+
+@router.get("/manual")
+def manual(request: Request):
     p = os.path.join(APP_DIR, "docs", "使用手册.md")
     try:
         md = open(p, "r", encoding="utf-8").read()
     except Exception as e:
-        resp = make_response("<h1>操作手册未找到</h1><p>%s</p>" % _md_inline(str(e)), 404)
-        resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
-        resp.headers["Pragma"] = "no-cache"
-        resp.headers["Expires"] = "0"
-        return resp
-    if request.args.get("embed") == "1":
+        resp = HTMLResponse("<h1>操作手册未找到</h1><p>%s</p>" % _md_inline(str(e)), status_code=404)
+        return _no_cache(resp)
+    if request.query_params.get("embed") == "1":
         # 应用内嵌：仅返回片段（无 html/head/body 外壳），由前端塞进面板，停留在应用内
         # 同样走流式，前端用 reader 边收边 append，避免大手册整段等待
         head = "<style>%s</style>\n<div class=\"man-body\">" % _MANUAL_CSS_EMBED
@@ -249,9 +282,6 @@ def manual():
         for chunk in _render_markdown_stream(md):
             yield chunk
         yield tail
-    resp = Response(stream_with_context(gen()), mimetype="text/html")
-    resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
-    resp.headers["Pragma"] = "no-cache"
-    resp.headers["Expires"] = "0"
+    resp = StreamingResponse(gen(), media_type="text/html")
     resp.headers["X-Accel-Buffering"] = "no"  # 关掉反代缓冲，确保 chunked 真生效
-    return resp
+    return _no_cache(resp)
