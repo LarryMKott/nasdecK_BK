@@ -92,7 +92,7 @@ async function checkUpdate(): Promise<void> {
     const cur = normV(d.current || appVersion.value)
     if (d.update_available && d.latest) {
       updateFound.value = true
-      updateUrl.value = d.url || 'https://github.com/han951meng/nasdeck/releases'
+      updateUrl.value = d.url || 'https://github.com/LarryMKott/nasdeck/releases'
       updateMsg.value = '发现新版本 ' + normV(d.latest) + '（当前 ' + cur + '）'
     } else if (d.error) {
       updateMsg.value = '检查更新失败：' + d.error
@@ -139,7 +139,7 @@ onMounted(() => {
         <h3>项目</h3>
         <div class="kv">
           <span class="k">项目主页</span>
-          <span class="v"><a href="https://github.com/han951meng/nasdeck" target="_blank" rel="noopener">github.com/han951meng/nasdeck</a></span>
+          <span class="v"><a href="https://github.com/LarryMKott/nasdeck" target="_blank" rel="noopener">github.com/LarryMKott/nasdeck</a></span>
         </div>
         <div class="kv">
           <span class="k">论坛地址</span>
