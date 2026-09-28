@@ -49,6 +49,24 @@ function resolveColor(c: string): string {
   return cssVar(m[1], (m[2] || '#888').trim())
 }
 
+/** 把颜色解析成 [r,g,b]（#rgb / #rrggbb / rgb() / rgba()），解析失败回退中性灰 */
+function toRGB(c: string): [number, number, number] {
+  const s = (c || '').trim()
+  let m = /^#([0-9a-f]{3})$/i.exec(s)
+  if (m) return m[1].split('').map(h => parseInt(h + h, 16)) as [number, number, number]
+  m = /^#([0-9a-f]{6})$/i.exec(s)
+  if (m) {
+    const n = parseInt(m[1], 16)
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
+  }
+  m = /^rgba?\(([^)]+)\)$/i.exec(s)
+  if (m) {
+    const p = m[1].split(',').map(v => parseFloat(v))
+    return [p[0] || 0, p[1] || 0, p[2] || 0]
+  }
+  return [136, 136, 136]
+}
+
 function draw(): void {
   const el = cv.value
   if (!el) return
@@ -100,15 +118,18 @@ function draw(): void {
     const color = resolveColor(l.color)
 
     if (l.fill !== false) {
-      ctx.fillStyle = color
-      ctx.globalAlpha = isDark ? 0.28 : 0.16
+      // 渐变面积填充：曲线处最浓 → 底边全透明（替代旧平涂，层次感更强）
+      const [r, g, b] = toRGB(color)
+      const grad = ctx.createLinearGradient(0, padT, 0, H)
+      grad.addColorStop(0, `rgba(${r},${g},${b},${isDark ? 0.34 : 0.22})`)
+      grad.addColorStop(1, `rgba(${r},${g},${b},0)`)
+      ctx.fillStyle = grad
       ctx.beginPath()
       ctx.moveTo(px(0, arr.length), padT + ih)
       arr.forEach((v, i) => ctx.lineTo(px(i, arr.length), py(v == null ? 0 : v)))
       ctx.lineTo(px(arr.length - 1, arr.length), padT + ih)
       ctx.closePath()
       ctx.fill()
-      ctx.globalAlpha = 1
     }
 
     ctx.strokeStyle = color
