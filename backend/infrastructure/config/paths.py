@@ -12,8 +12,12 @@
 import os
 import shutil
 
-# 应用根目录：backend/ 的父目录（部署时即飞牛应用目录，与原单文件 app.py 同层）
-REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# 应用根目录：backend/ 的父目录（部署时即飞牛应用目录，与原单文件 app.py 同层）。
+# 锚点链：本文件(config) → infrastructure → backend → 应用根。阶段2a 目录落位时
+# 锚点漏随迁（仍按 backend/ 直下两层计），APP_DIR 曾指到 backend/infrastructure：
+# / 与 /vue 静态直出 500、version appid 误判、debug.log/配置兜底目录整体偏移。
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                         "..", "..", ".."))
 APP_DIR = REPO_ROOT
 # 前端产物目录：templates/vue/index.html（Vue 构建产物，静态直出）。
 # 全应用无 Jinja 模板，不覆盖 template_folder。
