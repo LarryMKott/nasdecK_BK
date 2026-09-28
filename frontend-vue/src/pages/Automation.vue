@@ -273,10 +273,10 @@ async function exportReport(fmt: 'json' | 'html'): Promise<void> {
     const r = await apiFetch(url, 60000)
     if (fmt === 'json') {
       const j = await r.json()
-      downloadBlob('nasdash-report-' + ts + '.json', JSON.stringify(j, null, 2), 'application/json')
+      downloadBlob('nasdeck-report-' + ts + '.json', JSON.stringify(j, null, 2), 'application/json')
     } else {
       const html = await r.text()
-      downloadBlob('nasdash-report-' + ts + '.html', html, 'text/html')
+      downloadBlob('nasdeck-report-' + ts + '.html', html, 'text/html')
     }
     exportState.value = '已导出'
   } catch (e) {

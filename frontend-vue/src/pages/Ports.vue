@@ -5,7 +5,7 @@
  *  - /api/ports 取宿主机所有监听端口（TCP/UDP）+ 占用进程 + 来源（docker:容器名 / 宿主机）
  *  - 每 10s 轮询刷新（端口变化不频繁，10s 足够）
  *  - 「释放」按钮：二次确认弹窗 → POST /api/ports/release 向占用进程发 SIGTERM
- *    后端黑名单禁止杀系统关键进程（nasdash 自身 / PID1 / systemd / dockerd / sshd 等）
+ *    后端黑名单禁止杀系统关键进程（nasdeck 自身 / PID1 / systemd / dockerd / sshd 等）
  */
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
 import PanelHero from '../components/PanelHero.vue'
@@ -388,7 +388,7 @@ onUnmounted(() => {
         <b>应用</b>＝飞牛应用中心安装的应用（自动识别，带该应用自己的图标）；
         <b>容器</b>＝Docker 容器映射出来的端口；
         <b>系统</b>＝飞牛系统自带服务，并标注中文说明（如「飞牛文件共享」「飞牛 Web 管理后台」）。
-        <br /><b>应用归属怎么来的</b>：nasdash 在 NAS 本机读取进程信息——进程的运行用户、可执行文件路径、
+        <br /><b>应用归属怎么来的</b>：nasdeck 在 NAS 本机读取进程信息——进程的运行用户、可执行文件路径、
         工作目录与命令行，逐级比对应用安装目录（<code>/vol1/@appcenter/&lt;应用&gt;</code>），
         并沿父进程向上追溯，因此「应用用 python/node 拉起的子进程」也能归到对应应用名下，无需手工配置。
         <br />同一端口可能被<b>多个进程</b>同时占用（UDP 允许多进程复用同一端口；Docker 也会为 IPv4/IPv6 各起一个代理进程）。

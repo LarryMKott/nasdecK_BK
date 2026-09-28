@@ -83,12 +83,12 @@ function shortModel(m?: string): string {
   if (!s) return ''
   return s.length > 26 ? s.slice(0, 26) + '…' : s
 }
-/** 点物理盘 → 跳「硬盘 SMART」页并高亮该盘的健康卡（App.vue 监听 nasdash-nav 换页签） */
+/** 点物理盘 → 跳「硬盘 SMART」页并高亮该盘的健康卡（App.vue 监听 nasdeck-nav 换页签） */
 function focusDisk(dev: string): void {
   try {
-    sessionStorage.setItem('nasdash_focus_disk', dev)
+    sessionStorage.setItem('nasdeck_focus_disk', dev)
   } catch { /* 某些环境禁 sessionStorage，忽略（跳转仍在，只是不高亮） */ }
-  window.dispatchEvent(new CustomEvent('nasdash-nav', { detail: { tab: 'disks' } }))
+  window.dispatchEvent(new CustomEvent('nasdeck-nav', { detail: { tab: 'disks' } }))
 }
 
 /** 平均使用率只算本地卷：云挂载无使用率（后端置空），计入会把均值拉低成假象 */

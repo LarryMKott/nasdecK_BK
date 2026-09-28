@@ -78,7 +78,7 @@ def _send_bark(url, text):
     try:
         if not url.endswith("/"):
             url += "/"
-        req = urllib.request.Request(url + "push", data=json.dumps({"title": "nasdash 告警", "body": text}).encode("utf-8"),
+        req = urllib.request.Request(url + "push", data=json.dumps({"title": "nasdeck 告警", "body": text}).encode("utf-8"),
                                      headers={"Content-Type": "application/json"}, method="POST")
         with urllib.request.urlopen(req, timeout=10) as r:
             return r.status in (200, 201)
@@ -89,8 +89,8 @@ def _send_email(cfg, text):
     try:
         import smtplib
         from email.mime.text import MimeText
-        msg = MimeText("nasdash 告警通知\n\n%s\n\n时间：%s" % (text, time.strftime("%Y-%m-%d %H:%M:%S")), "plain", "utf-8")
-        msg["Subject"] = "nasdash 告警"
+        msg = MimeText("nasdeck 告警通知\n\n%s\n\n时间：%s" % (text, time.strftime("%Y-%m-%d %H:%M:%S")), "plain", "utf-8")
+        msg["Subject"] = "nasdeck 告警"
         msg["From"] = cfg.get("user", "")
         msg["To"] = cfg.get("to", "")
         with smtplib.SMTP_SSL(cfg.get("smtp_host"), int(cfg.get("smtp_port", 465)), timeout=10) as s:

@@ -43,14 +43,14 @@ for _a in "$@"; do
 done
 
 if [ "$WITH_WIZARD" = "1" ]; then
-  tar $TAR_FMT -czf nasdash.fpk app.tgz cmd config ICON.PNG ICON_256.PNG manifest wizard
+  tar $TAR_FMT -czf nasdeck.fpk app.tgz cmd config ICON.PNG ICON_256.PNG manifest wizard
   echo "[build] 含 wizard/（发布版，供 Web UI 安装/卸载向导页）"
 else
-  tar $TAR_FMT -czf nasdash.fpk app.tgz cmd config ICON.PNG ICON_256.PNG manifest
+  tar $TAR_FMT -czf nasdeck.fpk app.tgz cmd config ICON.PNG ICON_256.PNG manifest
   echo "[build] 无 wizard/（测试版，可 trim-cli 一键部署）"
 fi
 
-ls -la nasdash.fpk app.tgz
+ls -la nasdeck.fpk app.tgz
 
 # 4. 一致性校验（三处 md5 / desc 单行 / 版本号三处一致）
 ./scripts/verify.sh

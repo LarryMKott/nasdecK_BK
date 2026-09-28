@@ -1,6 +1,6 @@
-# NasDash 后端 - 标准大型项目（整洁架构）重构方案
+# NasDeck 后端 - 标准大型项目（整洁架构）重构方案
 
-> 项目：NasDash（飞牛OS fnOS NAS硬件监控面板，FPK应用包）
+> 项目：NasDeck（飞牛OS fnOS NAS硬件监控面板，FPK应用包）
 > 现状：Flask单文件迁移至FastAPI，Vue3单文件前端；已有成熟硬件采集、风扇控制、SQLite历史时序库；项目v2.3.3，开源。
 > 架构目标：采用**整洁架构(Clean Architecture)** 标准大型项目分层，领域与基础设施强隔离；存量采集逻辑复用，不推翻成熟采集代码；适配fnOS FPK轻量化打包约束。
 > 执行顺序与验收门禁见 [`docs/整洁架构重构开发计划.md`](整洁架构重构开发计划.md)（方案回答"改成什么样"，计划回答"按什么顺序改、怎么验收、怎么回滚"）。
@@ -22,7 +22,7 @@
 ## 二、完整目录结构
 
 ```
-nasdash/
+nasdeck/
 ├── backend/
 │   ├── __init__.py
 │   ├── main.py                      # 应用启动入口、DI容器组装、生命周期事件
@@ -173,7 +173,7 @@ history_repo: IHistoryRepo = HistoryRepoImpl()
 dashboard_usecase = DashboardUseCase(history_repo=history_repo)
 
 # 3.将usecase注册到FastAPI依赖容器，供路由Depends注入
-app = FastAPI(title="NasDash fnOS硬件监控", version="2.3.3")
+app = FastAPI(title="NasDeck fnOS硬件监控", version="2.3.3")
 app.include_router(api_router, prefix="/api/v1")
 
 @app.on_event("startup")

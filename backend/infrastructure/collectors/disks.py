@@ -544,7 +544,7 @@ def _start_badblocks(dev, mode="destructive"):
         total_bytes = int(subprocess.check_output(["blockdev", "--getsize64", dev_path], text=True, stderr=subprocess.DEVNULL).strip())
     except Exception:
         total_bytes = 0
-    outfile = "/tmp/nasdash_bb_%s.txt" % dev
+    outfile = "/tmp/nasdeck_bb_%s.txt" % dev
     try:
         if os.path.exists(outfile):
             os.remove(outfile)

@@ -66,7 +66,7 @@ const NAV: NavBlock[] = [
       { id: 'ports', label: '端口占用', icon: 'ports', realtime: true },
       { id: 'automation', label: '控制与自动化', icon: 'automation', realtime: true },
       { id: 'manual', label: '操作手册', icon: 'manual' },
-      { id: 'about', label: '关于 nasdash', icon: 'about' },
+      { id: 'about', label: '关于 nasdeck', icon: 'about' },
     ],
   },
 ]
@@ -109,14 +109,14 @@ function select(id: string): void {
   window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
 }
 
-/** 跨页跳转总线（v2.3.0 3.6）：任意 Vue 原生页 dispatch nasdash-nav 即可换页签。
+/** 跨页跳转总线（v2.3.0 3.6）：任意 Vue 原生页 dispatch nasdeck-nav 即可换页签。
  *  用 window 事件而不是 props/路由：外壳与页面是松耦合的，页面不该知道外壳结构。 */
 function onNav(e: Event): void {
   const id = (e as CustomEvent).detail?.tab
   if (id && ALL_TABS.some(t => t.id === id)) select(id)
 }
-onMounted(() => window.addEventListener('nasdash-nav', onNav))
-onUnmounted(() => window.removeEventListener('nasdash-nav', onNav))
+onMounted(() => window.addEventListener('nasdeck-nav', onNav))
+onUnmounted(() => window.removeEventListener('nasdeck-nav', onNav))
 
 // 数据新鲜度（3.9，隐形版）：平时不显示；只有实时页数据超过 10 秒没刷新才弹出黄色「数据已 N 秒未更新」告警（后端卡死/轮询断开时才有用，避免常驻装饰条）
 const realtime = computed(() => ALL_TABS.find(t => t.id === tab.value)?.realtime === true)

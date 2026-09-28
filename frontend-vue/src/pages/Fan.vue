@@ -59,7 +59,7 @@ let FAN_NT_EXPANDED: Record<string, boolean> = {}
 let FAN_LIST: any[] = []
 let SHOW_HIDDEN_FANS = false
 
-// 「接管风扇控制」总开关：关闭后 nasdash 仅监控、不写 PWM，控速交还系统原生
+// 「接管风扇控制」总开关：关闭后 nasdeck 仅监控、不写 PWM，控速交还系统原生
 let FAN_CTRL_ENABLED = true
 let FAN_CTRL_CHANGING = false   // 开关操作进行中，禁止轮询/同步把状态刷回旧值
 let FAN_CTRL_SYNCING = false    // 同步请求在途，避免面板重绘时叠发多个请求
@@ -176,7 +176,7 @@ function renderFanBody(): string {
   const gridInner = cards || `<div class="loading">可见风扇均已隐藏${hiddenCount > 0 ? '，点上方「显示已隐藏通道」可展开' : ''}。</div>`
 
   const lock = FAN_CTRL_ENABLED ? ''
-    : `<div class="fan-lock-banner">${iconSvg('alert')} 风扇接管已关闭：nasdash 不再根据温度自动调速。若飞牛自带风扇服务已配置好，会由它接管；否则保持当前转速。开启上方「接管风扇控制」才能用下方调速。</div>`
+    : `<div class="fan-lock-banner">${iconSvg('alert')} 风扇接管已关闭：nasdeck 不再根据温度自动调速。若飞牛自带风扇服务已配置好，会由它接管；否则保持当前转速。开启上方「接管风扇控制」才能用下方调速。</div>`
 
   return `<div class="fan-page${FAN_CTRL_ENABLED ? '' : ' fan-locked'}">
     ${lock}
@@ -303,7 +303,7 @@ function renderFanStatusInner(): string {
     const who = !known ? '系统自身'
       : active ? '飞牛自带的风扇服务'
         : '主板自己的策略（BIOS 自动）'
-    return `<div class="fan-off-row"><span class="fan-off-dot"></span><span>nasdash 没有接管风扇 · 现在由<b>${esc(who)}</b>调速</span></div>`
+    return `<div class="fan-off-row"><span class="fan-off-dot"></span><span>nasdeck 没有接管风扇 · 现在由<b>${esc(who)}</b>调速</span></div>`
   }
 
   // 正常：一行大白话「谁在管风扇」（只到芯片/驱动/加载状态为止，不再往下罗列 pwm 通道）
@@ -561,7 +561,7 @@ function applyFanLockVisual(): void {
       if (!banner && page) {
         banner = document.createElement('div')
         banner.className = 'fan-lock-banner'
-        banner.innerHTML = iconSvg('alert') + ' 风扇接管已关闭：nasdash 不再根据温度自动调速。若飞牛自带风扇服务已配置好，会由它接管；否则保持当前转速。开启上方「接管风扇控制」才能用下方调速。'
+        banner.innerHTML = iconSvg('alert') + ' 风扇接管已关闭：nasdeck 不再根据温度自动调速。若飞牛自带风扇服务已配置好，会由它接管；否则保持当前转速。开启上方「接管风扇控制」才能用下方调速。'
         // 必须挂到 .fan-page 下（渲染时 lock banner 就是 .fan-page 的第一个子节点）
         page.insertBefore(banner, page.firstChild)
       }
@@ -656,7 +656,7 @@ function toggleFanHwNote(id: string): void {
 function updateFanFloorNote(id: string, f: any): void {
   const el = document.getElementById(id + '-hwnote') as HTMLElement | null
   if (!el) return
-  // pwm_enable==1 才是 nasdash 真正在控速；==2 是已交还主板自动，那种情况下读到的 0 不算我们下发的
+  // pwm_enable==1 才是 nasdeck 真正在控速；==2 是已交还主板自动，那种情况下读到的 0 不算我们下发的
   const engaged = (f && (f.pwm_enable == 1 || f.pwm_enable === '1'))
   const zeroButSpinning = f && engaged && f.has_tach && (f.pwm != null && f.pwm <= 0) && (f.rpm > 0)
   if (zeroButSpinning) {
@@ -970,7 +970,7 @@ async function setFanAuto(hwmon: string, idx: number, activeMode?: string): Prom
       body: JSON.stringify({ hwmon: hwmon, idx: idx, mode: 'auto' }),
     })
     const j = await r.json()
-    const owner = j.owner === 'ext_service' ? '（已交还系统风扇服务）' : '（nasdash 接管温控）'
+    const owner = j.owner === 'ext_service' ? '（已交还系统风扇服务）' : '（nasdeck 接管温控）'
     if (st) st.textContent = j.ok ? ('已恢复自动 ' + owner) : ('失败：' + (j.error || ''))
     if (j.ok) syncFanData(hwmon, idx, 'auto')
     // 2) 同步 active_mode 到 fan_rules（如有规则）
@@ -1424,7 +1424,7 @@ onUnmounted(() => {
       @refresh="loadFanData(true)"
     >
       <template #action>
-        <label class="hero-switch" title="关闭后 nasdash 不再根据温度自动调速。若飞牛自带风扇服务已配置好，会交还它接管；否则保持当前转速，不再写 PWM。">
+        <label class="hero-switch" title="关闭后 nasdeck 不再根据温度自动调速。若飞牛自带风扇服务已配置好，会交还它接管；否则保持当前转速，不再写 PWM。">
           <input id="fanCtrlToggle" type="checkbox" :checked="ctrlEnabled" :disabled="ctrlChanging" @change="onToggleCtrl" />
           <span class="hero-switch-track"><span class="hero-switch-knob" /></span>
           <span class="hero-switch-txt">接管风扇控制</span>

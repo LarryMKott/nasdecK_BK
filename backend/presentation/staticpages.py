@@ -58,10 +58,10 @@ def _vue_missing_page():
     """
     resp = HTMLResponse(
         "<!DOCTYPE html><html lang='zh-CN'><head><meta charset='utf-8'>"
-        "<title>nasdash - 资源缺失</title></head><body style=\"font:14px/1.8 -apple-system,'PingFang SC',sans-serif;"
+        "<title>nasdeck - 资源缺失</title></head><body style=\"font:14px/1.8 -apple-system,'PingFang SC',sans-serif;"
         "max-width:560px;margin:80px auto;padding:0 24px\">"
         "<h2 style='font-size:18px'>界面资源缺失</h2>"
-        "<p style='color:#646a73'>应用的前端文件没找到。请刷新页面重试；若一直如此，请在应用中心重新安装 nasdash。</p>"
+        "<p style='color:#646a73'>应用的前端文件没找到。请刷新页面重试；若一直如此，请在应用中心重新安装 nasdeck。</p>"
         "</body></html>",
         status_code=500,
     )
@@ -271,8 +271,8 @@ def manual(request: Request):
     else:
         head = ("<!doctype html><html lang=\"zh-CN\"><head><meta charset=\"utf-8\">"
                 "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
-                "<title>nasdash 操作手册</title><style>%s</style></head>"
-                "<body><div class=\"topbar\">nasdash 操作手册 · <b>v%s</b> · "
+                "<title>nasdeck 操作手册</title><style>%s</style></head>"
+                "<body><div class=\"topbar\">nasdeck 操作手册 · <b>v%s</b> · "
                 "<a href=\"/\">← 返回面板</a></div>"
                 "<div class=\"wrap\">") % (_MANUAL_CSS, APP_VERSION)
         tail = "</div></body></html>"

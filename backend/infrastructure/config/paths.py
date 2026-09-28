@@ -7,7 +7,7 @@
 
 【配置点】
 - TRIM_PKGVAR：飞牛运行时注入的用户数据持久目录（配置/history.db 所在）
-- 未注入时按 /vol*/@appdata/com.dashboard.nasdash 探测，再回退 LEGACY_APPATA
+- 未注入时按 /vol*/@appdata/com.dashboard.nasdeck 探测，再回退 LEGACY_APPATA
 """
 import os
 import shutil
@@ -24,7 +24,7 @@ APP_DIR = REPO_ROOT
 # LEGACY_APPATA 是旧固件/旧安装下 _config_dir 的硬编码兜底位置（当 TRIM_PKGVAR 未注入时），
 # 与运行时 TRIM_PKGVAR（如 /vol1/@appdata/...）可能不在同一物理路径；
 # 重装迁移时须把它也当作旧配置来源，否则标注会孤儿在旧目录导致 UI 空白。
-LEGACY_APPATA = "/usr/local/apps/@appdata/com.dashboard.nasdash"
+LEGACY_APPATA = "/usr/local/apps/@appdata/com.dashboard.nasdeck"
 
 
 def _config_dir():
@@ -35,7 +35,7 @@ def _config_dir():
         # 持久化 @appdata 目录，保证配置与历史库（history.db）指向同一处，
         # 避免多进程/环境变量差异导致「写入一个库、API 读另一个空库」。
         import glob
-        cand = glob.glob("/vol*/@appdata/com.dashboard.nasdash")
+        cand = glob.glob("/vol*/@appdata/com.dashboard.nasdeck")
         if cand:
             d = cand[0]
     if not d:

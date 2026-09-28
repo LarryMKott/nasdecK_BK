@@ -1,4 +1,4 @@
-# nasdash FastAPI 迁移说明
+# nasdeck FastAPI 迁移说明
 
 > v2.3.3 单文件 Flask（app.py 11,251 行）→ FastAPI 模块化后端 的完整迁移记录。
 > 方案细节：[`docs/重构计划.md`](重构计划.md)；分阶段进度：[`docs/开发计划.md`](开发计划.md)。
@@ -6,7 +6,7 @@
 ## 一、项目目录结构
 
 ```
-nasdash/
+nasdeck/
 ├── app.py                    # 薄门面（约 60 行）：app = create_app() + 测试符号 re-export + __main__
 ├── requirements.txt          # 运行依赖：fastapi>=0.100 / uvicorn / sqlalchemy>=2.0
 ├── manifest / build.sh / cmd/ / ui/ / config/ / wizard/   # 飞牛 FPK 包层（未改动，除 install_callback 依赖）
@@ -92,10 +92,10 @@ nasdash/
 
 | 配置 | 位置 | 说明 |
 |---|---|---|
-| `TRIM_PKGVAR` | 环境变量 | 飞牛注入的用户数据目录（配置 JSON + history.db）；未注入时自动探测 `/vol*/@appdata/com.dashboard.nasdash` |
+| `TRIM_PKGVAR` | 环境变量 | 飞牛注入的用户数据目录（配置 JSON + history.db）；未注入时自动探测 `/vol*/@appdata/com.dashboard.nasdeck` |
 | `TRIM_SERVICE_PORT` | 环境变量 | 本地 TCP 端口（manifest `service_port=9800` 注入）；不设则默认 9800 |
-| `NAS_DASH_GATEWAY=1` | 环境变量 | 启用网关 Unix Socket 模式（由 cmd/main 注入） |
-| `APP_SOCKET` / `GATEWAY_PREFIX` | 环境变量 | socket 路径与网关前缀（默认 `APP_DIR/app.sock`、`/app/com.dashboard.nasdash`） |
+| `NAS_DECK_GATEWAY=1` | 环境变量 | 启用网关 Unix Socket 模式（由 cmd/main 注入） |
+| `APP_SOCKET` / `GATEWAY_PREFIX` | 环境变量 | socket 路径与网关前缀（默认 `APP_DIR/app.sock`、`/app/com.dashboard.nasdeck`） |
 | 依赖安装 | `cmd/install_callback` | 自动 `pip install -r requirements.txt`（fastapi/uvicorn/sqlalchemy，含 Pydantic v2） |
 | 打包 | `build.sh` L17 | tar 白名单已含 `backend requirements.txt`，并排除 `__pycache__` |
 

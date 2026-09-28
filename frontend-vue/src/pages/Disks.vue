@@ -317,7 +317,7 @@ function capText(d: Disk): string {
 function capTip(d: Disk): string {
   if (d.devs && d.devs.length > 1) {
     return '双磁臂硬盘：两个执行器共用一个盘体，各向系统暴露一个逻辑盘（' + d.dev_label + '），'
-      + '每臂 ' + (d.size || '?') + '，整盘 ' + (d.size_total || '约两倍') + '。nasdash 只显示一张卡，数据取两个执行器中更差的一侧。'
+      + '每臂 ' + (d.size || '?') + '，整盘 ' + (d.size_total || '约两倍') + '。nasdeck 只显示一张卡，数据取两个执行器中更差的一侧。'
   }
   return '硬盘总容量与接口类型（NVMe/SAS/SATA）；机械盘（HDD）还是固态盘（SSD）看下面「转速」那一行'
 }
@@ -566,8 +566,8 @@ async function loadDisks(force = false): Promise<void> {
 function maybeFocusDisk(): void {
   let dev = ''
   try {
-    dev = sessionStorage.getItem('nasdash_focus_disk') || ''
-    sessionStorage.removeItem('nasdash_focus_disk')
+    dev = sessionStorage.getItem('nasdeck_focus_disk') || ''
+    sessionStorage.removeItem('nasdeck_focus_disk')
   } catch { return }
   if (!dev) return
   const target = disks.value.find(d => diskKey(d) === dev || (d.devs || []).includes(dev))
@@ -1080,7 +1080,7 @@ onUnmounted(() => {
           </div>
           <div v-else class="disk-test-section">
             <div class="disk-test-title"><AppIcon name="pulse" />硬盘自检</div>
-            <div class="disk-test-msg">物理盘由阵列卡接管，nasdash 无法在其上跑自检（无 /dev 节点）</div>
+            <div class="disk-test-msg">物理盘由阵列卡接管，nasdeck 无法在其上跑自检（无 /dev 节点）</div>
           </div>
         </div>
       </div>
@@ -1176,7 +1176,7 @@ onUnmounted(() => {
           </div>
 
           <div class="hd-src">
-            判定依据来自：{{ gradeDisk.health_grade?.source || '硬盘自身 SMART' }}。全部是硬盘和阵列卡自己上报的数据，nasdash 只做汇总分级，不猜、不做推断。
+            判定依据来自：{{ gradeDisk.health_grade?.source || '硬盘自身 SMART' }}。全部是硬盘和阵列卡自己上报的数据，nasdeck 只做汇总分级，不猜、不做推断。
           </div>
         </div>
         <div class="modal-actions">

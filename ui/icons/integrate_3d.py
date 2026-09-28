@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""把生成的 3D 图标缩到 256x256 并覆盖到 nasdash/ui/images/icon-*.png。"""
+"""把生成的 3D 图标缩到 256x256 并覆盖到 nasdeck/ui/images/icon-*.png。"""
 import os
 from PIL import Image
 
 SRC = "/Users/hanyu/Workbuddy/2026-07-01-17-37-29/generated-images"
-DST = "/Users/hanyu/WorkBuddy/2026-07-01-17-37-29/nasdash/ui/images"
+DST = "/Users/hanyu/WorkBuddy/2026-07-01-17-37-29/nasdeck/ui/images"
 SIZE = 256
 
 MAP = {

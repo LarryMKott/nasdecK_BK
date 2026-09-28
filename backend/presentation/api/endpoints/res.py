@@ -83,7 +83,7 @@ def api_ports_appicon(request: Request):
 @router.post("/api/ports/release")
 def api_ports_release(request: Request, payload: dict = Depends(json_body_as(PortsReleaseRequest))):
     """释放端口占用：终止占用该端口的进程（SIGTERM 优雅终止）。
-    安全边界：禁止 kill 系统关键进程（nasdash 自身 / PID1 / systemd / dockerd / sshd 等）与 fnOS 核心服务；
+    安全边界：禁止 kill 系统关键进程（nasdeck 自身 / PID1 / systemd / dockerd / sshd 等）与 fnOS 核心服务；
     其余进程由用户在前端二次确认后承担后果。"""
     try:
         data = payload or {}

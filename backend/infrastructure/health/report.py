@@ -46,8 +46,8 @@ def _read_app_log(max_lines=60):
     """读取应用运行日志尾部（供健康报告排查 bug 用）。找不到返回 None。"""
     candidates = [
         os.environ.get("TRIM_PKGVAR", "") + "/app.log",
-        "/vol1/@appdata/com.dashboard.nasdash/app.log",
-        "/var/apps/com.dashboard.nasdash/var/app.log",
+        "/vol1/@appdata/com.dashboard.nasdeck/app.log",
+        "/var/apps/com.dashboard.nasdeck/var/app.log",
     ]
     for p in candidates:
         if p and os.path.isfile(p):
@@ -284,7 +284,7 @@ def build_diagnostics():
         pass
     diag = {
         "generated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
-        "nasdash_version": APP_VERSION,
+        "nasdeck_version": APP_VERSION,
         "fnos_version": _fnos_version(),
         "kernel": getattr(os.uname(), "release", ""),
         "sensor_chips": chips,
@@ -303,9 +303,9 @@ def build_diagnostics():
 def render_diagnostics_text(diag):
     """把诊断包渲染成可复制的纯文本。"""
     L = []
-    L.append("===== nasdash 设备诊断包 =====")
+    L.append("===== nasdeck 设备诊断包 =====")
     L.append("生成时间: %s" % diag.get("generated_at"))
-    L.append("nasdash 版本: %s" % diag.get("nasdash_version"))
+    L.append("nasdeck 版本: %s" % diag.get("nasdeck_version"))
     L.append("fnOS 版本: %s" % diag.get("fnos_version"))
     L.append("内核: %s" % diag.get("kernel"))
     L.append("传感器芯片: %s" % ", ".join(diag.get("sensor_chips") or []) or "无")
@@ -972,8 +972,8 @@ def _render_report_html(rep):
     body = (
         "<!doctype html><html lang='zh-CN'><head><meta charset='utf-8'>"
         "<meta name='viewport' content='width=device-width,initial-scale=1'>"
-        "<title>nasdash 硬件健康报告</title><style>" + CSS + "</style></head><body>"
-        f"<h1 class='rep-title'>nasdash 硬件健康报告</h1>"
+        "<title>nasdeck 硬件健康报告</title><style>" + CSS + "</style></head><body>"
+        f"<h1 class='rep-title'>nasdeck 硬件健康报告</h1>"
         f"<p class='rep-sub'>报告类型：HTML ｜ 生成时间 <b>{esc(rep.get('generated_at'))}</b> ｜ "
         f"版本 <b>{esc(rep.get('version'))}</b> ｜ 主机 <b>{esc(rep.get('host'))}</b> ｜ "
         f"运行时长 <b>{esc(rep.get('uptime'))}</b> ｜ 系统 <b>{esc(sys_.get('os'))}"
@@ -986,7 +986,7 @@ def _render_report_html(rep):
             ["计算机名称", sys_.get("hostname")],
             ["操作系统", sys_.get("os")],
             ["运行时长", fmt(sys_.get("uptime"))],
-            ["nasdash 版本", rep.get("version")],
+            ["nasdeck 版本", rep.get("version")],
             ["CPU 温度", fmt(sys_.get("cpu_temp"), " ℃")],
             ["内存使用率", fmt(mem.get("percent"), " %")],
             ["硬盘数量", "{n} 块{extra}".format(
@@ -1043,7 +1043,7 @@ def _render_report_html(rep):
         + (cat("存储拓扑")
            + f"<div class='note'><pre style='margin:0;white-space:pre-wrap;font-family:Consolas,Menlo,monospace;font-size:12px'>{esc(topology)}</pre></div>"
            if topology.strip() else "")
-        + "<div class='footer'>本报告由 nasdash 自动生成，仅供硬件健康参考。</div>"
+        + "<div class='footer'>本报告由 nasdeck 自动生成，仅供硬件健康参考。</div>"
         "</body></html>"
     )
     from fastapi.responses import HTMLResponse

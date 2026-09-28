@@ -28,7 +28,7 @@ def _fan_write_raw(hwmon, idx, raw):
 
 # 接管总开关关闭时落到的「安全待机占空比」：保持 enable=1 手动模式，不写 2。
 # 原因：NCT6797 上 pwm_enable=2（交还芯片 Thermal Cruise）会把风扇拉到满速狂转；
-# 这块 DIY 主板又无 fnOS 原生 FCS 可接管，故只能由 nasdash 以手动模式落一个安静待机值并停手，
+# 这块 DIY 主板又无 fnOS 原生 FCS 可接管，故只能由 nasdeck 以手动模式落一个安静待机值并停手，
 # 让用户明确看到「接管已释放、风扇已放慢」，而不是冻结在高位看着像还在控。
 _FAN_RELEASE_IDLE_PWM = 30
 
@@ -48,7 +48,7 @@ def _fan_release_to_idle():
         except Exception:
             pass
 def _fan_set_enable(hwmon, idx, val):
-    """设置 pwm_enable：1=软件接管控速（nasdash 写 pwm 生效）；2=交还主板/内核自动。带缓存，值不变则不写。"""
+    """设置 pwm_enable：1=软件接管控速（nasdeck 写 pwm 生效）；2=交还主板/内核自动。带缓存，值不变则不写。"""
     key = (hwmon, idx)
     if _FAN_ENABLE_CACHE.get(key) == val:
         return True

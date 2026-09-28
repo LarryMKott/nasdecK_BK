@@ -152,7 +152,7 @@ def disk_temp_decision(states, cfg, all_idle: bool) -> FanDecision:
     """硬盘温控决策（原 _fan_disk_temp_decision；全闲置判定参数传入、接管标志随值返回）。
       "control" → 接管，pwm 为目标 raw（低于开转温度时维持最低占空 min_pwm，不交还主板）
       "release" → 完全读不到温度（安全兜底，交还主板/内核自动控速）
-    说明：只要能读到有效盘温，nasdash 始终接管——避免无 FCS 的主板（如 DIY B360M）在
+    说明：只要能读到有效盘温，nasdeck 始终接管——避免无 FCS 的主板（如 DIY B360M）在
     交还后被 BIOS Thermal Cruise 拉满 100% 全速。低于开转温度不再停转/交还，而是维持最低
     占空（用户设的 min_pwm，默认 30%），既安静又保留基础气流。
     休眠停转（sleep_stop + 所有盘 idle 且无不可休眠盘偏热）仍可停转 → control/0。"""
@@ -160,7 +160,7 @@ def disk_temp_decision(states, cfg, all_idle: bool) -> FanDecision:
     if not valid:
         return FanDecision(action="release", pwm=None, engaged=False)
     if all_idle:
-        # 所有可休眠盘休眠且无不可休眠盘偏热 → 停转（显式休眠停转功能，nasdash 接管写 0）
+        # 所有可休眠盘休眠且无不可休眠盘偏热 → 停转（显式休眠停转功能，nasdeck 接管写 0）
         return FanDecision(action="control", pwm=0, engaged=False)
     T = disk_source_max_temp(valid, float(cfg.get("start_temp", 40)), float(cfg.get("full_temp", 60)))
     if T is None:

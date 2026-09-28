@@ -67,7 +67,7 @@ class DashboardUseCase:
                     "docker": _safe(f_docker.result, {}),
                     "time": time.strftime("%Y-%m-%d %H:%M:%S"),
                     "elapsed": round(time.time() - t0, 2),
-                    "nasdash_version": self._info.nasdash_version(),
+                    "nasdeck_version": self._info.nasdeck_version(),
                     "fnos_version": self._info.fnos_version(),
                 }
                 # 把阵列卡芯片温度并入 system，供「温度监控」tab 直接读取（随 /api/all /api/system 刷新）

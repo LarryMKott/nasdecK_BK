@@ -6,7 +6,7 @@ import { viteSingleFile } from 'vite-plugin-singlefile'
  * 探针页构建配置（阶段 1a）
  *
  * 关键约束（来自《最终实施方案》）：
- * - 飞牛网关通过 /cgi/ThirdParty/com.dashboard.nasdash/index.cgi/ 反代到 Flask，
+ * - 飞牛网关通过 /cgi/ThirdParty/com.dashboard.nasdeck/index.cgi/ 反代到 Flask，
  *   静态资源若走 /assets/xxx.js 这样的根路径极易 404 或与其他应用打架。
  * - 因此用 vite-plugin-singlefile 把 JS/CSS 全部内联，产物就是一个独立 index.html，
  *   零路径风险、零 hash 问题。稳定后再考虑拆包。

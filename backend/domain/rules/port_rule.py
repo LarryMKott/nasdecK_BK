@@ -1,7 +1,7 @@
 """端口释放安全规则（纯数据 + 纯判定）。
 
 忠实副本来源：backend/infrastructure/collectors/ports.py::_PORT_PROTECTED（v2.3.3）。
-安全策略：禁止终止系统关键进程（nasdash 自身 / PID1 / systemd / dockerd / sshd /
+安全策略：禁止终止系统关键进程（nasdeck 自身 / PID1 / systemd / dockerd / sshd /
 飞牛核心服务等）；其余进程由用户在前端二次确认后承担后果。
 """
 

@@ -76,7 +76,7 @@ def api_fan_set(request: Request, payload: dict = Depends(json_body_as(FanSetReq
     """设置风扇转速：设目标 PWM（后台缓变线程平滑过渡）或恢复自动控温"""
     try:
         if not _FAN_CTRL_ENABLED:
-            return _jr({"ok": False, "error": "风扇接管已关闭，nasdash 不控速（仅监控）"}, 400)
+            return _jr({"ok": False, "error": "风扇接管已关闭，nasdeck 不控速（仅监控）"}, 400)
         data = payload or {}
     except Exception:
         return _jr({"ok": False, "error": "bad json"}, 400)
@@ -118,11 +118,11 @@ def api_fan_set(request: Request, payload: dict = Depends(json_body_as(FanSetReq
                 with FAN_LOCK:
                     FAN_TARGETS.pop((h, i), None)
             else:
-                # 系统风扇服务未运行：nasdash 自带保守温控曲线接管
+                # 系统风扇服务未运行：nasdeck 自带保守温控曲线接管
                 with FAN_LOCK:
                     FAN_TARGETS[(h, i)] = {"mode": "auto", "target": None}
             _save_fan_mode(i, "auto", None)
-        owner = "ext_service" if ext else "nasdash"
+        owner = "ext_service" if ext else "nasdeck"
         return _jr({"ok": True, "mode": "auto", "owner": owner})
     try:
         pct = int(pwm)
@@ -205,7 +205,7 @@ def api_fan_control_get():
 
 @router.post("/api/fan/control")
 def api_fan_control_set(request: Request, payload: dict = Depends(json_body_as(FanControlRequest)), _admin = Depends(require_admin)):
-    """开关风扇接管：关闭后 nasdash 不再根据温度自动调速。若飞牛自带风扇服务已配置，
+    """开关风扇接管：关闭后 nasdeck 不再根据温度自动调速。若飞牛自带风扇服务已配置，
     会交还它接管；否则保持当前转速、不再写 PWM。"""
     global _FAN_CTRL_ENABLED
     try:
@@ -219,7 +219,7 @@ def api_fan_control_set(request: Request, payload: dict = Depends(json_body_as(F
     # 状态已切换，立即清掉 FCS 状态缓存，让前端下一次拉取拿到最新状态。
     _fcs_status_cached(clear=True)
     if enabled:
-        # 重新接管前必须停掉系统风扇服务，否则 nasdash 会因 FCS 在跑而拒绝写 PWM。
+        # 重新接管前必须停掉系统风扇服务，否则 nasdeck 会因 FCS 在跑而拒绝写 PWM。
         # 只有 FCS 真的配置了参数时才需要停；没配置时它本来就不会控速。
         # systemctl stop 交给后台线程，避免阻塞本 API 响应（开关才能真正秒回）。
         try:

@@ -12,9 +12,9 @@
   stderr 错误圈 → 配置迁移 → 历史库 → 风扇模式恢复 → 后台线程 → 监听
 
 【配置点】环境变量（与原版一致，由 cmd/main 注入）：
-- NAS_DASH_GATEWAY=1   启用网关模式（Unix Socket）
+- NAS_DECK_GATEWAY=1   启用网关模式（Unix Socket）
 - APP_SOCKET           socket 路径（默认 APP_DIR/app.sock）
-- GATEWAY_PREFIX       网关转发前缀（默认 /app/com.dashboard.nasdash）
+- GATEWAY_PREFIX       网关转发前缀（默认 /app/com.dashboard.nasdeck）
 - TRIM_SERVICE_PORT    本地 TCP 端口（manifest service_port=9800 注入）
 """
 import os
@@ -84,10 +84,10 @@ def main():
 
     # ---- 监听（原 __main__ 块）----
     app_dir = APP_DIR  # 原 __main__ 局部 APP_DIR 同源（paths.APP_DIR 锚定包父目录）
-    if os.environ.get("NAS_DASH_GATEWAY") == "1":  # 【配置点】飞牛网关模式
+    if os.environ.get("NAS_DECK_GATEWAY") == "1":  # 【配置点】飞牛网关模式
         socket_path = os.environ.get("APP_SOCKET") or os.path.join(app_dir, "app.sock")
         # 网关转发请求路径带前缀 /app/{appname}，去掉前缀再交给原路由
-        gw_prefix = (os.environ.get("GATEWAY_PREFIX") or "/app/com.dashboard.nasdash").rstrip("/")
+        gw_prefix = (os.environ.get("GATEWAY_PREFIX") or "/app/com.dashboard.nasdeck").rstrip("/")
         asgi_app = app
         if gw_prefix and gw_prefix != "/":
             asgi_app = _PrefixMiddleware(app, gw_prefix)

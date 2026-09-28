@@ -52,8 +52,8 @@ start)
     # cgi 反代模式：app 监听 127.0.0.1:9800 + unix socket（双重监听，
     # 9800 供 index.cgi 反代；socket 供本地 self_test/直连健康检）。
     rm -f "$APP_ROOT/app.sock" 2>/dev/null
-    export NAS_DASH_GATEWAY=1
-    export GATEWAY_PREFIX="/app/com.dashboard.nasdash"
+    export NAS_DECK_GATEWAY=1
+    export GATEWAY_PREFIX="/app/com.dashboard.nasdeck"
     export APP_SOCKET="$APP_ROOT/app.sock"
     $PYTHON "$APP_DIR/app.py" > "$LOG_FILE" 2>&1 &
     echo $! > "$PID_FILE"

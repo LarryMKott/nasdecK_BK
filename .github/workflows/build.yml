@@ -1,4 +1,4 @@
-name: Build nasdash fpk
+name: Build nasdeck fpk
 
 on:
   push:
@@ -38,5 +38,5 @@ jobs:
       - name: Upload fpk artifact
         uses: actions/upload-artifact@v7
         with:
-          name: nasdash-fpk
-          path: nasdash.fpk
+          name: nasdeck-fpk
+          path: nasdeck.fpk

@@ -1,9 +1,9 @@
 {
-  "name": "nasdash-frontend-vue",
+  "name": "nasdeck-frontend-vue",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "nasdash 前端 Vue 化试点工程（阶段 1a 探针）——仅用于验证 Vue3+Vite+飞牛网关+API 链路，暂不替换主页面",
+  "description": "nasdeck 前端 Vue 化试点工程（阶段 1a 探针）——仅用于验证 Vue3+Vite+飞牛网关+API 链路，暂不替换主页面",
   "packageManager": "pnpm@9.15.4",
   "scripts": {
     "dev": "vite",

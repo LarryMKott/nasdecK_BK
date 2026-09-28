@@ -4,8 +4,8 @@ from abc import ABC, abstractmethod
 
 class IAppInfo(ABC):
     @abstractmethod
-    def nasdash_version(self) -> str:
-        """nasdash 应用版本（APP_VERSION）。"""
+    def nasdeck_version(self) -> str:
+        """nasdeck 应用版本（APP_VERSION）。"""
 
     @abstractmethod
     def fnos_version(self) -> str:

@@ -26,7 +26,7 @@ def _parse_ver(v):
     return tuple(int(p) for p in parts[:3]) if parts else (0, 0, 0)
 
 def _app_version():
-    appid = os.path.basename(APP_DIR)  # 如 com.dashboard.nasdash
+    appid = os.path.basename(APP_DIR)  # 如 com.dashboard.nasdeck
     candidates = [
         os.path.join(APP_DIR, "manifest"),
         os.path.join("/var/apps", appid, "manifest"),
@@ -76,7 +76,7 @@ def _fnos_version():
 # ---------- 检测新版本（GitHub latest release，带缓存/超时/静默失败，绝不阻塞页面） ----------
 _VERSION_CHECK = {"cached_result": None, "checked_at": 0}
 _VERSION_CHECK_TTL = 6 * 3600  # 6 小时缓存，避免频繁打 GitHub API
-_VERSION_REPO_URL = "https://api.github.com/repos/han951meng/nasdash/releases/latest"
+_VERSION_REPO_URL = "https://api.github.com/repos/han951meng/nasdeck/releases/latest"
 
 def _check_latest_version():
     """查询 GitHub latest release；带缓存、5s 超时、异常静默返回。"""
@@ -85,13 +85,13 @@ def _check_latest_version():
         return _VERSION_CHECK["cached_result"]
     result = {"current": APP_VERSION, "latest": None, "update_available": False, "url": None, "error": None}
     try:
-        req = urllib.request.Request(_VERSION_REPO_URL, headers={"User-Agent": "nasdash-version-check"})
+        req = urllib.request.Request(_VERSION_REPO_URL, headers={"User-Agent": "nasdeck-version-check"})
         with urllib.request.urlopen(req, timeout=5) as resp:
             data = json.loads(resp.read().decode("utf-8"))
         tag = (data.get("tag_name") or "").strip()
         latest = ("v" + tag.lstrip("vV")) if tag else ""
         result["latest"] = latest
-        result["url"] = data.get("html_url") or "https://github.com/han951meng/nasdash/releases"
+        result["url"] = data.get("html_url") or "https://github.com/han951meng/nasdeck/releases"
         result["update_available"] = _parse_ver(latest) > _parse_ver(APP_VERSION)
     except Exception as e:
         result["error"] = str(e)[:160]
@@ -105,7 +105,7 @@ from backend.domain.interfaces.app_info import IAppInfo
 
 
 class AppInfo(IAppInfo):
-    def nasdash_version(self) -> str:
+    def nasdeck_version(self) -> str:
         return APP_VERSION
 
     def fnos_version(self) -> str:

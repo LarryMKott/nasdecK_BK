@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""生成 nasdash 三套图标：line(线条) / color(彩色) / three(彩色3D)。"""
+"""生成 nasdeck 三套图标：line(线条) / color(彩色) / three(彩色3D)。"""
 import os
 
-OUT = "/Users/hanyu/WorkBuddy/2026-07-01-17-37-29/nasdash/ui/icons"
+OUT = "/Users/hanyu/WorkBuddy/2026-07-01-17-37-29/nasdeck/ui/icons"
 LINE_DIR = os.path.join(OUT, "line")
 COLOR_DIR = os.path.join(OUT, "color")
 THREE_DIR = os.path.join(OUT, "three")
@@ -67,7 +67,7 @@ ICONS = [
         '<path d="M4 5.5 C 7 4 10 4.5 12 6 c2-1.5 5-2 8-0.5 v12 c-3-1.5-6-1-8 0.5 c-2-1.5-5-2-8-0.5 z"/>',
         '<line x1="12" y1="6" x2="12" y2="17.5"/>',
     ]),
-    ("about", "关于 nasdash", "#8C8C8C", [
+    ("about", "关于 nasdeck", "#8C8C8C", [
         '<circle cx="12" cy="12" r="8.5"/>',
         '<line x1="12" y1="11" x2="12" y2="16"/>',
         '<circle cx="12" cy="7.8" r="1.1" data-fill="1"/>',
@@ -136,7 +136,7 @@ for name, label, brand, elems in ICONS:
 
 html_doc = f'''<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>nasdash 图标方案预览</title>
+<title>nasdeck 图标方案预览</title>
 <style>
   body{{margin:0;background:#0f1115;color:#e6e6e6;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;padding:28px}}
   h1{{font-size:20px;font-weight:600;margin:0 0 4px}}
@@ -151,12 +151,12 @@ html_doc = f'''<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
   .tag{{font-size:12px;color:#9aa0a6}}
   .hint{{margin-top:24px;font-size:13px;color:#9aa0a6;line-height:1.7}}
 </style></head><body>
-<h1>nasdash 图标方案预览</h1>
+<h1>nasdeck 图标方案预览</h1>
 <div class="sub">左→右：线条版（飞牛蓝）　·　彩色版（色块底+品牌色线条）　·　彩色3D（渐变立体底+白色浮雕+投影）</div>
 <div class="grid">{''.join(rows)}</div>
 <div class="hint">三套均为 SVG 矢量，任意尺寸都清晰。你看完告诉我用哪套（或混搭），我再替换进 app.py / 模板并热更到 158。</div>
 </body></html>'''
 
-preview = "/Users/hanyu/WorkBuddy/2026-07-01-17-37-29/nasdash/ui/icons/preview.html"
+preview = "/Users/hanyu/WorkBuddy/2026-07-01-17-37-29/nasdeck/ui/icons/preview.html"
 open(preview, "w").write(html_doc)
 print("preview ->", preview)

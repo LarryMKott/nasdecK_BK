@@ -20,12 +20,12 @@ def _fan_ext_service_running():
 # 接管 / 交还系统风扇服务（FanControlServer）：
 # 本应用与 fnOS 自带的 FanControlServer 都直接写 /sys/class/hwmon/.../pwmN，
 # 二者同时运行会抢控 → 风扇转速抖动甚至被对方覆盖。论坛亦有用户反馈此冲突。
-# 故采用「接管即停、全交还即恢复」策略：nasdash 真正在控速任意风扇时停掉 FCS，
+# 故采用「接管即停、全交还即恢复」策略：nasdeck 真正在控速任意风扇时停掉 FCS，
 # 全部交还自动后重启 FCS，恢复 fnOS 原生控温。全程 best-effort，失败静默，
 # 绝不因停/启服务异常而中断风扇调速主流程。默认（用户未启用任何控速）不触碰 FCS。
 _FCS_TAKEN = {"v": False}
 # 用户可在面板「永久禁用」FanControlServer（stop+disable，重启不复活）；持久化到 @appdata。
-# 为 True 时，nasdash 交还自动控温后不再把 FCS 拉起来，尊重用户选择。
+# 为 True 时，nasdeck 交还自动控温后不再把 FCS 拉起来，尊重用户选择。
 FCS_STATE_FILE = os.path.join(_config_dir(), "fcs_state.json")
 # systemctl start/stop pwm-fancontrol 可能慢至数秒，用锁+后台线程避免阻塞 HTTP 请求。
 _FCS_OP_LOCK = _threading.Lock()
@@ -187,7 +187,7 @@ def _fan_start_ext_service():
 
 def _fcs_disable():
     """永久禁用 FanControlServer：stop + disable（重启不复活）+ 持久化标志。
-    即便 systemctl 命令异常也会写标志，确保 nasdash 交还逻辑不再拉起 FCS。"""
+    即便 systemctl 命令异常也会写标志，确保 nasdeck 交还逻辑不再拉起 FCS。"""
     ok = False
     try:
         shell.sudo_cmd(["systemctl", "disable", "--now", "pwm-fancontrol"], 8)

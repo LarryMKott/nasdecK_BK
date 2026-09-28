@@ -17,7 +17,7 @@ from backend.infrastructure.version import APP_VERSION
 
 def create_app() -> FastAPI:
     app = FastAPI(
-        title="nasdash",
+        title="nasdeck",
         version=APP_VERSION.lstrip("v"),
         description="飞牛OS NAS 硬件监控面板（FastAPI 重构版）",
         docs_url="/docs",            # OpenAPI 交互文档

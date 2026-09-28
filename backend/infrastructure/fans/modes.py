@@ -34,7 +34,7 @@ def _save_fan_mode(idx, mode, target):
         pass
 
 # ===================== 风扇接管总开关 =====================
-# 关闭后 nasdash 不再根据温度自动调速。若飞牛自带风扇服务已配置，会交还它接管；
+# 关闭后 nasdeck 不再根据温度自动调速。若飞牛自带风扇服务已配置，会交还它接管；
 # 否则保持当前转速、不再写 PWM。
 FAN_CONTROL_CFG = os.path.join(_config_dir(), "fan_control.json")
 _FAN_CTRL_ENABLED = True
@@ -50,7 +50,7 @@ def _load_fan_control_enabled():
     return _FAN_CTRL_ENABLED
 
 def _restore_fan_modes():
-    """nasdash 启动后自动恢复风扇模式，避免重启后 FAN_TARGETS 空导致风扇保持硬件全速：
+    """nasdeck 启动后自动恢复风扇模式，避免重启后 FAN_TARGETS 空导致风扇保持硬件全速：
     - 有持久化配置：按用户上次选择恢复（auto 接管；若 FCS 在控则交还 enable=2；manual 恢复固定值）。
     - 无配置（首次/清配置）：若系统风扇服务 FCS 未在控，默认将所有可控风扇设为 auto 接管，
       消除开机全速；若 FCS 在控则交还、不强行接管（尊重 fnOS 原生控温）。"""
@@ -58,7 +58,7 @@ def _restore_fan_modes():
         if not _FAN_CTRL_ENABLED:
             # 接管关闭：优先把控制权交还 fnOS 原生 FanControlServer（FCS）。
             # FCS 使用 enable=1 + pwm 手动控速；若我们再写 enable=2 会覆盖它，导致风扇被卡在高速。
-            # 若 FCS 真的配置了风扇参数，启动它接管；否则 nasdash 不再写 PWM，
+            # 若 FCS 真的配置了风扇参数，启动它接管；否则 nasdeck 不再写 PWM，
             # 保持风扇当前手动值（避免部分主板 enable=2 反而把转速拉得更高）。
             if not _fcs_disabled() and _fcs_installed_state() == "enabled" and _fcs_has_board_config():
                 _fan_start_ext_service()
@@ -74,7 +74,7 @@ def _restore_fan_modes():
         if not idx2hw:
             return
         # FCS 服务 active(exited) 不代表它真的能控速：/boot/board.json 为空时它只是空跑。
-        # 只有服务在跑且配置了风扇参数时，才视为「系统在控」，nasdash 不抢。
+        # 只有服务在跑且配置了风扇参数时，才视为「系统在控」，nasdeck 不抢。
         fcs = _fan_ext_service_running() and _fcs_has_board_config()
         modes = _load_fan_modes()
         if not modes:

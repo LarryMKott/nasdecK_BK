@@ -349,7 +349,7 @@
    "summary": "Api Fan Control Get"
   },
   "post": {
-   "description": "开关风扇接管：关闭后 nasdash 不再根据温度自动调速。若飞牛自带风扇服务已配置，\n会交还它接管；否则保持当前转速、不再写 PWM。",
+   "description": "开关风扇接管：关闭后 nasdeck 不再根据温度自动调速。若飞牛自带风扇服务已配置，\n会交还它接管；否则保持当前转速、不再写 PWM。",
    "operationId": "api_fan_control_set_api_fan_control_post",
    "requestBody": {
     "content": {
@@ -803,7 +803,7 @@
  },
  "/api/ports/release": {
   "post": {
-   "description": "释放端口占用：终止占用该端口的进程（SIGTERM 优雅终止）。\n安全边界：禁止 kill 系统关键进程（nasdash 自身 / PID1 / systemd / dockerd / sshd 等）与 fnOS 核心服务；\n其余进程由用户在前端二次确认后承担后果。",
+   "description": "释放端口占用：终止占用该端口的进程（SIGTERM 优雅终止）。\n安全边界：禁止 kill 系统关键进程（nasdeck 自身 / PID1 / systemd / dockerd / sshd 等）与 fnOS 核心服务；\n其余进程由用户在前端二次确认后承担后果。",
    "operationId": "api_ports_release_api_ports_release_post",
    "requestBody": {
     "content": {

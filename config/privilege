@@ -2,6 +2,6 @@
     "defaults": {
         "run-as": "root"
     },
-    "username": "nasdash",
-    "groupname": "nasdash"
+    "username": "nasdeck",
+    "groupname": "nasdeck"
 }

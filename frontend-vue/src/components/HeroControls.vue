@@ -4,7 +4,7 @@
  * 放在新页面的 hero 里，位置与老页面一致（右上角）。
  *
  * 自动刷新开关（老页同口径）：
- *  - 开启后每 30 秒替当前页面点一次「立即刷新」；偏好存 localStorage（nasdash_autorefresh），默认关。
+ *  - 开启后每 30 秒替当前页面点一次「立即刷新」；偏好存 localStorage（nasdeck_autorefresh），默认关。
  *  - 同一时刻只有当前页面的实例在运行，所以 30s 一拍永远只刷「当前页」，不会全站乱刷。
  *  - 风扇控制页传 autoTick=false 跳过 30s 整页重建（老页同做法）：该页实时数据本就每秒
  *    就地刷新，整页重建反而会冲掉用户正在拖的滑块 / 正在编辑的曲线。
@@ -24,7 +24,7 @@ const themeTitle = computed(
 )
 
 /* ---------------- 自动刷新（老页同款开关） ---------------- */
-const AUTO_KEY = 'nasdash_autorefresh'
+const AUTO_KEY = 'nasdeck_autorefresh'
 const auto = ref(false)
 let autoTimer = 0
 

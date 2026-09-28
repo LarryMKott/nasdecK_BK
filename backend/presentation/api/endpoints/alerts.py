@@ -91,7 +91,7 @@ def api_alerts_config_set(request: Request, payload: dict = Depends(json_body_as
 @router.post("/api/alerts/test")
 def api_alerts_test(_admin = Depends(require_admin)):
     cfg = _load_alerts()
-    text = "这是一条来自 nasdash 的测试通知（当前版本 %s）。若收到说明通知渠道配置正确。" % APP_VERSION
+    text = "这是一条来自 nasdeck 的测试通知（当前版本 %s）。若收到说明通知渠道配置正确。" % APP_VERSION
     res = _dispatch_notifications(text, cfg, "danger")
     return _jr({"ok": True, "results": res})
 

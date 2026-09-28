@@ -41,12 +41,12 @@ def _fan_cpu_temp_cached():
 
 def _fan_ensure_all_claimed():
     """每轮兜底：把枚举到的、尚未被接管的可控风扇默认设为 auto 接管。
-    解决硬重启时序（hwmon 晚于 nasdash 自启注册、启动期枚举不全）与 fan_mode.json 不完整
+    解决硬重启时序（hwmon 晚于 nasdeck 自启注册、启动期枚举不全）与 fan_mode.json 不完整
     导致的「部分风扇失控、开机狂转」。已显式设为 manual 的风扇在 FAN_TARGETS 中会被跳过，不被覆盖。"""
     try:
         if not _FAN_CTRL_ENABLED:
             return
-        # 同上：FCS 没真配置时不视为「系统在控」，nasdash 该接管就接管，否则风扇会全速。
+        # 同上：FCS 没真配置时不视为「系统在控」，nasdeck 该接管就接管，否则风扇会全速。
         if _fcs_running_cached() and _fcs_has_board_config():
             return
         enum = _enumerate_fans()
@@ -65,7 +65,7 @@ def fan_smooth_loop():
                 # 接管关闭：优先把控制权交还 fnOS 原生 FanControlServer（FCS）。
                 # FCS 使用 enable=1 + pwm 手动控速；若我们再写 enable=2 会覆盖 FCS，
                 # 使风扇被卡在最后的高位。因此 FCS 真的配置了风扇参数时只启动/保持它，
-                # 不再写 enable=2；否则 nasdash 直接停手，保持风扇当前手动值，
+                # 不再写 enable=2；否则 nasdeck 直接停手，保持风扇当前手动值，
                 # 避免某些主板 enable=2 后转速反而被拉得更高。
                 if not _fcs_disabled() and _fcs_installed_cached() and _fcs_has_board_config():
                     if _FCS_TAKEN["v"]:
@@ -76,7 +76,7 @@ def fan_smooth_loop():
                 time.sleep(0.6)
                 continue
             # 自愈：每轮确保本机枚举到的每个可控风扇都被接管为 auto（除非用户显式设为 manual）。
-            # 解决硬重启时序（hwmon 晚于 nasdash 自启注册、启动期枚举不全）与 fan_mode.json 不完整
+            # 解决硬重启时序（hwmon 晚于 nasdeck 自启注册、启动期枚举不全）与 fan_mode.json 不完整
             # 导致的「部分风扇失控、开机狂转」。FCS 在控时不抢（交还原生控温）。
             _fan_ensure_all_claimed()
             # 接管总开关刚切到 ON：本 tick 一次性把风扇直接写到目标（见 _FAN_SNAP 标志），即时反馈给用户。
@@ -259,7 +259,7 @@ def get_fan_status():
             else:
                 mode = "disk_temp" if active_mode == "linear" else "curve"
         else:
-            # 无温控规则：以用户设的逻辑模式为准。nasdash 接管控速时硬件 pwm_enable 恒为 1（manual），
+            # 无温控规则：以用户设的逻辑模式为准。nasdeck 接管控速时硬件 pwm_enable 恒为 1（manual），
             # 不能据此判断，故显示 auto（下面若 tcfg 为 manual 会再覆盖为 manual）。
             mode = "auto"
             active_mode = None
@@ -283,7 +283,7 @@ def get_fan_status():
             "rpm": rpm, "pwm": pwm_pct,
             "pwm_enable": _pe,   # 原始寄存器值：0=关闭 1=软件控(手动) 2=交还主板/内核自动
             # 调速信号类型：'pwm'=4pin 脉宽调速 / 'dc'=3pin 直流电压调速 / None=该通道无此寄存器。
-            # DC 模式下 nasdash 写的占空比按电压比例输出，低档更易停转，前端会给出提示。
+            # DC 模式下 nasdeck 写的占空比按电压比例输出，低档更易停转，前端会给出提示。
             "pwm_mode": _fan_read_pwm_mode(hwmon, idx),
             "mode": mode,
             "rule": rule_out,

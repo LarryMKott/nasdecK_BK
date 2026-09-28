@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""nasdash 纯函数回归测试（不依赖硬件，可在本地 venv 跑）。
+"""nasdeck 纯函数回归测试（不依赖硬件，可在本地 venv 跑）。
 
 覆盖历史上真实踩过的两个解析 bug：
   - 金士顿 SSD 被误判为三星（v1.7.8 修复）：型号列丢厂商前缀
@@ -509,7 +509,7 @@ def test_fcs_enable_enables_and_clears_flag(monkeypatch):
     assert flag.get("v") is False
 
 def test_fan_start_respects_user_disabled(monkeypatch):
-    """用户永久禁用 FCS 后，nasdash 交还自动温控时不再把 FCS 拉起来。"""
+    """用户永久禁用 FCS 后，nasdeck 交还自动温控时不再把 FCS 拉起来。"""
     calls = []
     monkeypatch.setattr(shell, "sudo_cmd", lambda cmd, *a, **k: (calls.append(list(cmd)), "")[1])
     monkeypatch.setattr(fcs_mod, "_fcs_disabled", lambda: True)

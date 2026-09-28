@@ -29,7 +29,7 @@ class PortsUseCase:
     def release_port(self, pid_raw) -> tuple:
         """释放端口占用：终止占用进程（SIGTERM 优雅终止）。返回 (http_status, body)。
 
-        安全边界：禁止 kill 系统关键进程（nasdash 自身 / PID1 / systemd / dockerd /
+        安全边界：禁止 kill 系统关键进程（nasdeck 自身 / PID1 / systemd / dockerd /
         sshd 等）与 fnOS 核心服务；其余进程由用户在前端二次确认后承担后果。"""
         try:
             pid = int(pid_raw)
@@ -38,7 +38,7 @@ class PortsUseCase:
         if pid <= 1:
             return 400, {"ok": False, "error": "PID 非法"}
         if pid == os.getpid():
-            return 400, {"ok": False, "blocked": True, "error": "不能释放 nasdash 自身进程"}
+            return 400, {"ok": False, "blocked": True, "error": "不能释放 nasdeck 自身进程"}
         comm = self._net.proc_comm(pid)
         if is_protected(comm):
             return 400, {"ok": False, "blocked": True, "error": "该进程为系统关键进程，禁止释放"}

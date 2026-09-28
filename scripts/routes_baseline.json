@@ -1,5 +1,5 @@
 {
-  "source": "/vol1/1000/apps/zcode/nasdash/app.py",
+  "source": "/vol1/1000/apps/zcode/nasdeck/app.py",
   "generated_by": "scripts/extract_routes.py（正则静态抽取，不 import）",
   "route_count": 58,
   "routes": [

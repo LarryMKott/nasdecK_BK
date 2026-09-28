@@ -74,7 +74,7 @@ class FakeInfo(IAppInfo):
     def __init__(self, fail_fnos=False):
         self.fail_fnos = fail_fnos
 
-    def nasdash_version(self): return "2.4.0"
+    def nasdeck_version(self): return "2.4.0"
 
     def fnos_version(self):
         if self.fail_fnos:
@@ -90,8 +90,8 @@ def _uc(**kw):
 def test_execute_aggregate_shape_and_merges():
     r = _uc().execute()
     assert list(r.keys())[:9] == ["raid", "disks", "system", "storage", "docker", "time",
-                                  "elapsed", "nasdash_version", "fnos_version"]
-    assert r["nasdash_version"] == "2.4.0" and r["fnos_version"] == "0.9.0"
+                                  "elapsed", "nasdeck_version", "fnos_version"]
+    assert r["nasdeck_version"] == "2.4.0" and r["fnos_version"] == "0.9.0"
     # board/memory/cpu_usage 并入 system；阵列卡 ROC 温度并入 system.raid_temp
     assert r["system"]["board"] == {"manufacturer": "ASUS"}
     assert r["system"]["memory_modules"] == {"modules": [1]}

@@ -17,7 +17,7 @@ echo "=== verify.sh: 发版前一致性校验 ==="
 
 APP_MD5=$(md5_of app.tgz)
 MAN_MD5=$(grep '^checksum' manifest | awk -F'= ' '{print $2}' | tr -d ' ')
-FPK_MD5=$(tar -xzOf nasdash.fpk app.tgz 2>/dev/null | md5_of /dev/stdin)
+FPK_MD5=$(tar -xzOf nasdeck.fpk app.tgz 2>/dev/null | md5_of /dev/stdin)
 echo "app.tgz md5      = $APP_MD5"
 echo "manifest checksum= $MAN_MD5"
 echo "fpk inner app.tgz= $FPK_MD5"
@@ -55,7 +55,7 @@ assert len(_chg_vers) <= 3, f"changelog 超过 3 条（当前 {len(_chg_vers)} �
 print(f"OK: changelog 存在且 {len(_chg_vers)} 条 ≤3")
 
 man_ver = re.search(r'^version\s*=\s*(\S+)', s, re.M).group(1)
-fpk = subprocess.check_output(['tar', '-xzOf', 'nasdash.fpk', 'manifest']).decode()
+fpk = subprocess.check_output(['tar', '-xzOf', 'nasdeck.fpk', 'manifest']).decode()
 fpk_ver = re.search(r'^version\s*=\s*(\S+)', fpk, re.M).group(1)
 readme = open('README.md').read()
 rm = re.search(r'当前版本：v([\d.]+)', readme)

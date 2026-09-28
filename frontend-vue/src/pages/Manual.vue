@@ -182,7 +182,7 @@ onUnmounted(() => {
     <PanelHero
       icon="manual"
       title="操作手册"
-      :sub="appVersion ? 'nasdash 使用说明 · v' + appVersion : 'nasdash 使用说明'"
+      :sub="appVersion ? 'nasdeck 使用说明 · v' + appVersion : 'nasdeck 使用说明'"
       :last-update="lastUpdate"
       :busy="busy"
       @refresh="loadManual"

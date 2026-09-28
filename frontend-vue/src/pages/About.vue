@@ -1,9 +1,9 @@
 <script setup lang="ts">
 /**
- * 关于 nasdash（Vue 版，阶段 3 第 2 个迁移模块）
+ * 关于 nasdeck（Vue 版，阶段 3 第 2 个迁移模块）
  *
  * 复刻 templates/index.html 的 renderAbout：
- *  - PanelHero 副标题显示当前版本（nasdash {current}）
+ *  - PanelHero 副标题显示当前版本（nasdeck {current}）
  *  - 版本信息卡：fnOS 版本（/api/system 顶层 fnos_version）、运行内核（/api/system system.kernel）
  *  - 项目卡：项目主页 / 论坛地址外链 + 「检查新版本」按钮（拉 /api/version?force=1）
  *
@@ -92,7 +92,7 @@ async function checkUpdate(): Promise<void> {
     const cur = normV(d.current || appVersion.value)
     if (d.update_available && d.latest) {
       updateFound.value = true
-      updateUrl.value = d.url || 'https://github.com/han951meng/nasdash/releases'
+      updateUrl.value = d.url || 'https://github.com/han951meng/nasdeck/releases'
       updateMsg.value = '发现新版本 ' + normV(d.latest) + '（当前 ' + cur + '）'
     } else if (d.error) {
       updateMsg.value = '检查更新失败：' + d.error
@@ -115,8 +115,8 @@ onMounted(() => {
   <div>
     <PanelHero
       icon="about"
-      title="关于 nasdash"
-      :sub="appVersion ? 'nasdash ' + appVersion : 'nasdash'"
+      title="关于 nasdeck"
+      :sub="appVersion ? 'nasdeck ' + appVersion : 'nasdeck'"
       :last-update="lastUpdate"
     />
 
@@ -139,7 +139,7 @@ onMounted(() => {
         <h3>项目</h3>
         <div class="kv">
           <span class="k">项目主页</span>
-          <span class="v"><a href="https://github.com/han951meng/nasdash" target="_blank" rel="noopener">github.com/han951meng/nasdash</a></span>
+          <span class="v"><a href="https://github.com/han951meng/nasdeck" target="_blank" rel="noopener">github.com/han951meng/nasdeck</a></span>
         </div>
         <div class="kv">
           <span class="k">论坛地址</span>

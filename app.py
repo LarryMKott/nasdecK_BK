@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""nasdash 应用入口（薄门面）。
+"""nasdeck 应用入口（薄门面）。
 
 原 11,251 行单文件 Flask 实现已拆分至 backend/ 包（方案与铁律见 docs/重构计划.md，
 分阶段进度见 docs/开发计划.md）。本文件保留三个职责：

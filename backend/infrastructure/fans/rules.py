@@ -81,7 +81,7 @@ def _apply_temp_curve(cfg, data, recover_max=100):
     return None
 
 def _fan_auto_pwm(cpu_temp):
-    # nasdash 自带保守温控曲线（系统风扇服务不在时接管）
+    # nasdeck 自带保守温控曲线（系统风扇服务不在时接管）
     pts = [(45, 90), (60, 140), (75, 204), (80, 255)]
     if cpu_temp is None:
         raw = pts[0][1]
@@ -121,7 +121,7 @@ def _fan_smooth_step(hwmon, idx, target, snap=False):
 
 # ===================== 风扇：硬盘温度控制（disk_temp）=====================
 # 论坛需求（服务器/硬盘多/风扇多场景）：用指定硬盘温度驱动风扇——
-# 如设置若干硬盘，40°C 开转、60°C 全速、硬盘休眠则停转。nasdash 增量支持，不替换现有 IT87/NCT 温控。
+# 如设置若干硬盘，40°C 开转、60°C 全速、硬盘休眠则停转。nasdeck 增量支持，不替换现有 IT87/NCT 温控。
 FAN_DISK_TEMP_FILE = os.path.join(_config_dir(), "fan_disk_temp.json")
 
 def _load_fan_disk_temp():
@@ -200,7 +200,7 @@ def _fan_sys_temp_pwm(T, cfg):
     return _domain_fan.sys_temp_pwm(T, cfg)
 
 
-# 主板/CPU 温控滞回状态：None=未初始化, True=nasdash 接管控速, False=已交还主板自动
+# 主板/CPU 温控滞回状态：None=未初始化, True=nasdeck 接管控速, False=已交还主板自动
 _st_engaged = {"v": None}
 
 def _fan_sys_temp_decision(T, cfg):
@@ -268,7 +268,7 @@ def _fan_disk_temp_pwm(states, cfg):
     return _domain_fan.disk_temp_pwm(states, cfg, _all_monitored_idle(valid, cfg))
 
 
-# 硬盘温控滞回状态：None=未初始化, True=nasdash 接管控速, False=已交还主板自动
+# 硬盘温控滞回状态：None=未初始化, True=nasdeck 接管控速, False=已交还主板自动
 _dt_engaged = {"v": None}
 
 
@@ -459,7 +459,7 @@ _FAN_ENGAGED = {}
 def _fan_rule_decision(key, rule, T, all_idle=False, source=None):
     """逐风扇温控滞回状态机，语义与旧的两套全局状态机一致但按风扇独立记忆。
     返回 (action, raw)：control=按曲线接管 / release=交还自动 / hold=已释放且在滞回区不写。
-    stop_below_start=True 时：温度低于开转温度（或硬盘空闲=冷态）直接强制 0%（保持在 nasdash
+    stop_below_start=True 时：温度低于开转温度（或硬盘空闲=冷态）直接强制 0%（保持在 nasdeck
     软件接管、不交还自动），实现「低于开转温度即停转」。读不到温度仍保守交还自动（避免未知
     高温时风扇熄火，比强制停转更安全）。"""
     start = float(rule.get("start_temp", 40))
@@ -475,7 +475,7 @@ def _fan_rule_decision(key, rule, T, all_idle=False, source=None):
     if all_idle:
         _FAN_ENGAGED[key] = False
         if stop_below:
-            # 勾选「低温停转」：空闲=冷态，强制 0%（保持在 nasdash 软件接管、不交还自动）
+            # 勾选「低温停转」：空闲=冷态，强制 0%（保持在 nasdeck 软件接管、不交还自动）
             return ("control", 0)
         if _no_fcs:
             # 无 FCS 主板（B360M）：全盘空闲维持最低占空，绝不交还 BIOS 狂转
@@ -492,10 +492,10 @@ def _fan_rule_decision(key, rule, T, all_idle=False, source=None):
         return ("release", None)
     if T < start:
         if stop_below:
-            # 低温强制停转：直接写 0%（保持在 nasdash 软件接管，不交还自动）
+            # 低温强制停转：直接写 0%（保持在 nasdeck 软件接管，不交还自动）
             _FAN_ENGAGED[key] = False
             return ("control", 0)
-        # 方案A（v2.3.2）：低于开转温度且不勾「低温停转」→ nasdash 仍接管，维持最低占空 min_pwm，
+        # 方案A（v2.3.2）：低于开转温度且不勾「低温停转」→ nasdeck 仍接管，维持最低占空 min_pwm，
         # 不再交还主板/内核自动。无 FCS 的 DIY 主板（如 B360M）交还后会被 BIOS Thermal Cruise
         # 拉满 100% 全速，与「低温应安静」的直觉相反；常接管既安静又保留基础气流。
         _FAN_ENGAGED[key] = True

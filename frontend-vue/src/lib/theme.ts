@@ -1,8 +1,8 @@
 /**
  * 主题判定 —— 与既有 templates/index.html 顶部内联脚本保持完全同源，
- * 优先级：本地 nasdash_theme(dark/light) → 飞牛 fnos-theme-mode → URL 参数 → 系统偏好。
+ * 优先级：本地 nasdeck_theme(dark/light) → 飞牛 fnos-theme-mode → URL 参数 → 系统偏好。
  */
-export const THEME_KEY = 'nasdash_theme'
+export const THEME_KEY = 'nasdeck_theme'
 
 export type ThemeSaved = 'dark' | 'light' | 'auto'
 export type ThemeApplied = 'dark' | 'light'

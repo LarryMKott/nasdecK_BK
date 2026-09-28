@@ -108,7 +108,7 @@ let themeObserver: MutationObserver | null = null
 let resizeTimer = 0
 
 // ===== 温度红线（用户可设，纯前端 localStorage，不写服务端）=====
-const TEMP_THRESHOLD_KEY = 'nasdash_temp_threshold'
+const TEMP_THRESHOLD_KEY = 'nasdeck_temp_threshold'
 function loadTempThreshold(): number {
   try {
     const raw = localStorage.getItem(TEMP_THRESHOLD_KEY)
@@ -793,7 +793,7 @@ function svgChartImg(m: ReportMetricDef, pairs: { ts: number; v: number }[]): st
 function toMarkdown(range: Range, genAt: string, items: ReportItem[], overview: Narrative, points: HistPoint[]): string {
   const rt = RANGE_ZH[range] || range
   const n = items.length ? items[0].s.n : 0
-  let md = '# nasdash 历史趋势分析报告\n\n'
+  let md = '# nasdeck 历史趋势分析报告\n\n'
   md += `- 数据区间：${rt}（历史数据自动保留 30 天）\n`
   md += `- 生成时间：${genAt}\n`
   md += `- 数据样本：${n} 条（每 30 秒聚合一点）\n\n`
@@ -844,7 +844,7 @@ function toHTML(range: Range, genAt: string, items: ReportItem[], overview: Narr
     advice = `<div class="block danger-block"><h2>异常与建议</h2><ul>${warns.map(x => `<li><b>${x.m.label}：</b>${x.nar ? x.nar.text : ''}</li>`).join('')}</ul><p>建议：优先检查机箱风道与防尘，必要时调整风扇策略或降低负载。</p></div>`
   }
   const CSS = `*{box-sizing:border-box}body{font-family:-apple-system,"Microsoft YaHei",sans-serif;background:#f5f6f8;color:#1f2430;margin:0;padding:24px;line-height:1.6}.wrap{max-width:840px;margin:0 auto;background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,.08)}header h1{font-size:20px;margin:0 0 6px}.meta{color:#6b7280;font-size:13px}.overview{border-radius:10px;padding:14px 16px;margin:18px 0;font-size:15px}.overview.ok{background:#e9f7ef;color:#1b7f4b;border:1px solid #bfe6cf}.overview.warn{background:#fff6e6;color:#9a6a00;border:1px solid #ffe0a3}.overview.danger{background:#fdecec;color:#b42323;border:1px solid #f6c9c9}h2{font-size:16px;margin:22px 0 10px;border-left:3px solid #4aa3ff;padding-left:8px}.item{border:1px solid #eef0f3;border-radius:10px;padding:12px 14px;margin-bottom:10px}.item.danger{border-color:#f3c2c2;background:#fff7f7}.item.warn{border-color:#ffe2b0;background:#fffaef}.item-h{display:flex;align-items:center;gap:8px;font-size:14px}.dot{width:10px;height:10px;border-radius:50%;display:inline-block}.badge{font-size:11px;padding:1px 8px;border-radius:10px;margin-left:auto}.badge.ok{background:#e9f7ef;color:#1b7f4b}.badge.warn{background:#fff6e6;color:#9a6a00}.badge.danger{background:#fdecec;color:#b42323}.spark{margin:8px 0}.nar{font-size:13px;color:#374151}.block.danger-block{background:#fff7f7;border:1px solid #f3c2c2;border-radius:10px;padding:14px 16px;margin-top:18px}.block ul{margin:8px 0;padding-left:20px}.block li{margin:4px 0;font-size:13px}footer{margin-top:24px;color:#9aa1ad;font-size:12px;text-align:center}`
-  return `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>nasdash 历史趋势分析报告</title><style>${CSS}</style></head><body><div class="wrap"><header><h1>nasdash 历史趋势分析报告</h1><div class="meta">数据区间：${rt} · 生成时间：${genAt} · 样本 ${n} 条（每 30 秒一点，自动保留 30 天）</div></header><div class="overview ${ovClass}">${overview.text}</div>${body}${advice}<footer>本报告由 nasdash 在您的 NAS 本地生成，数据未离开本机。</footer></div></body></html>`
+  return `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>nasdeck 历史趋势分析报告</title><style>${CSS}</style></head><body><div class="wrap"><header><h1>nasdeck 历史趋势分析报告</h1><div class="meta">数据区间：${rt} · 生成时间：${genAt} · 样本 ${n} 条（每 30 秒一点，自动保留 30 天）</div></header><div class="overview ${ovClass}">${overview.text}</div>${body}${advice}<footer>本报告由 nasdeck 在您的 NAS 本地生成，数据未离开本机。</footer></div></body></html>`
 }
 function downloadReport(filename: string, content: string, mime: string, bom: boolean): void {
   const blob = new Blob(bom ? ['\ufeff' + content] : [content], { type: mime + ';charset=utf-8' })
@@ -911,7 +911,7 @@ async function genReport(range: Range, fmt: RptFmt): Promise<void> {
       mime = 'text/html'
       ext = 'html'
     }
-    const fn = `nasdash-历史报告-${range}-${new Date().toISOString().slice(0, 10)}.${ext}`
+    const fn = `nasdeck-历史报告-${range}-${new Date().toISOString().slice(0, 10)}.${ext}`
     downloadReport(fn, content, mime, bom)
     reportStatus.value = '已下载：' + fn
     setTimeout(() => {
@@ -1003,7 +1003,7 @@ onUnmounted(() => {
   <div v-if="histMetric === 'fan'" class="card" style="margin-top: 12px">
     <div class="section-title">各风扇通道历史（转速 + 接管状态）</div>
     <div style="font-size: 12px; color: var(--text-3); margin: 4px 0 10px; line-height: 1.6">
-      绿点 = 软件接管(1) · 红点 = 交还主板(2)。可据此排查「哪台扇何时被谁抢走」——红点出现即说明该时刻风扇脱离了 nasdash 控制。
+      绿点 = 软件接管(1) · 红点 = 交还主板(2)。可据此排查「哪台扇何时被谁抢走」——红点出现即说明该时刻风扇脱离了 nasdeck 控制。
     </div>
     <div v-if="fanChannels.length === 0" style="font-size: 13px; color: var(--muted)">暂无风扇通道历史数据（让 NAS 运行一段时间后会自动积累，每 30 秒记录一次）。</div>
     <div
