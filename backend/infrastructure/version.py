@@ -98,3 +98,15 @@ def _check_latest_version():
     _VERSION_CHECK["cached_result"] = result
     _VERSION_CHECK["checked_at"] = now
     return result
+
+
+# ---- 阶段 3：应用信息适配器（实现 domain.interfaces.app_info.IAppInfo）----
+from backend.domain.interfaces.app_info import IAppInfo
+
+
+class AppInfo(IAppInfo):
+    def nasdash_version(self) -> str:
+        return APP_VERSION
+
+    def fnos_version(self) -> str:
+        return _fnos_version()

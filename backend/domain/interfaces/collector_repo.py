@@ -57,3 +57,13 @@ class IHardwareCollector(ABC):
     @abstractmethod
     def get_rapl_power(self) -> dict:
         """RAPL 实时功耗（Intel 平台；无则空 dict）。"""
+
+    # ---- 阶段 3 扩展（UseCase 落地需要）----
+
+    @abstractmethod
+    def get_gpu_live(self) -> list:
+        """显卡实时状态（显存占用/频率等；独显驱动直读，核显走 i915 GEM）。"""
+
+    @abstractmethod
+    def get_realtime_metrics(self) -> dict:
+        """实时指标（{"net": [...], "disk": [...], ...}，1s 粒度差分）。"""

@@ -1,5 +1,5 @@
 {
- "_comment": "分层依赖豁免清单（scripts/check_layers.py 消费）。只减不增；阶段 3 UseCase 落地逐票销毁，阶段 4 出口=清零。本清单由搬迁后首次 scan 自举生成（143 处违规去重后 96 票）。",
+ "_comment": "分层依赖豁免清单（scripts/check_layers.py 消费）。只减不增；阶段 3 UseCase 落地逐票销毁，阶段 4 出口=清零。搬迁后自举 143 处/66 票；已销：all.py（仪表盘，阶段3批A首单）。当前 53 票。",
  "waivers": {
   "backend.presentation.api.endpoints.alerts": [
    "backend.infrastructure.collectors.board",
@@ -8,21 +8,6 @@
    "backend.infrastructure.collectors.system",
    "backend.infrastructure.health.alerts",
    "backend.infrastructure.health.report",
-   "backend.infrastructure.version",
-   "backend.infrastructure.gateway"
-  ],
-  "backend.presentation.api.endpoints.all": [
-   "backend.infrastructure.collectors.board",
-   "backend.infrastructure.collectors.cpuusage",
-   "backend.infrastructure.collectors.disks",
-   "backend.infrastructure.collectors.dockermod",
-   "backend.infrastructure.collectors.gpu",
-   "backend.infrastructure.collectors.metrics",
-   "backend.infrastructure.collectors.raid",
-   "backend.infrastructure.collectors.storage",
-   "backend.infrastructure.collectors.system",
-   "backend.infrastructure.health.alerts",
-   "backend.infrastructure.health.diskhealth",
    "backend.infrastructure.version",
    "backend.infrastructure.gateway"
   ],

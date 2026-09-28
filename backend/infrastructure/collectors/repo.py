@@ -7,6 +7,8 @@ from backend.domain.interfaces.collector_repo import IHardwareCollector
 from backend.infrastructure.collectors.board import get_board, get_memory_modules
 from backend.infrastructure.collectors.cpuusage import get_cpu_usage
 from backend.infrastructure.collectors.dockermod import get_docker
+from backend.infrastructure.collectors.gpu import _get_gpu_live
+from backend.infrastructure.collectors.metrics import get_realtime_metrics
 from backend.infrastructure.collectors.ports import get_listening_ports
 from backend.infrastructure.collectors.raid import get_raid_card
 from backend.infrastructure.collectors.storage import get_storage, get_volume_map
@@ -52,3 +54,9 @@ class HardwareCollectorRepo(IHardwareCollector):
 
     def get_rapl_power(self) -> dict:
         return get_rapl_power()
+
+    def get_gpu_live(self) -> list:
+        return _get_gpu_live()
+
+    def get_realtime_metrics(self) -> dict:
+        return get_realtime_metrics()
