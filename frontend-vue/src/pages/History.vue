@@ -189,7 +189,8 @@ function drawHist(d: { points?: HistPoint[] } | null): void {
       : CFG.unit === 'c' ? Math.round(v) + '°C'
         : CFG.unit === 'rpm' ? Math.round(v) + ' RPM'
           : CFG.unit === 'pct' ? Math.round(v) + '%'
-            : fmtSpeed(v)
+            : v < 10 ? v.toFixed(1) + ' B/s' /* 刻度专用：亚 10 B/s 留 1 位小数，避免 1/3·maxV 四舍五入后与相邻刻度重名 */
+              : fmtSpeed(v)
 
   ctx.strokeStyle = 'rgba(128,128,128,0.15)'
   ctx.lineWidth = 1

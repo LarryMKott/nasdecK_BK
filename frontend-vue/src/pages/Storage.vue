@@ -198,6 +198,10 @@ onMounted(() => {
     <!-- 卷映射（v2.3.0 3.6）：结构对齐飞牛原生「存储空间管理」，盘块可点跳健康卡 -->
     <div class="section-title">卷映射</div>
     <div class="card">
+      <!-- 空态：无卷也无独立盘时给一行占位（避免渲染成空白卡片） -->
+      <div v-if="!(vmap?.volumes?.length) && !(vmap?.loose?.length)" class="note" style="text-align:center;padding:12px 0 8px">
+        暂无卷映射信息（未检测到存储卷或独立盘）
+      </div>
       <div v-for="v in vmap?.volumes || []" :key="v.mount" class="vmap-vol">
         <div class="vmap-head">
           <b class="vmap-name">{{ v.mount }}</b>
@@ -305,7 +309,7 @@ onMounted(() => {
               <td>{{ v.fstype }}</td>
               <td>{{ v.size }}</td>
               <td>{{ v.used }} / {{ v.avail }}</td>
-              <td style="min-width: 140px">
+              <td class="pct-cell">
                 <div class="progress">
                   <div class="progress-fill" :style="fillStyle(v)">
                     {{ insideFill(v) ? pctNum(v) + '%' : '' }}

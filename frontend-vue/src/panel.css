@@ -213,6 +213,8 @@
   .card{background:var(--card);border-radius:var(--r-md);padding:var(--s-4);box-shadow:var(--shadow);border:1px solid var(--border);transition:box-shadow var(--t) var(--ease),transform var(--t) var(--ease)}
   @media(hover:hover){.card:hover{transform:translateY(-2px);box-shadow:var(--shadow-hover)}}
   .card h3{font-size:13px;color:var(--text-3);margin-bottom:10px;font-weight:600;letter-spacing:.3px}
+  /* 卡片标题品牌短线：全站统一的小层次记号（flex 布局的 h3 里自动成为首个 flex 项） */
+  .card h3::before{content:"";display:inline-block;width:3px;height:11px;border-radius:2px;background:var(--c-primary);opacity:.55;margin-right:7px;vertical-align:-1px}
   .kv{display:flex;justify-content:space-between;padding:4px 0;font-size:14px;border-bottom:1px solid var(--divider);gap:12px}
   .kv:last-child{border-bottom:none}
   .kv .k{color:var(--muted);flex:0 0 auto;max-width:60%}
@@ -292,6 +294,8 @@
   .table tr:hover{background:var(--c-fill-1)}
   .table td{color:var(--text-2)}
   .progress{height:20px;background:var(--fill);border-radius:10px;overflow:hidden;position:relative}
+  /* 存储卷「使用率」列：桌面 140 保证条内标签完整；移动断点收窄（见 768 块）避免整列被推出可视区 */
+  .pct-cell{min-width:140px}
   .progress-fill{height:100%;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;color:#fff;font-size:11px;font-weight:600;position:relative;overflow:hidden;transition:width .5s var(--ease)}
   .progress-fill::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,0) 65%);pointer-events:none}
   .progress-pct{position:absolute;top:0;height:100%;display:flex;align-items:center;font-size:11px;font-weight:600;line-height:1;white-space:nowrap;color:var(--text-2)}
@@ -316,7 +320,8 @@
   @keyframes sk{0%{background-position:100% 0}100%{background-position:0 0}}
   .sk-card{border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;background:var(--card)}
   .sk-line{height:13px;margin:12px 0;border-radius:6px}
-  pre{background:#1e293b;color:#e2e8f0;padding:14px;border-radius:8px;font-size:12px;overflow-x:auto;max-height:400px;white-space:pre-wrap}
+  /* 代码/拓扑块：跟随主题的柔和代码面（旧版亮色近黑一条、暗色近乎隐形，v2.4 换令牌化） */
+  pre{background:var(--c-fill-0);border:1px solid var(--border);color:var(--text-1);padding:14px;border-radius:var(--r-md);font-size:12px;line-height:1.7;overflow-x:auto;max-height:400px;white-space:pre-wrap;font-family:ui-monospace,Consolas,Menlo,monospace}
   .section-title{font-size:15px;font-weight:600;margin:18px 0 10px;color:var(--text)}
   .cc-schedule{margin-top:8px}
   .cc-sched-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px}
@@ -378,7 +383,8 @@
   .hero-badge .dot{width:6px;height:6px;border-radius:50%;background:#4ADE80}
   .hero-badge.warn .dot{background:#FDE047}
   .hero-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px;margin-top:18px;position:relative;z-index:1}
-  .hs{background:var(--tint-brand-06);border:1px solid rgba(0,0,0,.05);border-radius:var(--r-md);padding:14px 16px;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:78px;text-align:center}
+  .hs{background:linear-gradient(180deg,rgba(117,191,255,.09),rgba(117,191,255,.03));border:1px solid rgba(0,0,0,.05);border-radius:var(--r-md);padding:14px 16px;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:78px;text-align:center;transition:transform var(--t) var(--ease),box-shadow var(--t) var(--ease)}
+  @media(hover:hover){.hs:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(var(--semi-grey-9),.08)}}
   .hs-v{font-size:30px;font-weight:600;color:#1f2329;line-height:1.15;white-space:nowrap;text-align:center;font-variant-numeric:tabular-nums;letter-spacing:-.015em}
   .hs-v small{font-size:13px;font-weight:500;opacity:.7;margin-left:3px}
   .hs-k{font-size:13px;color:#646a73;margin-top:5px;font-weight:500;text-align:center}
@@ -400,7 +406,7 @@
   [data-theme="dark"] .hero-ctrls .icon-btn{color:var(--c-text-0);border-color:var(--c-border)}
   [data-theme="dark"] .hero-ctrls .icon-btn:hover{background:var(--c-fill-2);color:var(--c-text-0)}
   [data-theme="dark"] .hero-switch{color:var(--c-text-0)}
-  [data-theme="dark"] .hs{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.09);box-shadow:0 1px 2px rgba(0,0,0,.22)}
+  [data-theme="dark"] .hs{background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.09);box-shadow:0 1px 2px rgba(0,0,0,.22)}
   [data-theme="dark"] .hero-head{border-bottom:1px solid rgba(255,255,255,.07);padding-bottom:14px;margin-bottom:0}
   [data-theme="dark"] .hs-v{color:var(--c-text-0)}
   [data-theme="dark"] .hs-k{color:var(--c-text-1)}
@@ -533,14 +539,14 @@ details.disk-info-card[open] .faq-hint::after{content:"收起 ▴"}
 .vmap-name{font-size:15px}
 .vmap-cap{font-size:12px;color:var(--text-3)}
 .vmap-bar{height:6px;border-radius:3px;background:var(--fill);margin:8px 0 10px;overflow:hidden}
-.vmap-bar i{display:block;height:100%;border-radius:3px;background:var(--primary);transition:width .5s var(--ease)}
+.vmap-bar i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,rgba(51,133,255,.65),var(--primary));transition:width .5s var(--ease)}
 .vmap-meta{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;margin-bottom:10px}
 .vmap-meta i{font-style:normal;color:var(--text-3);margin-right:6px;font-size:12px}
 .vmap-cap2{font-size:12px;color:var(--text-3);margin-bottom:8px}
 .vmap-sub{color:var(--text-3);font-size:12px}
 .vmap-pds{display:flex;flex-wrap:wrap;gap:8px}
-.vmap-pd{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--fill-0);cursor:pointer;font-size:13px;color:var(--text-1)}
-.vmap-pd:hover{border-color:var(--primary)}
+  .vmap-pd{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--fill-0);cursor:pointer;font-size:13px;color:var(--text-1);transition:border-color var(--t) var(--ease),transform var(--t) var(--ease),box-shadow var(--t) var(--ease)}
+  .vmap-pd:hover{border-color:var(--primary);transform:translateY(-1px);box-shadow:0 3px 10px rgba(var(--semi-grey-9),.08)}
 .vmap-temp{font-weight:600;font-size:12px}
 .vmap-temp.asleep{color:var(--text-3);font-weight:400}
 .vmap-go{color:var(--text-3);font-weight:600}
@@ -594,7 +600,9 @@ details.disk-info-card[open] .faq-hint::after{content:"收起 ▴"}
     .detect-title{font-size:15px}
     .detect-sub{margin-bottom:12px}
     .table{font-size:12px;display:block;overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch}
-    .table th,.table td{padding:8px 10px}
+    .table th,.table td{padding:8px 6px}
+    /* 使用率进度格收窄到 96px：配合 padding 收缩让 5 列在 390px 内完整可见（v2.4 回归修复） */
+    .pct-cell{min-width:96px}
     /* 表头禁止逐字竖排折行（挂/载/点）：表头整词 nowrap，列宽由内容撑起、容器内横滚 */
     .table th{white-space:nowrap}
     /* 横向滚动的宽表：sticky 表头改为跟随滚动（display:block 下 sticky 无意义） */
@@ -635,7 +643,7 @@ details.disk-info-card[open] .faq-hint::after{content:"收起 ▴"}
   .preset-btn:hover{border-color:var(--blue);color:var(--blue)}
   .preset-btn.full{background:var(--red);color:#fff;border-color:var(--red)}
   .preset-btn.full:hover{opacity:.85;color:#fff}
-  .preset-btn.active{background:var(--blue);color:#fff;border-color:var(--blue);box-shadow:0 0 0 2px var(--glow-brand-25)}
+  .preset-btn.active{background:var(--blue);color:#fff;border-color:var(--blue);box-shadow:0 0 0 2px var(--glow-brand-25),inset 0 1px 0 rgba(255,255,255,.25)}
   .preset-btn.full.active{background:var(--red);border-color:var(--red);box-shadow:0 0 0 2px var(--glow-red-25)}
   .fan-global-state{font-size:13px;color:var(--muted);margin-left:auto}
   .fan-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
@@ -661,7 +669,7 @@ details.disk-info-card[open] .faq-hint::after{content:"收起 ▴"}
   .volt-pro>summary::before{content:'▸ '}
   .volt-pro[open]>summary::before{content:'▾ '}
   .volt-pro>summary:hover{color:var(--text-1)}
-  .fan-rpm{font-size:26px;font-weight:700;color:var(--blue);line-height:1.1}
+  .fan-rpm{font-size:26px;font-weight:700;color:var(--blue);line-height:1.1;font-variant-numeric:tabular-nums}
   .fan-rpm small{font-size:12px;color:var(--muted);font-weight:400;margin-left:4px}
   .fan-hw-note{margin-top:8px;padding:6px 10px;border-radius:7px;background:var(--tint-amber-10);border:1px solid var(--tint-amber-35);font-size:12px;line-height:1.5;display:none;align-items:center;flex-wrap:wrap;gap:8px}
   /* DC(电压)调速提示：该接口用电压高低调速，低档更易停转，与 PWM 行为不同需明确告知 */
@@ -839,7 +847,7 @@ details.disk-info-card[open] .faq-hint::after{content:"收起 ▴"}
   .seg{display:inline-flex;gap:6px;margin:2px 0 4px}
   .seg-btn{background:var(--bg);color:var(--muted);border:1px solid var(--border);border-radius:6px;padding:4px 12px;font-size:12px;cursor:pointer;transition:.15s;white-space:nowrap}
   .seg-btn:hover{color:var(--text)}
-  .seg-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+  .seg-btn.active{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:inset 0 1px 0 rgba(255,255,255,.22)}
   /* 告警横幅 */
   .alert-banner{display:none;align-items:flex-start;gap:12px;background:linear-gradient(135deg,#b91c1c,#ef4444);color:#fff;padding:11px 18px;border-radius:10px;margin-bottom:16px;box-shadow:0 2px 10px rgba(185,28,28,.28);font-size:14px;line-height:1.6}
   .alert-banner.show{display:flex}
