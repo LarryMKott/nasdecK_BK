@@ -7,7 +7,13 @@
 注意：仅构造对象、零 IO（采集器的命令执行都发生在方法调用时）。
 """
 from backend.application.usecases.dashboard_usecase import DashboardUseCase
+from backend.application.usecases.docker_usecase import DockerUseCase
+from backend.application.usecases.network_usecase import NetworkUseCase
+from backend.application.usecases.ports_usecase import PortsUseCase
+from backend.application.usecases.storage_usecase import StorageUseCase
+from backend.infrastructure.collectors.network_service import NetworkService
 from backend.infrastructure.collectors.repo import HardwareCollectorRepo
+from backend.infrastructure.command import cmd_runner
 from backend.infrastructure.fans.driver import HwmonFanDriver
 from backend.infrastructure.health.alert_repo_impl import AlertRepoImpl
 from backend.infrastructure.health.service import HealthService
@@ -20,6 +26,7 @@ class Container:
 
     def __init__(self):
         self.collector = HardwareCollectorRepo()
+        self.network = NetworkService()
         self.health = HealthService()
         self.app_info = AppInfo()
         self.history = HistoryRepoImpl()
@@ -27,6 +34,10 @@ class Container:
         self.fan_driver = HwmonFanDriver()
         # ---- UseCase ----
         self.dashboard = DashboardUseCase(self.collector, self.health, self.app_info)
+        self.storage = StorageUseCase(self.collector, log=cmd_runner.log)
+        self.docker = DockerUseCase(self.collector)
+        self.ports = PortsUseCase(self.collector, self.network)
+        self.network_uc = NetworkUseCase(self.network)
 
 
 _container: Container | None = None

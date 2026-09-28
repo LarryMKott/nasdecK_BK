@@ -363,7 +363,7 @@ def api_fan_disk_temp_set(request: Request, payload: dict = Depends(json_body_as
         return err
     if _save_fan_disk_temp(cfg):
         return _jr({"ok": True, "config": cfg})
-    return _jr({"ok": False, "error": "写配置失败"}), 500
+    return _jr({"ok": False, "error": "写配置失败"}, 500)
 
 @router.get("/api/fan/sys_temp")
 def api_fan_sys_temp_get():
@@ -391,7 +391,7 @@ def api_fan_sys_temp_set(request: Request, payload: dict = Depends(json_body_as(
         return err
     if _save_fan_sys_temp(cfg):
         return _jr({"ok": True, "config": cfg})
-    return _jr({"ok": False, "error": "写配置失败"}), 500
+    return _jr({"ok": False, "error": "写配置失败"}, 500)
 
 @router.get("/api/fan/rules")
 def api_fan_rules_get():
@@ -491,7 +491,7 @@ def api_fan_rules_set(request: Request, payload: dict = Depends(json_body_as(Fan
         return _jr({"ok": False, "error": "缺少 key 或 rules"}, 400)
     if _save_fan_rules({"rules": cur}):
         return _jr({"ok": True, "rules": cur})
-    return _jr({"ok": False, "error": "写配置失败"}), 500
+    return _jr({"ok": False, "error": "写配置失败"}, 500)
 
 @router.post("/api/fan/fcs")
 def api_fan_fcs_post(request: Request, payload: dict = Depends(json_body_as(FanFcsRequest)), _admin = Depends(require_admin)):
@@ -633,4 +633,4 @@ def api_fan_labels_post(request: Request, payload: dict = Depends(json_body_as(F
                     _rename_history_fan(_i, _nn, _on)
             _threading.Thread(target=_rename_history_bg, daemon=True).start()
         return _jr({"ok": True})
-    return _jr({"ok": False, "error": "save failed"}), 500
+    return _jr({"ok": False, "error": "save failed"}, 500)

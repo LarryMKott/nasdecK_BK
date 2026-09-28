@@ -86,7 +86,7 @@ def api_alerts_config_set(request: Request, payload: dict = Depends(json_body_as
         cfg["level_channels"] = lc
     if _save_alerts(cfg):
         return _jr({"ok": True, "config": cfg})
-    return _jr({"ok": False, "error": "写配置失败"}), 500
+    return _jr({"ok": False, "error": "写配置失败"}, 500)
 
 @router.post("/api/alerts/test")
 def api_alerts_test(_admin = Depends(require_admin)):

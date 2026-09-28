@@ -137,7 +137,7 @@ def api_disks_selftest_post(request: Request, payload: dict = Depends(json_body_
             _start_badblocks(dev, mode="destructive")
         return _jr({"ok": True})
     except Exception as e:
-        return _jr({"ok": False, "error": str(e)}), 500
+        return _jr({"ok": False, "error": str(e)}, 500)
 
 @router.post("/api/disks/selftest/abort")
 def api_disks_selftest_abort(request: Request, payload: dict = Depends(json_body_as(DiskSelftestAbortRequest)), _admin = Depends(require_admin)):
@@ -162,4 +162,4 @@ def api_disks_selftest_abort(request: Request, payload: dict = Depends(json_body
             _abort_badblocks(dev)
         return _jr({"ok": True})
     except Exception as e:
-        return _jr({"ok": False, "error": str(e)}), 500
+        return _jr({"ok": False, "error": str(e)}, 500)
