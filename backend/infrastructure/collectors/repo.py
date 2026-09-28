@@ -6,14 +6,15 @@
 from backend.domain.interfaces.collector_repo import IHardwareCollector
 from backend.infrastructure.collectors.board import get_board, get_memory_modules
 from backend.infrastructure.collectors.cpuusage import get_cpu_usage
+from backend.infrastructure.collectors.disks import _disks_meta_map, _is_standalone_disk, get_disks
 from backend.infrastructure.collectors.dockermod import get_docker
 from backend.infrastructure.collectors.gpu import _get_gpu_live
 from backend.infrastructure.collectors.metrics import get_realtime_metrics
 from backend.infrastructure.collectors.ports import get_listening_ports
 from backend.infrastructure.collectors.raid import get_raid_card
 from backend.infrastructure.collectors.storage import get_storage, get_volume_map
-from backend.infrastructure.collectors.system import get_network_nics, get_rapl_power, get_system
-from backend.infrastructure.collectors.disks import get_disks
+from backend.infrastructure.collectors.system import (get_cpu_freq_mhz, get_live_mem, get_load_avg,
+                                      get_network_nics, get_rapl_power, get_system)
 
 
 class HardwareCollectorRepo(IHardwareCollector):
@@ -60,3 +61,18 @@ class HardwareCollectorRepo(IHardwareCollector):
 
     def get_realtime_metrics(self) -> dict:
         return get_realtime_metrics()
+
+    def get_disks_meta_map(self) -> dict:
+        return _disks_meta_map()
+
+    def get_live_mem_percent(self) -> float | None:
+        return get_live_mem()
+
+    def get_load_avg(self) -> list:
+        return get_load_avg()
+
+    def get_cpu_freq_mhz(self) -> float | None:
+        return get_cpu_freq_mhz()
+
+    def is_standalone_disk(self, dev: str) -> tuple:
+        return _is_standalone_disk(dev)

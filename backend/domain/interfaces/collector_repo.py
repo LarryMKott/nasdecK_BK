@@ -67,3 +67,23 @@ class IHardwareCollector(ABC):
     @abstractmethod
     def get_realtime_metrics(self) -> dict:
         """实时指标（{"net": [...], "disk": [...], ...}，1s 粒度差分）。"""
+
+    @abstractmethod
+    def get_disks_meta_map(self) -> dict:
+        """dev → 磁盘静态元数据（model/size/brand/type），300s TTL 缓存（/api/metrics 高频轮询专用）。"""
+
+    @abstractmethod
+    def get_live_mem_percent(self) -> float | None:
+        """实时内存占用率(%)（/proc/meminfo MemAvailable 口径；异常返回 None）。"""
+
+    @abstractmethod
+    def get_load_avg(self) -> list:
+        """系统负载 (1/5/15min)（os.getloadavg 列表；异常由调用方兜底）。"""
+
+    @abstractmethod
+    def get_cpu_freq_mhz(self) -> float | None:
+        """CPU 当前频率（/proc/cpuinfo 全核瞬时平均，口径同 /api/system；无值返回 None）。"""
+
+    @abstractmethod
+    def is_standalone_disk(self, dev: str) -> tuple:
+        """dev 是否「独立盘」（整块/未挂载/未被持有），返回 (ok, reason)；决定能否跑破坏性 badblocks。"""

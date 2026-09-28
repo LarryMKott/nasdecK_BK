@@ -1,7 +1,7 @@
 # --split-- 以下内容自 app.py 原样搬迁（import 由 fix_imports.py 补齐）
+from backend.domain.rules.disk_rule import safe_token as _domain_safe_token
 from backend.infrastructure.config.paths import APP_DIR
 import os
-import re
 import shutil
 import subprocess
 import time
@@ -52,12 +52,10 @@ def read_file(path, default=""):
 
 def _safe_token(s, maxlen=128):
     """校验系统枚举值（设备名/hwmon 路径/容器名等）只含安全字符，防路径/命令注入。
-    返回原值或 None（非法）。"""
-    if not isinstance(s, str) or not s or len(s) > maxlen:
-        return None
-    if not re.fullmatch(r"[A-Za-z0-9_./@:-]+", s):
-        return None
-    return s
+    返回原值或 None（非法）。
+    v2.4 换线：规范核在 domain.rules.disk_rule.safe_token（纯规则），此处保留原名委托，
+    infrastructure 存量调用点零改动。"""
+    return _domain_safe_token(s, maxlen)
 
 def _run_raw(args, timeout=30, as_root=False, quiet=False):
     try:

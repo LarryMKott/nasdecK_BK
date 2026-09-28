@@ -541,9 +541,9 @@ def test_fan_page_has_ctrl_toggle():
     """前端风扇页应含「接管风扇控制」总开关（FCS 状态框 v2.0.5 已移除，此开关保留）。
 
     v2.3.0 第 11 步「旧页退休瘦身」起旧页 templates/index.html 已删除，
-    断言对象改为 Vue 页源码 frontend-vue/src/pages/Fan.vue。
+    断言对象改为 Vue 页源码（原 src/pages/Fan.vue，前端目录重构后为 src/views/Fan/index.vue）。
     """
-    with open("frontend-vue/src/pages/Fan.vue", encoding="utf-8") as f:
+    with open("frontend-vue/src/views/Fan/index.vue", encoding="utf-8") as f:
         src = f.read()
     assert "fanCtrlToggle" in src
     assert "接管风扇控制" in src

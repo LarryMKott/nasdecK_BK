@@ -1,4 +1,5 @@
 # --split-- 以下内容自 app.py 原样搬迁（import 由 fix_imports.py 补齐）
+from backend.domain.rules.disk_rule import disk_name_clean as _domain_disk_name_clean
 from backend.infrastructure.command import cmd_runner as shell
 
 from backend.infrastructure.collectors.disks import get_disks
@@ -134,8 +135,7 @@ def _health_key_for(disk, pd=None):
 # ---------------- 运维自定义盘名（v2.3.0 3.8） ----------------
 # storcli 的 E0:S3、系统盘符 sda 这类代号人难认；允许给每块盘起「数据盘1」这类好认的名字。
 # key 与缺陷趋势同源（_health_key_for：序列号优先 → WWN → 盘符），改名跟着盘走，换盘符/重启不丢。
-
-_DISK_NAME_MAX = 40
+# 盘名长度上限随 _disk_name_clean 换线收敛至 domain.rules.disk_rule.DISK_NAME_MAX。
 
 
 def _disk_names_path():
@@ -148,11 +148,9 @@ def _disk_names_load():
 
 
 def _disk_name_clean(name):
-    """清洗自定义盘名：去掉控制字符与首尾空白、超长截断；返回空串表示「清除」。"""
-    if name is None:
-        return ""
-    name = re.sub(r"[\x00-\x1f\x7f]", "", str(name))
-    return name.strip()[:_DISK_NAME_MAX]
+    """清洗自定义盘名：去掉控制字符与首尾空白、超长截断；返回空串表示「清除」。
+    v2.4 换线：规范核在 domain.rules.disk_rule.disk_name_clean（纯规则），此处保留原名委托。"""
+    return _domain_disk_name_clean(name)
 
 
 def _disk_health_snapshot_now():

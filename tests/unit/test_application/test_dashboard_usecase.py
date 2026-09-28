@@ -53,6 +53,12 @@ class FakeCollector(IHardwareCollector):
     def get_rapl_power(self): return {}
     def get_gpu_live(self): return self._call("get_gpu_live", lambda: [dict(g) for g in self.gpu_live])
     def get_realtime_metrics(self): return self._call("get_realtime_metrics", lambda: dict(self.rt))
+    # ---- 阶段 3 批 A 第三单接口扩展（仪表盘编排不触达，补齐抽象方法即可）----
+    def get_disks_meta_map(self): return {}
+    def get_live_mem_percent(self): return None
+    def get_load_avg(self): return [0.1, 0.2, 0.3]
+    def get_cpu_freq_mhz(self): return None
+    def is_standalone_disk(self, dev): return (True, "")
 
 
 class FakeHealth(IHealthService):
@@ -68,6 +74,14 @@ class FakeHealth(IHealthService):
         if self.fail_enrich:
             raise RuntimeError("enrich")
         return [dict(d, channel="raid") for d in disks]
+
+    # ---- 阶段 3 批 A 第三单接口扩展（仪表盘编排不触达，补齐抽象方法即可）----
+    def dispatch_notifications(self, text, cfg, level="danger"): return {"system": True}
+    def build_health_report(self): return {}
+    def redact_report(self, rep): return rep
+    def build_diagnostics(self): return {}
+    def render_diagnostics_text(self, diag): return ""
+    def render_report_html(self, rep): return None
 
 
 class FakeInfo(IAppInfo):

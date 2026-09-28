@@ -21,3 +21,13 @@ class IHistoryRepo(ABC):
     @abstractmethod
     def rename_fan(self, idx: int, new_name: str, old_name: str | None = None) -> None:
         """风扇改名同步：该扇全部历史记录零残留改名（等价现 _rename_history_fan）。"""
+
+    @abstractmethod
+    def metric_points(self, start: int, bucket: int) -> list:
+        """按时间桶聚合的指标降采样行（/api/history 查询核）。
+
+        参数：start = 起始 unix 秒；bucket = 桶宽（秒）。
+        返回行元组列表 (bts, disk_read, disk_write, net_rx, net_tx, cpu_power,
+        cpu_temp, mb_temp, gpu_temp, disk_temp_max, raid_temp, fan_rpm_avg, mem_used_pct)，
+        bts 为毫秒时间戳，聚合列为均值（NULL 保留），bts 升序——与现 /api/history 的 SQL 逐字等价。
+        """

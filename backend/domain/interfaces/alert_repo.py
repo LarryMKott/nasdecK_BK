@@ -14,5 +14,5 @@ class IAlertRepo(ABC):
         """读告警配置；无文件/损坏时返回含默认值的 dict（与现 _load_alerts 行为一致）。"""
 
     @abstractmethod
-    def save_alerts(self, cfg: dict) -> None:
-        """保存告警配置（原子写，等价现 _save_alerts）。"""
+    def save_alerts(self, cfg: dict) -> bool:
+        """保存告警配置（原子写，等价现 _save_alerts）；返回是否写入成功（端点据其映射 200/500）。"""

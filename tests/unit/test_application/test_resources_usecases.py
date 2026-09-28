@@ -47,6 +47,12 @@ class BaseCollector(IHardwareCollector):
     def get_rapl_power(self): return {}
     def get_gpu_live(self): return []
     def get_realtime_metrics(self): return {"net": [], "disk": []}
+    # ---- 阶段 3 批 A 第三单接口扩展（本组用例不触达，补齐抽象方法即可）----
+    def get_disks_meta_map(self): return {}
+    def get_live_mem_percent(self): return None
+    def get_load_avg(self): return [0.1, 0.2, 0.3]
+    def get_cpu_freq_mhz(self): return None
+    def is_standalone_disk(self, dev): return (True, "")
 
 
 class FakeNetwork(INetworkService):

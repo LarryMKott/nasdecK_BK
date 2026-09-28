@@ -7,5 +7,5 @@ class AlertRepoImpl(IAlertRepo):
     def load_alerts(self) -> dict:
         return _load_alerts()
 
-    def save_alerts(self, cfg: dict) -> None:
-        _save_alerts(cfg)
+    def save_alerts(self, cfg: dict) -> bool:
+        return bool(_save_alerts(cfg))

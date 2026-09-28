@@ -15,3 +15,6 @@ class HistoryRepoImpl(IHistoryRepo):
 
     def rename_fan(self, idx: int, new_name: str, old_name: str | None = None) -> None:
         db._rename_history_fan(idx, new_name, old_name)
+
+    def metric_points(self, start: int, bucket: int) -> list:
+        return db._query_metric_points(start, bucket)

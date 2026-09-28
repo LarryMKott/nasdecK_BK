@@ -3,5 +3,8 @@
 #   health_judge.grade_disk_health  ← backend/health/diskhealth.py::_grade_disk_health
 #   fan_rule.*                      ← backend/fans/rules.py（曲线/PWM/决策的纯计算核）
 #   alert_rule.evaluate_alerts      ← backend/health/alerts.py::_evaluate_alerts
+#   port_rule.is_protected          ← backend/infrastructure/collectors/ports.py（安全名单，阶段 3 批 A 换线）
+#   disk_rule.safe_token            ← backend/infrastructure/command/cmd_runner.py::_safe_token（阶段 3 批 A 换线）
+#   disk_rule.disk_name_clean       ← backend/infrastructure/health/diskhealth.py::_disk_name_clean（阶段 3 批 A 换线）
 # 忠实性约束：判定逻辑逐行等价（含默认值/文案），差异仅限——全局滞回态改为随值返回（FanDecision.engaged）、
 # IO 结果（全闲置判定/告警配置/阵列卡数据/主板温度）改为参数传入。

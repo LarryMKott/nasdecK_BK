@@ -13,6 +13,7 @@ _db_lock 互斥；30 天自清理。
 import json
 import os
 import re
+import sqlite3 as _sqlite3
 import threading as _threading
 import time
 
@@ -179,3 +180,21 @@ def _rename_history_fan(idx, new_name, old_name=None):
                 con.execute(stmt, upd)
     except Exception as e:
         print("[history] rename fan failed idx=%s: %s" % (idx, e), flush=True)
+
+
+def _query_metric_points(start, bucket):
+    """按时间桶聚合的指标降采样查询（/api/history 查询核，SQL 自端点逐字搬迁）。
+
+    返回行元组列表（bts 毫秒时间戳 + 12 个均值列，NULL 保留，bts 升序）；
+    读取走 sqlite3 直连 + _db_lock，与写路径互斥语义不变。
+    """
+    with _db_lock:
+        con = _sqlite3.connect(_DB_PATH)
+        rows = con.execute(
+            "SELECT (ts/?)*?*1000 AS bts, AVG(disk_read), AVG(disk_write), AVG(net_rx), AVG(net_tx), AVG(cpu_power), "
+            "AVG(cpu_temp), AVG(mb_temp), AVG(gpu_temp), AVG(disk_temp_max), AVG(raid_temp), "
+            "AVG(fan_rpm_avg), AVG(mem_used_pct) "
+            "FROM samples WHERE ts>=? GROUP BY bts ORDER BY bts",
+            (bucket, bucket, start)).fetchall()
+        con.close()
+    return rows

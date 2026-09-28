@@ -1,14 +1,7 @@
 {
- "_comment": "分层依赖豁免清单（scripts/check_layers.py 消费）。只减不增；阶段 3 UseCase 落地逐票销毁，阶段 4 出口=清零。搬迁后自举 143 处/66 票；已销：all.py（仪表盘 13 票）、res.py（存储/Docker/网络/端口 11 票）。当前 45 票。",
+ "_comment": "分层依赖豁免清单（scripts/check_layers.py 消费）。只减不增；阶段 3 UseCase 落地逐票销毁，阶段 4 出口=清零。搬迁后自举 143 处/66 票；已销：all.py（仪表盘 13 票）、res.py（存储/Docker/网络/端口 11 票）、第三单 alerts/metrics/disks/helpers 18 票（alerts 7、metrics 5、disks 5、helpers 1；metrics 的 require_admin/json_body 为生成期残留未用导入，随改写清除）。当前 28 票；gateway 票（require_admin 依赖）随阶段 4 网关体异常处理器迁 presentation 时统一销毁。",
  "waivers": {
   "backend.presentation.api.endpoints.alerts": [
-   "backend.infrastructure.collectors.board",
-   "backend.infrastructure.collectors.disks",
-   "backend.infrastructure.collectors.dockermod",
-   "backend.infrastructure.collectors.system",
-   "backend.infrastructure.health.alerts",
-   "backend.infrastructure.health.report",
-   "backend.infrastructure.version",
    "backend.infrastructure.gateway"
   ],
   "backend.presentation.api.endpoints.basic": [
@@ -17,11 +10,6 @@
    "backend.infrastructure.version"
   ],
   "backend.presentation.api.endpoints.disks": [
-   "backend.infrastructure.collectors.disks",
-   "backend.infrastructure.collectors.raid",
-   "backend.infrastructure.health.diskhealth",
-   "backend.infrastructure.jsonstore",
-   "backend.infrastructure.command.cmd_runner",
    "backend.infrastructure.gateway"
   ],
   "backend.presentation.api.endpoints.fans": [
@@ -40,14 +28,7 @@
    "backend.infrastructure.state",
    "backend.infrastructure.gateway"
   ],
-  "backend.presentation.api.endpoints.helpers": [
-   "backend.infrastructure.collectors.disks"
-  ],
   "backend.presentation.api.endpoints.metrics": [
-   "backend.infrastructure.collectors.cpuusage",
-   "backend.infrastructure.collectors.gpu",
-   "backend.infrastructure.collectors.metrics",
-   "backend.infrastructure.persistence.db",
    "backend.infrastructure.gateway"
   ],
   "backend.presentation.api.endpoints.raid": [

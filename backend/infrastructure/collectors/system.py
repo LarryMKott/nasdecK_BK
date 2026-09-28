@@ -1058,3 +1058,38 @@ def fmt_kb(kb):
     if kb >= 1024:
         return f"{kb/1024:.0f} MB"
     return f"{kb} KB"
+
+
+# ===================== 轻量实时读数（v2.4 阶段 3 自 presentation/api/endpoints/helpers.py 平移） =====================
+def get_live_mem():
+    """实时内存占用率(%):读 /proc/meminfo 用 MemAvailable 估算(无 psutil 依赖)。"""
+    try:
+        mem = {}
+        with open("/proc/meminfo") as f:
+            for line in f:
+                if ':' in line:
+                    k, v = line.split(':', 1)
+                    mem[k.strip()] = int(v.split()[0])  # KB
+        total = mem.get("MemTotal", 0)
+        avail = mem.get("MemAvailable", 0)
+        if total <= 0:
+            return None
+        return round((1 - avail / total) * 100, 1)
+    except Exception:
+        return None
+
+
+def get_cpu_freq_mhz():
+    """CPU 当前频率（全部核心瞬时值的平均，口径同 /api/system 的 cpu_info.current_freq_mhz）。
+    /proc/cpuinfo 是内核内存里的虚拟文件，每秒读一次开销极小（几 KB），供检测页频率行 1s 增量刷新。"""
+    try:
+        with open("/proc/cpuinfo") as _f:
+            _mhz = [float(_ln.split(":", 1)[1]) for _ln in _f if _ln[:7].lower() == "cpu mhz" and ":" in _ln]
+        return round(sum(_mhz) / len(_mhz), 1) if _mhz else None
+    except Exception:
+        return None
+
+
+def get_load_avg():
+    """系统负载 (1/5/15min)。异常由调用方兜底（/api/metrics 原语义：失败置 null）。"""
+    return list(os.getloadavg())
