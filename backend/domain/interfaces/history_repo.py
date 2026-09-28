@@ -15,8 +15,8 @@ class IHistoryRepo(ABC):
         """建表/迁移（等价现 _init_history_db；幂等，启动时调用一次）。"""
 
     @abstractmethod
-    def write_sample(self, payload: dict) -> None:
-        """写入一个采样点（等价现 _write_history_sample 的入参载荷）。"""
+    def write_sample(self) -> None:
+        """采集当前快照并写入一个采样点（等价现 _write_history_sample，无参自取）。"""
 
     @abstractmethod
     def rename_fan(self, idx: int, new_name: str, old_name: str | None = None) -> None:
