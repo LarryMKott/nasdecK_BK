@@ -1,0 +1,1196 @@
+{
+ "/": {
+  "get": {
+   "description": "主入口：Vue 应用（11 个模块全部为原生页；第 11 步起已无旧页依赖）。",
+   "operationId": "index__get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Index"
+  }
+ },
+ "/api/alerts": {
+  "get": {
+   "operationId": "api_alerts_api_alerts_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Alerts"
+  }
+ },
+ "/api/alerts/config": {
+  "get": {
+   "operationId": "api_alerts_config_get_api_alerts_config_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Alerts Config Get"
+  },
+  "post": {
+   "operationId": "api_alerts_config_set_api_alerts_config_post",
+   "requestBody": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "$ref": "#/components/schemas/AlertsConfigRequest"
+      }
+     }
+    },
+    "required": false
+   },
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Alerts Config Set"
+  }
+ },
+ "/api/alerts/test": {
+  "post": {
+   "operationId": "api_alerts_test_api_alerts_test_post",
+   "requestBody": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "$ref": "#/components/schemas/AlertsTestRequest"
+      }
+     }
+    },
+    "required": false
+   },
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Alerts Test"
+  }
+ },
+ "/api/all": {
+  "get": {
+   "operationId": "api_all_api_all_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api All"
+  }
+ },
+ "/api/diagnostics": {
+  "get": {
+   "description": "设备诊断包：txt=可复制纯文本（贴论坛用），json=结构化。隐私安全、不联网。",
+   "operationId": "api_diagnostics_api_diagnostics_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Diagnostics"
+  }
+ },
+ "/api/disks": {
+  "get": {
+   "description": "硬盘 SMART 板块。\n\nstandalone（是否独立盘，决定能否跑破坏性 badblocks）必须实时计算，\n不能跟着 get_disks 的 300s 缓存走——否则用户刚从阵列移除硬盘，\nB 档按钮要等 5 分钟缓存过期才变绿。SMART 等重数据仍走缓存。",
+   "operationId": "api_disks_api_disks_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Disks"
+  }
+ },
+ "/api/disks/rename": {
+  "post": {
+   "description": "设置/清除运维自定义盘名（v2.3.0 3.8）。body: {key, name}；name 空串 = 清除。\n\nkey 用 /api/disks 返回的 name_key（序列号优先，与缺陷趋势同源），\n前端不自己拼 key，避免口径漂移。",
+   "operationId": "api_disks_rename_api_disks_rename_post",
+   "requestBody": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "$ref": "#/components/schemas/DiskRenameRequest"
+      }
+     }
+    },
+    "required": false
+   },
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Disks Rename"
+  }
+ },
+ "/api/disks/selftest": {
+  "get": {
+   "description": "返回当前硬盘自检任务状态（只读）。",
+   "operationId": "api_disks_selftest_get_api_disks_selftest_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Disks Selftest Get"
+  },
+  "post": {
+   "description": "启动硬盘自检：type=long（SMART 长自检）/ badblocks（破坏性，仅独立盘）/ surface（只读表面扫描，所有盘）。",
+   "operationId": "api_disks_selftest_post_api_disks_selftest_post",
+   "requestBody": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "$ref": "#/components/schemas/DiskSelftestRequest"
+      }
+     }
+    },
+    "required": false
+   },
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Disks Selftest Post"
+  }
+ },
+ "/api/disks/selftest/abort": {
+  "post": {
+   "description": "中止指定硬盘的自检任务。",
+   "operationId": "api_disks_selftest_abort_api_disks_selftest_abort_post",
+   "requestBody": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "$ref": "#/components/schemas/DiskSelftestAbortRequest"
+      }
+     }
+    },
+    "required": false
+   },
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Disks Selftest Abort"
+  }
+ },
+ "/api/disks/selftest/history": {
+  "get": {
+   "description": "返回硬盘自检历史记录（新→旧，最多 50 条）。",
+   "operationId": "api_disks_selftest_history_api_disks_selftest_history_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Disks Selftest History"
+  }
+ },
+ "/api/docker": {
+  "get": {
+   "description": "Docker 容器板块。",
+   "operationId": "api_docker_api_docker_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Docker"
+  }
+ },
+ "/api/errors/clear": {
+  "post": {
+   "description": "清空错误历史圈（问题解决后用户手动清掉，不必等重启）。",
+   "operationId": "api_errors_clear_api_errors_clear_post",
+   "requestBody": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "$ref": "#/components/schemas/ErrorsClearRequest"
+      }
+     }
+    },
+    "required": false
+   },
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Errors Clear"
+  }
+ },
+ "/api/errors/test": {
+  "post": {
+   "description": "人为写入一条测试错误记录（验证「错误记录」捕获→展示→清除全链路用）。\n\n走的是与真实报错完全相同的链路：stderr 打印 → _StderrTee 扫描 → 入圈 →\nreport.error_ring 暴露 → 前端弹窗展示。文案明确标注「测试」，避免被当真 bug 排查。",
+   "operationId": "api_errors_test_api_errors_test_post",
+   "requestBody": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "$ref": "#/components/schemas/ErrorsTestRequest"
+      }
+     }
+    },
+    "required": false
+   },
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Errors Test"
+  }
+ },
+ "/api/fan/control": {
+  "get": {
+   "description": "风扇接管总开关状态。",
+   "operationId": "api_fan_control_get_api_fan_control_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Fan Control Get"
+  },
+  "post": {
+   "description": "开关风扇接管：关闭后 nasdash 不再根据温度自动调速。若飞牛自带风扇服务已配置，\n会交还它接管；否则保持当前转速、不再写 PWM。",
+   "operationId": "api_fan_control_set_api_fan_control_post",
+   "requestBody": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "$ref": "#/components/schemas/FanControlRequest"
+      }
+     }
+    },
+    "required": false
+   },
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Fan Control Set"
+  }
+ },
+ "/api/fan/disk_temp": {
+  "get": {
+   "description": "读取硬盘温度控风扇配置 + 实时监控盘温度/休眠 + 计算所得目标PWM",
+   "operationId": "api_fan_disk_temp_get_api_fan_disk_temp_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Fan Disk Temp Get"
+  },
+  "post": {
+   "operationId": "api_fan_disk_temp_set_api_fan_disk_temp_post",
+   "requestBody": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "$ref": "#/components/schemas/FanDiskTempConfigRequest"
+      }
+     }
+    },
+    "required": false
+   },
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Fan Disk Temp Set"
+  }
+ },
+ "/api/fan/fcs": {
+  "post": {
+   "description": "永久禁用 / 恢复 FanControlServer。body: {\"action\": \"disable\"|\"enable\"}。\ndisable = systemctl stop + disable（重启不复活）+ 持久化标志；enable = enable + start。",
+   "operationId": "api_fan_fcs_post_api_fan_fcs_post",
+   "requestBody": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "$ref": "#/components/schemas/FanFcsRequest"
+      }
+     }
+    },
+    "required": false
+   },
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Fan Fcs Post"
+  }
+ },
+ "/api/fan/history": {
+  "get": {
+   "description": "返回每台风扇的转速/占空比/接管状态历史（每 30s 一点，保留 30 天）。供风扇问题排查复盘。",
+   "operationId": "api_fan_history_api_fan_history_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Fan History"
+  }
+ },
+ "/api/fan/labels": {
+  "get": {
+   "description": "返回用户标注的风扇名称/电压：key=\"hwmon::idx\" -> {\"name\",\"voltage\"}",
+   "operationId": "api_fan_labels_get_api_fan_labels_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Fan Labels Get"
+  },
+  "post": {
+   "description": "保存风扇标注（合并模式：仅覆盖传入的通道，保留其余，防止单条保存清空全部）。",
+   "operationId": "api_fan_labels_post_api_fan_labels_post",
+   "requestBody": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "$ref": "#/components/schemas/FanLabelsRequest"
+      }
+     }
+    },
+    "required": false
+   },
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Fan Labels Post"
+  }
+ },
+ "/api/fan/pwm_mode": {
+  "post": {
+   "description": "切换风扇接口的调速信号类型：PWM(4pin 脉宽) ↔ DC(3pin 直流电压)。\n\n背景：3pin 风扇插在被设成 PWM 的接口上会一直全速——因为它没有 PWM 线，只认电压。\n多数主板 BIOS 里能给每个接口单独选 PWM/DC，Linux 下对应 pwmN_mode 寄存器。\n但**能不能改由主板硬件决定**：部分接口只焊了 PWM 电路，写 DC 会被内核直接拒绝，\n这种情况只能进 BIOS 或换 4pin 风扇，属主板限制而非软件问题。",
+   "operationId": "api_fan_pwm_mode_api_fan_pwm_mode_post",
+   "requestBody": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "$ref": "#/components/schemas/FanPwmModeRequest"
+      }
+     }
+    },
+    "required": false
+   },
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Fan Pwm Mode"
+  }
+ },
+ "/api/fan/rules": {
+  "get": {
+   "description": "读取逐风扇温控规则（含旧全局面板派生的默认）+ 每台风扇的温度源、实时温度、计算目标。\nis_custom：是否已存在用户逐风扇覆盖文件。",
+   "operationId": "api_fan_rules_get_api_fan_rules_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Fan Rules Get"
+  },
+  "post": {
+   "description": "保存逐风扇温控规则覆盖。两种 body：\n  整体覆盖：{\"rules\": {\"<hwmon>::<idx>\": {...}|null, ...}}\n  单条设置：{\"key\": \"<hwmon>::<idx>\", \"rule\": {...}|null}\nrule=null 表示清除该风扇的自定义（回到全局默认/手动）。",
+   "operationId": "api_fan_rules_set_api_fan_rules_post",
+   "requestBody": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "$ref": "#/components/schemas/FanRulesRequest"
+      }
+     }
+    },
+    "required": false
+   },
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Fan Rules Set"
+  }
+ },
+ "/api/fan/set": {
+  "post": {
+   "description": "设置风扇转速：设目标 PWM（后台缓变线程平滑过渡）或恢复自动控温",
+   "operationId": "api_fan_set_api_fan_set_post",
+   "requestBody": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "$ref": "#/components/schemas/FanSetRequest"
+      }
+     }
+    },
+    "required": false
+   },
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Fan Set"
+  }
+ },
+ "/api/fan/status": {
+  "get": {
+   "description": "轻量风扇状态：供前端高频轮询，实时显示转速/当前占空比/目标（常驻线程 2s tick）",
+   "operationId": "api_fan_status_api_fan_status_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Fan Status"
+  }
+ },
+ "/api/fan/sys_temp": {
+  "get": {
+   "description": "读取主板/CPU 温度控风扇配置 + 当前温度源读数 + 计算所得目标PWM",
+   "operationId": "api_fan_sys_temp_get_api_fan_sys_temp_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Fan Sys Temp Get"
+  },
+  "post": {
+   "operationId": "api_fan_sys_temp_set_api_fan_sys_temp_post",
+   "requestBody": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "$ref": "#/components/schemas/FanSysTempConfigRequest"
+      }
+     }
+    },
+    "required": false
+   },
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Fan Sys Temp Set"
+  }
+ },
+ "/api/fan/temps": {
+  "get": {
+   "description": "温度统一快照：CPU/主板/各硬盘/全量测点/阵列卡，供前端「当前温度」卡与温度墙高频展示。\n全部数据来自后台采集循环的 _TEMP_SNAP（~2s 刷新），不再各自采样。",
+   "operationId": "api_fan_temps_api_fan_temps_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Fan Temps"
+  }
+ },
+ "/api/history": {
+  "get": {
+   "description": "返回历史趋势降采样点（磁盘读/写速率），按 range 时间桶聚合，省流量。",
+   "operationId": "api_history_api_history_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api History"
+  }
+ },
+ "/api/me": {
+  "get": {
+   "description": "返回当前网关登录用户，供前端展示登录身份。",
+   "operationId": "api_me_api_me_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Me"
+  }
+ },
+ "/api/metrics": {
+  "get": {
+   "description": "轻量实时指标：网络吞吐 + 磁盘 I/O + CPU/内存/负载。供前端高频(1s)轮询，不触发重型 /api/all(阵列卡/SMART等)。\n网络速率会把 OVS 桥（如 eno1-ovs）归并到物理口名（eno1），与 /api/system 的合并显示名对齐，\n这样前端按 data-nic 直接覆盖即可。",
+   "operationId": "api_metrics_api_metrics_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Metrics"
+  }
+ },
+ "/api/network": {
+  "get": {
+   "description": "独立网卡接口：返回 get_network_nics() 结果（IP/MAC/速率/驱动/状态等）。\n不进 get_system 的 60s TTL 缓存，供前端「网络」卡片轻量(5s)刷新，\n避免被 RAID/SMART/Docker 等慢采集拖慢。",
+   "operationId": "api_network_api_network_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Network"
+  }
+ },
+ "/api/network/wol": {
+  "post": {
+   "description": "设置网卡 WOL（网络唤醒）开关（v2.3.0 3.2）。\n仅对硬件支持该能力的物理口开放；成功后写进配置，进程启动时回放一次以跨重启保留。\n作用面严格限于用户点的那张网卡，不做其它系统改动。",
+   "operationId": "api_network_wol_api_network_wol_post",
+   "requestBody": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "$ref": "#/components/schemas/NetworkWolRequest"
+      }
+     }
+    },
+    "required": false
+   },
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Network Wol"
+  }
+ },
+ "/api/ports": {
+  "get": {
+   "description": "宿主机端口占用：列出所有监听端口 + 占用进程 + 是否 Docker 容器端口（v2.3.0 端口扫描）。",
+   "operationId": "api_ports_api_ports_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Ports"
+  }
+ },
+ "/api/ports/appicon": {
+  "get": {
+   "description": "返回应用中心某个已安装 app 的图标，供「端口占用」页标出是哪个应用在用端口。\n\n只接受已安装的 appid（_app_ids 白名单）+ 固定子路径，杜绝目录穿越；\nDocker 容器行也用这个接口——商店装的 docker 应用（homebox / cf-dns-select）会生成同名\n@appcenter 目录，容器名即 appid，同样命中白名单；纯 docker run 的容器没有图标源。\n找不到图标就 404，前端自动回退成纯文字。图片强缓存一天（图标基本不变）。",
+   "operationId": "api_ports_appicon_api_ports_appicon_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Ports Appicon"
+  }
+ },
+ "/api/ports/release": {
+  "post": {
+   "description": "释放端口占用：终止占用该端口的进程（SIGTERM 优雅终止）。\n安全边界：禁止 kill 系统关键进程（nasdash 自身 / PID1 / systemd / dockerd / sshd 等）与 fnOS 核心服务；\n其余进程由用户在前端二次确认后承担后果。",
+   "operationId": "api_ports_release_api_ports_release_post",
+   "requestBody": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "$ref": "#/components/schemas/PortsReleaseRequest"
+      }
+     }
+    },
+    "required": false
+   },
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Ports Release"
+  }
+ },
+ "/api/raid": {
+  "get": {
+   "description": "阵列卡板块。#raid 渲染同时依赖 raid + disks，故一并返回（raid 带 60s 缓存，disks 带 300s 缓存）。",
+   "operationId": "api_raid_api_raid_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Raid"
+  }
+ },
+ "/api/raid/cc": {
+  "get": {
+   "description": "阵列卡一致性检查（Consistency Check）。\n\n仅对存在的硬件 RAID 逻辑盘（VD）执行；本机为 JBOD 直通时无 VD，接口直接返回明确错误（不崩溃）。\n- GET  ?vd=0         ：查询该 VD 的 CC 进度与状态（idle/running/paused + 百分比）\n- POST {vd, action}  ：action = start|pause|resume|stop（stop 后不可恢复）\nCC 为只读扫描（不改数据），但会抬升磁盘负载，前端在开始前需二次确认。",
+   "operationId": "api_raid_cc_api_raid_cc_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Raid Cc"
+  },
+  "post": {
+   "description": "阵列卡一致性检查（Consistency Check）。\n\n仅对存在的硬件 RAID 逻辑盘（VD）执行；本机为 JBOD 直通时无 VD，接口直接返回明确错误（不崩溃）。\n- GET  ?vd=0         ：查询该 VD 的 CC 进度与状态（idle/running/paused + 百分比）\n- POST {vd, action}  ：action = start|pause|resume|stop（stop 后不可恢复）\nCC 为只读扫描（不改数据），但会抬升磁盘负载，前端在开始前需二次确认。",
+   "operationId": "api_raid_cc_api_raid_cc_post",
+   "requestBody": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "$ref": "#/components/schemas/RaidCcRequest"
+      }
+     }
+    },
+    "required": false
+   },
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Raid Cc"
+  }
+ },
+ "/api/raid/cc/schedule": {
+  "get": {
+   "description": "一致性检查定时调度配置。\nGET：返回当前配置；POST {enabled, period, hour, minute, weekday, vd}：保存。\n配置本身与是否存在 VD 无关（保存合法）；真正触发由 _check_cc_schedule 按时执行，\n无 VD 时静默跳过。前端仅在存在硬件逻辑盘时展示该配置 UI。",
+   "operationId": "api_raid_cc_schedule_api_raid_cc_schedule_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Raid Cc Schedule"
+  },
+  "post": {
+   "description": "一致性检查定时调度配置。\nGET：返回当前配置；POST {enabled, period, hour, minute, weekday, vd}：保存。\n配置本身与是否存在 VD 无关（保存合法）；真正触发由 _check_cc_schedule 按时执行，\n无 VD 时静默跳过。前端仅在存在硬件逻辑盘时展示该配置 UI。",
+   "operationId": "api_raid_cc_schedule_api_raid_cc_schedule_post",
+   "requestBody": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "$ref": "#/components/schemas/RaidCcScheduleRequest"
+      }
+     }
+    },
+    "required": false
+   },
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Raid Cc Schedule"
+  }
+ },
+ "/api/raid/copyback": {
+  "get": {
+   "description": "阵列卡 CopyBack 自动换盘（监控 + 触发）。\n仅对硬件 RAID（存在 VD）环境有效；本机 JBOD 直通无 VD 时接口返回明确错误（不崩溃）。\n- GET                  ：返回自动 CopyBack 开关状态 + 当前正在/待换盘的盘\n- POST {action}        ：action = enable | disable（开/关控制器自动 CopyBack）\n- POST {slot, action}  ：action = start（手动对故障盘触发 CopyBack，须先配热备盘）",
+   "operationId": "api_raid_copyback_api_raid_copyback_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Raid Copyback"
+  },
+  "post": {
+   "description": "阵列卡 CopyBack 自动换盘（监控 + 触发）。\n仅对硬件 RAID（存在 VD）环境有效；本机 JBOD 直通无 VD 时接口返回明确错误（不崩溃）。\n- GET                  ：返回自动 CopyBack 开关状态 + 当前正在/待换盘的盘\n- POST {action}        ：action = enable | disable（开/关控制器自动 CopyBack）\n- POST {slot, action}  ：action = start（手动对故障盘触发 CopyBack，须先配热备盘）",
+   "operationId": "api_raid_copyback_api_raid_copyback_post",
+   "requestBody": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "$ref": "#/components/schemas/RaidCopybackRequest"
+      }
+     }
+    },
+    "required": false
+   },
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Raid Copyback"
+  }
+ },
+ "/api/raid/hotspare": {
+  "get": {
+   "description": "阵列卡热备盘分配（全局 GHS / 专用 DHS）。\n仅对存在的硬件 RAID 环境有效；本机 JBOD 直通无 VD 时接口返回明确错误（不崩溃）。\n- GET            ：返回当前热备盘列表（含类型 global/dedicated）\n- POST {slot, action}：action = add(全局) | add_dedicated(专用) | remove",
+   "operationId": "api_raid_hotspare_api_raid_hotspare_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Raid Hotspare"
+  },
+  "post": {
+   "description": "阵列卡热备盘分配（全局 GHS / 专用 DHS）。\n仅对存在的硬件 RAID 环境有效；本机 JBOD 直通无 VD 时接口返回明确错误（不崩溃）。\n- GET            ：返回当前热备盘列表（含类型 global/dedicated）\n- POST {slot, action}：action = add(全局) | add_dedicated(专用) | remove",
+   "operationId": "api_raid_hotspare_api_raid_hotspare_post",
+   "requestBody": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "$ref": "#/components/schemas/RaidHotspareRequest"
+      }
+     }
+    },
+    "required": false
+   },
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Raid Hotspare"
+  }
+ },
+ "/api/raid/locate": {
+  "post": {
+   "description": "物理盘定位（locate LED 闪烁）。仅当控制器/背板支持时可用（locate_supported）。",
+   "operationId": "api_raid_locate_api_raid_locate_post",
+   "requestBody": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "$ref": "#/components/schemas/RaidLocateRequest"
+      }
+     }
+    },
+    "required": false
+   },
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Raid Locate"
+  }
+ },
+ "/api/report": {
+  "get": {
+   "operationId": "api_report_api_report_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Report"
+  }
+ },
+ "/api/storage": {
+  "get": {
+   "description": "存储卷板块（mdadm/lsblk/df，均为本地快速命令）。volume_map = 卷映射树（v2.3.0 3.6）。",
+   "operationId": "api_storage_api_storage_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Storage"
+  }
+ },
+ "/api/system": {
+  "get": {
+   "description": "系统资源板块（CPU/内存/温度/风扇/GPU/网卡 + 主板/内存条），供 #system 与 #fan 按需刷新。",
+   "operationId": "api_system_api_system_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api System"
+  }
+ },
+ "/api/version": {
+  "get": {
+   "description": "检测新版本：返回 {current, latest, update_available, url, error}。force=1 强制刷新缓存。",
+   "operationId": "api_version_api_version_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Api Version"
+  }
+ },
+ "/manual": {
+  "get": {
+   "operationId": "manual_manual_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Manual"
+  }
+ },
+ "/ui/images/{filename}": {
+  "get": {
+   "description": "暴露 ui/images 下的静态图标，供页面内 <img> 引用。",
+   "operationId": "ui_images_ui_images__filename__get",
+   "parameters": [
+    {
+     "in": "path",
+     "name": "filename",
+     "required": true,
+     "schema": {
+      "title": "Filename",
+      "type": "string"
+     }
+    }
+   ],
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    },
+    "422": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/HTTPValidationError"
+       }
+      }
+     },
+     "description": "Validation Error"
+    }
+   },
+   "summary": "Ui Images"
+  }
+ },
+ "/vue": {
+  "get": {
+   "operationId": "vue_pilot_vue_get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Vue Pilot"
+  }
+ },
+ "/vue/": {
+  "get": {
+   "operationId": "vue_pilot_vue__get",
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    }
+   },
+   "summary": "Vue Pilot"
+  }
+ }
+}
