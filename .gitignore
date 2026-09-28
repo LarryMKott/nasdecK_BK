@@ -7,6 +7,7 @@ __pycache__/
 
 # 本地自测虚拟环境
 .venv/
+venv313/
 
 # 运行时日志
 debug.log
@@ -48,6 +49,9 @@ frontend-vue/.vite/
 # 前端截图自检工作区与 IDE
 .smoke/
 .idea/
+
+# Mimosa 安全扫描插件状态（本机工具产物，不入库）
+.mimosa/
 
 # 整洁架构重构期原目录备份（安全网，不入库；git 历史为正式基线）
 backend_backup_*

@@ -1,125 +1,59 @@
 <script setup lang="ts">
 /**
- * 主入口外壳（阶段 2 起接管）。
+ * 主入口外壳（架构迁移批1起：hash 切页交由 vue-router 接管）。
  *
  * 结构（复用老页面的 .header/.container/.sidebar/.tabs/.panel 类名，
  * 因此观感与旧版面板完全一致）：
- *  - 左侧：11 个模块页签（分组与老页面一致）
- *  - 右侧内容区：**11 个模块全部为 Vue 原生页** ——
- *      硬件配置检测 / 系统资源 / 温度监控 / 历史趋势 / 操作手册 / 关于 /
- *      Docker / 控制与自动化 / 存储卷 / 硬盘 SMART / 风扇控制
+ *  - 左侧：12 个模块页签（NAV 由路由 meta 归一而来，见 router/routes）
+ *  - 右侧内容区：<RouterView> 渲染当前模块页（路由切换即卸载重建，
+ *    与旧 v-if 链语义一致；切回秒开由 pageCache 负责）
  *
- * v2.3.0 第 11 步「旧页退休瘦身」：旧版单页面板（templates/index.html）与
- * 壳内 iframe 回滚宿主已全部删除，界面 100% 由本应用渲染，不再有任何旧页依赖。
+ * v2.3.0 第 11 步「旧页退休瘦身」：旧版单页面板与 iframe 回滚宿主已全部删除，
+ * 界面 100% 由本应用渲染。v2.4 架构迁移：页签数据源从手写数组改为路由 meta。
  */
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import AppIcon from './components/AppIcon.vue'
-import SystemResources from './pages/SystemResources.vue'
-import Temperature from './pages/Temperature.vue'
-import History from './pages/History.vue'
-import Manual from './pages/Manual.vue'
-import About from './pages/About.vue'
-import Docker from './pages/Docker.vue'
-import Ports from './pages/Ports.vue'
-import Detect from './pages/Detect.vue'
-import Automation from './pages/Automation.vue'
-import Storage from './pages/Storage.vue'
-import Disks from './pages/Disks.vue'
-import Fan from './pages/Fan.vue'
-import { freshness } from './lib/api'
-import { useTheme } from './lib/useTheme'
+import { useRoute, useRouter } from 'vue-router'
+import AppIcon from '@/components/ui/AppIcon.vue'
+import { NAV } from '@/router/routes'
+import { freshness } from '@/api/client'
+import { useAppStore } from '@/stores/app.store'
+import { useTheme } from '@/composables/common/useTheme'
 
-interface TabDef {
-  id: string
-  label: string
-  icon: string
-  /** 是否实时轮询页：是则在页眉显示「数据于 N 秒前更新」 */
-  realtime?: boolean
-}
-interface NavBlock {
-  group?: string
-  tabs: TabDef[]
-}
+const route = useRoute()
+const router = useRouter()
+const app = useAppStore()
 
-const NAV: NavBlock[] = [
-  { tabs: [{ id: 'detect', label: '硬件配置检测', icon: 'detect', realtime: true }] },
-  {
-    group: '资源监控',
-    tabs: [
-      { id: 'system', label: '系统资源', icon: 'system', realtime: true },
-      { id: 'temps', label: '温度监控', icon: 'thermo', realtime: true },
-      { id: 'sys-hist', label: '历史趋势', icon: 'history' },
-    ],
-  },
-  {
-    group: '存储',
-    tabs: [
-      { id: 'disks', label: '硬盘 SMART', icon: 'hdd', realtime: true },
-      { id: 'storage', label: '存储卷', icon: 'storage', realtime: true },
-    ],
-  },
-  {
-    group: '其他',
-    tabs: [
-      { id: 'fan', label: '风扇控制', icon: 'fan', realtime: true },
-      { id: 'docker', label: 'Docker', icon: 'docker', realtime: true },
-      { id: 'ports', label: '端口占用', icon: 'ports', realtime: true },
-      { id: 'automation', label: '控制与自动化', icon: 'automation', realtime: true },
-      { id: 'manual', label: '操作手册', icon: 'manual' },
-      { id: 'about', label: '关于 nasdeck', icon: 'about' },
-    ],
-  },
-]
-
-const ALL_TABS: TabDef[] = NAV.flatMap(b => b.tabs)
-
-/**
- * 首屏落点：默认「硬件配置检测」（与老版本一致 —— 打开先看整机体检总览）。
- * 带 #xxx 时优先恢复该页签。
- */
-const startTab = (() => {
-  try {
-    const h = location.hash.replace(/^#/, '')
-    if (h && ALL_TABS.some(t => t.id === h)) return h
-  } catch {
-    /* 某些沙箱下 location 受限，忽略 */
-  }
-  return 'detect'
-})()
-
-const tab = ref(startTab)
-const sidebarOpen = ref(false)
-
-// 主题（模块级单例）：这里调用一次，确保外壳一挂载就把 data-theme 落到 <html>，
+// 主题（app store 单例）：壳一挂载就把 data-theme 落到 <html>，
 // 不必等某个页面的 hero 控件先渲染。
 useTheme()
 
+const sidebarOpen = computed(() => app.sidebarOpen)
+
+const ALL_IDS = NAV.flatMap(b => b.tabs.map(t => t.id))
+
 /** 当前页签标题，供无障碍朗读 */
-const currentLabel = computed(() => ALL_TABS.find(t => t.id === tab.value)?.label ?? '')
+const currentLabel = computed(() => {
+  const m = route.meta as { label?: string }
+  return m.label ?? ''
+})
 
 function select(id: string): void {
-  tab.value = id
-  sidebarOpen.value = false
-  try {
-    // 用 hash 记录当前页签：刷新后仍停在原页（不触发服务端请求）
-    history.replaceState(null, '', '#' + id)
-  } catch {
-    /* 某些沙箱下 history 受限，忽略 */
-  }
-  window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
+  app.closeSidebar()
+  // hash 路由记录当前页签：刷新后仍停在原页（不触发服务端请求）
+  router.push('/' + id)
 }
 
-/** 跨页跳转总线（v2.3.0 3.6）：任意 Vue 原生页 dispatch nasdeck-nav 即可换页签。
- *  用 window 事件而不是 props/路由：外壳与页面是松耦合的，页面不该知道外壳结构。 */
+/** 跨页跳转总线（v2.3.0 3.6）：任意页面 dispatch nasdeck-nav 即可换页签。
+ *  用 window 事件而不是 props/路由注入：页面与外壳松耦合，页面不必知道外壳结构。 */
 function onNav(e: Event): void {
   const id = (e as CustomEvent).detail?.tab
-  if (id && ALL_TABS.some(t => t.id === id)) select(id)
+  if (id && ALL_IDS.includes(id)) select(id)
 }
 onMounted(() => window.addEventListener('nasdeck-nav', onNav))
 onUnmounted(() => window.removeEventListener('nasdeck-nav', onNav))
 
 // 数据新鲜度（3.9，隐形版）：平时不显示；只有实时页数据超过 10 秒没刷新才弹出黄色「数据已 N 秒未更新」告警（后端卡死/轮询断开时才有用，避免常驻装饰条）
-const realtime = computed(() => ALL_TABS.find(t => t.id === tab.value)?.realtime === true)
+const realtime = computed(() => (route.meta as { realtime?: boolean }).realtime === true)
 const now = ref(Date.now())
 let tick = 0
 const staleSec = computed(() => (freshness.lastAny ? Math.floor((now.value - freshness.lastAny) / 1000) : -1))
@@ -130,7 +64,7 @@ onUnmounted(() => { if (tick) window.clearInterval(tick) })
 
 <template>
   <div class="header">
-    <button class="btn menu-toggle" @click="sidebarOpen = !sidebarOpen">
+    <button class="btn menu-toggle" @click="app.toggleSidebar()">
       <AppIcon name="menu" /> 模块
     </button>
   </div>
@@ -145,7 +79,7 @@ onUnmounted(() => { if (tick) window.clearInterval(tick) })
             v-for="t in block.tabs"
             :key="t.id"
             class="tab"
-            :class="{ active: t.id === tab }"
+            :class="{ active: t.id === route.name }"
             :title="t.label"
             @click="select(t.id)"
           >
@@ -161,21 +95,10 @@ onUnmounted(() => { if (tick) window.clearInterval(tick) })
         数据已 {{ staleSec }} 秒未更新 · 后端可能已断开
       </div>
       <div class="panel active">
-        <Detect v-if="tab === 'detect'" />
-        <SystemResources v-else-if="tab === 'system'" />
-        <Temperature v-else-if="tab === 'temps'" />
-        <History v-else-if="tab === 'sys-hist'" />
-        <Manual v-else-if="tab === 'manual'" />
-        <About v-else-if="tab === 'about'" />
-        <Docker v-else-if="tab === 'docker'" />
-        <Ports v-else-if="tab === 'ports'" />
-        <Automation v-else-if="tab === 'automation'" />
-        <Storage v-else-if="tab === 'storage'" />
-        <Disks v-else-if="tab === 'disks'" />
-        <Fan v-else-if="tab === 'fan'" />
+        <RouterView />
       </div>
     </main>
   </div>
 
-  <div class="nav-overlay" :class="{ show: sidebarOpen }" @click="sidebarOpen = false" />
+  <div class="nav-overlay" :class="{ show: sidebarOpen }" @click="app.closeSidebar()" />
 </template>

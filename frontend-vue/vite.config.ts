@@ -1,3 +1,5 @@
+/// <reference types="vitest/config" />
+import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { viteSingleFile } from 'vite-plugin-singlefile'
@@ -13,6 +15,12 @@ import { viteSingleFile } from 'vite-plugin-singlefile'
  */
 export default defineConfig({
   plugins: [vue(), viteSingleFile()],
+  // @ 别名 → src（与 tsconfig paths 保持一致；架构迁移批1引入）
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+    },
+  },
   base: './',
   build: {
     // 直接产出到 Flask 的模板目录，构建完即就位
@@ -39,5 +47,10 @@ export default defineConfig({
         changeOrigin: true
       }
     }
+  },
+  // Vitest（计划步骤 6：utils / composables 单元测试）；组件无关的纯逻辑用 jsdom 即可
+  test: {
+    environment: 'jsdom',
+    include: ['tests/**/*.spec.ts'],
   }
 })
