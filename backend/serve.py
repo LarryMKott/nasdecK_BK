@@ -22,8 +22,8 @@ import threading
 
 import uvicorn
 
-from backend.errring import install_error_ring
-from backend.paths import APP_DIR, _migrate_legacy_configs
+from backend.infrastructure.logging.errring import install_error_ring
+from backend.infrastructure.config.paths import APP_DIR, _migrate_legacy_configs
 
 
 class _PrefixMiddleware:
@@ -71,15 +71,15 @@ def main():
     # ---- 启动序列（原 import 期副作用显式化；顺序与原模块自上而下执行等价）----
     install_error_ring()                      # 原 L79：stderr 错误圈
     _migrate_legacy_configs()                 # 原 L187：旧配置迁移
-    from backend.history.db import _init_history_db
+    from backend.infrastructure.persistence.db import _init_history_db
     _init_history_db()                        # 原 L6851：历史库建表/补列
-    from backend.fans.modes import _restore_fan_modes
+    from backend.infrastructure.fans.modes import _restore_fan_modes
     _restore_fan_modes()                      # 原 L1428：启动即恢复风扇模式，避免重启后全速
     from backend.daemon import start_background_workers
     start_background_workers()                # 原 6 处线程 start
 
     # ---- 组装应用 ----
-    from backend.web.app import create_app
+    from backend.presentation.app import create_app
     app = create_app()
 
     # ---- 监听（原 __main__ 块）----

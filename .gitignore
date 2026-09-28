@@ -50,4 +50,4 @@ frontend-vue/.vite/
 .idea/
 
 # 整洁架构重构期原目录备份（安全网，不入库；git 历史为正式基线）
-backend_backup_*.tgz
+backend_backup_*

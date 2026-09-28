@@ -14,25 +14,25 @@
 import glob  # noqa: F401  (测试 monkeypatch 目标：app.glob / FakeGlob)
 import os    # noqa: F401  (测试 monkeypatch 目标：app.os.path.exists)
 
-from backend.collectors.cputemp import (_mb_temp_from_sensors, _parse_cpu_temp,  # noqa: F401
+from backend.infrastructure.collectors.cputemp import (_mb_temp_from_sensors, _parse_cpu_temp,  # noqa: F401
                                         _parse_mb_temp, _parse_sensors_all)
-from backend.collectors.disks import get_disks  # noqa: F401
-from backend.collectors.dockermod import (_docker_size_to_bytes,  # noqa: F401
+from backend.infrastructure.collectors.disks import get_disks  # noqa: F401
+from backend.infrastructure.collectors.dockermod import (_docker_size_to_bytes,  # noqa: F401
                                           _parse_docker_pct, _split_netio)
-from backend.collectors.raid import (_parse_ctrl_temp, _parse_roc_temp,  # noqa: F401
+from backend.infrastructure.collectors.raid import (_parse_ctrl_temp, _parse_roc_temp,  # noqa: F401
                                      _resolve_brand_model,
                                      detect_storage_controllers,
                                      disk_brand_and_feature)
-from backend.collectors.smart import parse_nvme_smart  # noqa: F401
-from backend.fans.control import get_fan_status  # noqa: F401
-from backend.fans.enumerate import _enumerate_fans, _select_temp_fans  # noqa: F401
-from backend.fans.fcs import (_fcs_disable, _fcs_enable, _fcs_status,  # noqa: F401
+from backend.infrastructure.collectors.smart import parse_nvme_smart  # noqa: F401
+from backend.infrastructure.fans.control import get_fan_status  # noqa: F401
+from backend.infrastructure.fans.enumerate import _enumerate_fans, _select_temp_fans  # noqa: F401
+from backend.infrastructure.fans.fcs import (_fcs_disable, _fcs_enable, _fcs_status,  # noqa: F401
                               _fan_start_ext_service, _fan_stop_ext_service)
-from backend.fans.rules import _fan_curve_pwm  # noqa: F401
-from backend.health.alerts import _evaluate_alerts  # noqa: F401
-from backend.health.report import _render_report_html, build_health_report  # noqa: F401
-from backend.web.app import create_app
-from backend.web.staticpages import _vue_missing_page  # noqa: F401
+from backend.infrastructure.fans.rules import _fan_curve_pwm  # noqa: F401
+from backend.infrastructure.health.alerts import _evaluate_alerts  # noqa: F401
+from backend.infrastructure.health.report import _render_report_html, build_health_report  # noqa: F401
+from backend.presentation.app import create_app
+from backend.presentation.staticpages import _vue_missing_page  # noqa: F401
 
 app = create_app()
 

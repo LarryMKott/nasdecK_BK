@@ -139,7 +139,8 @@ def find_cycles(graph):
 
 
 def main():
-    waivers = json.loads(WAIVERS.read_text("utf-8")) if WAIVERS.exists() else {}
+    data = json.loads(WAIVERS.read_text("utf-8")) if WAIVERS.exists() else {}
+    waivers = data.get("waivers", data)  # 兼容嵌套格式 {"_comment","waivers":{...}} 与扁平格式
     violations, checked = scan()
     unwaived, waived = [], 0
     for mod, dep, why in violations:
@@ -148,8 +149,14 @@ def main():
             waived += 1
         else:
             unwaived.append((mod, dep, why))
-    print(f"[check_layers] 扫描新层模块 {checked} 个：违规 {len(unwaived)}，豁免抵扣 {waived}")
-    for mod, dep, why in unwaived:
+    # 同一 (模块, 依赖) 多处 import 只报一次，便于豁免清点
+    seen, uniq = set(), []
+    for v in unwaived:
+        if (v[0], v[1]) not in seen:
+            seen.add((v[0], v[1]))
+            uniq.append(v)
+    print(f"[check_layers] 扫描新层模块 {checked} 个：违规 {len(uniq)}（去重后），豁免抵扣 {waived}")
+    for mod, dep, why in uniq:
         print(f"  VIOLATION {mod} -> {dep}  ({why})")
     cycles = find_cycles(dependency_graph())
     print(f"[check_layers] 模块级依赖环：{len(cycles)}")

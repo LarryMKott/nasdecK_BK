@@ -1,4 +1,93 @@
 {
-  "_comment": "分层依赖豁免清单（scripts/check_layers.py 消费）。只减不增；阶段 4 出口 = 本清单业务条目清零。键=模块路径，值=允许导入的模块前缀列表。",
-  "waivers": {}
+ "_comment": "分层依赖豁免清单（scripts/check_layers.py 消费）。只减不增；阶段 3 UseCase 落地逐票销毁，阶段 4 出口=清零。本清单由搬迁后首次 scan 自举生成（143 处违规去重后 96 票）。",
+ "waivers": {
+  "backend.presentation.api.endpoints.alerts": [
+   "backend.infrastructure.collectors.board",
+   "backend.infrastructure.collectors.disks",
+   "backend.infrastructure.collectors.dockermod",
+   "backend.infrastructure.collectors.system",
+   "backend.infrastructure.health.alerts",
+   "backend.infrastructure.health.report",
+   "backend.infrastructure.version",
+   "backend.infrastructure.gateway"
+  ],
+  "backend.presentation.api.endpoints.all": [
+   "backend.infrastructure.collectors.board",
+   "backend.infrastructure.collectors.cpuusage",
+   "backend.infrastructure.collectors.disks",
+   "backend.infrastructure.collectors.dockermod",
+   "backend.infrastructure.collectors.gpu",
+   "backend.infrastructure.collectors.metrics",
+   "backend.infrastructure.collectors.raid",
+   "backend.infrastructure.collectors.storage",
+   "backend.infrastructure.collectors.system",
+   "backend.infrastructure.health.alerts",
+   "backend.infrastructure.health.diskhealth",
+   "backend.infrastructure.version",
+   "backend.infrastructure.gateway"
+  ],
+  "backend.presentation.api.endpoints.basic": [
+   "backend.infrastructure.logging.errring",
+   "backend.infrastructure.gateway",
+   "backend.infrastructure.version"
+  ],
+  "backend.presentation.api.endpoints.disks": [
+   "backend.infrastructure.collectors.disks",
+   "backend.infrastructure.collectors.raid",
+   "backend.infrastructure.health.diskhealth",
+   "backend.infrastructure.jsonstore",
+   "backend.infrastructure.command.cmd_runner",
+   "backend.infrastructure.gateway"
+  ],
+  "backend.presentation.api.endpoints.fans": [
+   "backend.infrastructure.collectors.cputemp",
+   "backend.infrastructure.collectors.disks",
+   "backend.infrastructure.collectors.gpu",
+   "backend.infrastructure.fans.control",
+   "backend.infrastructure.fans.enumerate",
+   "backend.infrastructure.fans.fcs",
+   "backend.infrastructure.fans.hwmon",
+   "backend.infrastructure.fans.labels",
+   "backend.infrastructure.fans.modes",
+   "backend.infrastructure.fans.rules",
+   "backend.infrastructure.persistence.db",
+   "backend.infrastructure.jsonstore",
+   "backend.infrastructure.state",
+   "backend.infrastructure.gateway"
+  ],
+  "backend.presentation.api.endpoints.helpers": [
+   "backend.infrastructure.collectors.disks"
+  ],
+  "backend.presentation.api.endpoints.metrics": [
+   "backend.infrastructure.collectors.cpuusage",
+   "backend.infrastructure.collectors.gpu",
+   "backend.infrastructure.collectors.metrics",
+   "backend.infrastructure.persistence.db",
+   "backend.infrastructure.gateway"
+  ],
+  "backend.presentation.api.endpoints.raid": [
+   "backend.infrastructure.collectors.disks",
+   "backend.infrastructure.collectors.raid",
+   "backend.infrastructure.command.cmd_runner",
+   "backend.infrastructure.gateway"
+  ],
+  "backend.presentation.api.endpoints.res": [
+   "backend.infrastructure.command",
+   "backend.infrastructure.collectors.dockermod",
+   "backend.infrastructure.collectors.ports",
+   "backend.infrastructure.collectors.storage",
+   "backend.infrastructure.collectors.system",
+   "backend.infrastructure.collectors.wol",
+   "backend.infrastructure.command.cmd_runner",
+   "backend.infrastructure.gateway"
+  ],
+  "backend.presentation.app": [
+   "backend.infrastructure.gateway",
+   "backend.infrastructure.version"
+  ],
+  "backend.presentation.staticpages": [
+   "backend.infrastructure.config.paths",
+   "backend.infrastructure.version"
+  ]
+ }
 }

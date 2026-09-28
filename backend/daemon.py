@@ -16,26 +16,26 @@ import threading
 import time
 
 from backend import schedule
-from backend.collectors import metrics as _metrics_mod
-from backend.collectors.board import get_board, get_memory_modules
-from backend.collectors.cpuusage import _cpu_snap, get_cpu_usage
-from backend.collectors.cputemp import _temp_collect_loop
-from backend.collectors.disks import get_disks
-from backend.collectors.dockermod import get_docker
-from backend.collectors.metrics import (_CPU_POWER_EMA, _DISK_LAST_IO,
+from backend.infrastructure.collectors import metrics as _metrics_mod
+from backend.infrastructure.collectors.board import get_board, get_memory_modules
+from backend.infrastructure.collectors.cpuusage import _cpu_snap, get_cpu_usage
+from backend.infrastructure.collectors.cputemp import _temp_collect_loop
+from backend.infrastructure.collectors.disks import get_disks
+from backend.infrastructure.collectors.dockermod import get_docker
+from backend.infrastructure.collectors.metrics import (_CPU_POWER_EMA, _DISK_LAST_IO,
                                         _DISK_STANDBY_IDLE_MIN, _METRICS_LOCK,
                                         _metrics_cur, _metrics_prev,
                                         _read_disk_stats, _read_net_bytes,
                                         _read_rapl_energy)
-from backend.collectors.raid import get_raid_card
-from backend.collectors.storage import get_storage
-from backend.collectors.system import get_system
-from backend.collectors.wol import _wol_reapply_on_start
-from backend.fans.control import _fan_smooth_runner
-from backend.health.diskhealth import disk_health_loop
-from backend.history import db as _db
+from backend.infrastructure.collectors.raid import get_raid_card
+from backend.infrastructure.collectors.storage import get_storage
+from backend.infrastructure.collectors.system import get_system
+from backend.infrastructure.collectors.wol import _wol_reapply_on_start
+from backend.infrastructure.fans.control import _fan_smooth_runner
+from backend.infrastructure.health.diskhealth import disk_health_loop
+from backend.infrastructure.persistence import db as _db
 from backend.schedule import _check_cc_schedule, _cc_sched_last_check
-from backend.state import _CPU_USAGE_CACHE, _CPU_USAGE_LOCK
+from backend.infrastructure.state import _CPU_USAGE_CACHE, _CPU_USAGE_LOCK
 
 # metrics 主循环逐 tick 使用的可变归属状态说明：
 # - _CPU_POWER_EMA / _cc_sched_last_check / _db_last_write 原为 app.py 模块级 global，

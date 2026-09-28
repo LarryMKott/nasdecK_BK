@@ -9,9 +9,9 @@
 运行：./test.sh  （自动建 .venv 装 flask+pytest 并跑）
 """
 import app as app
-from backend import shell
-from backend.fans import enumerate as fans_enumerate
-from backend.fans import fcs as fcs_mod
+from backend.infrastructure.command import cmd_runner as shell
+from backend.infrastructure.fans import enumerate as fans_enumerate
+from backend.infrastructure.fans import fcs as fcs_mod
 import json
 
 

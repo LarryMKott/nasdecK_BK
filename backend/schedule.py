@@ -1,8 +1,8 @@
 # --split-- 以下内容自 app.py 原样搬迁（import 由 fix_imports.py 补齐）
-from backend import shell
-from backend.collectors.raid import get_raid_card
-from backend.paths import _config_dir
-from backend.shell import STORCLI
+from backend.infrastructure.command import cmd_runner as shell
+from backend.infrastructure.collectors.raid import get_raid_card
+from backend.infrastructure.config.paths import _config_dir
+from backend.infrastructure.command.cmd_runner import STORCLI
 import json
 import os
 import re
