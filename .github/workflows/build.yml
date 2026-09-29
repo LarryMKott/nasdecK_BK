@@ -27,6 +27,8 @@ jobs:
       # pnpm 版本读 frontend-vue/package.json 的 packageManager 字段（pnpm@9.15.4）
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
+        with:
+          package_json_file: frontend-vue/package.json
 
       - name: Set up Node 22
         uses: actions/setup-node@v4
