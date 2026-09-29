@@ -8,6 +8,11 @@
 - Response(stream_with_context(gen())) → StreamingResponse（同步生成器
   由 Starlette 在线程池迭代，chunked 语义不变）
 - 资源路径锚点：原 os.path.dirname(__file__)（app.py 在应用根）→ paths.APP_DIR
+
+【多文件产物】（2026-09，前端去 singlefile 拆包）
+- 产物从单 index.html 变为 index.html + assets/*（Vite 内容 hash chunk），
+  新增 /assets/{path} 与 /vue/{path} 两条静态资源路由（immutable 长缓存），
+  入口 / /vue /vue/ 仍统一走 _serve_vue_app()（no-store）。
 """
 import os
 import re
@@ -24,6 +29,13 @@ router = APIRouter()
 # 【配置点】静态资源目录（部署时位于应用根，即 APP_DIR 下）
 _UI_IMAGES_DIR = os.path.join(APP_DIR, "ui", "images")
 _VUE_DIR = os.path.join(APP_DIR, "templates", "vue")
+_VUE_ASSETS_DIR = os.path.join(_VUE_DIR, "assets")
+_VUE_INDEX = os.path.join(_VUE_DIR, "index.html")
+
+# 产物静态资源为 Vite 内容 hash 文件名（内容变 → 文件名变），可 immutable 长缓存：
+# 弱网/断网重访时命中浏览器缓存的资源不再重拉，网络抖动只影响未缓存的少数 chunk。
+# index.html 本身仍 no-store（入口必须每次新鲜，才能拿到最新 hash 引用）。
+_ASSET_CACHE_CONTROL = "public, max-age=31536000, immutable"
 
 
 def _send_under(directory, filename):
@@ -70,14 +82,39 @@ def _vue_missing_page():
 
 
 def _serve_vue_app():
-    """主界面：frontend-vue/ 构建产物，单文件 HTML。
+    """主界面：frontend-vue/ 构建产物入口页（多文件形态：index.html 引用 assets/ 下
+    带内容 hash 的 JS/CSS chunk，由下方 /assets、/vue 两条静态路由伺服）。
 
-    产物 `templates/vue/index.html` 已提交进仓库（无 Node 环境也能打包）。
+    产物已提交进仓库（无 Node 环境也能打包）。
     """
-    vue_index = os.path.join(_VUE_DIR, "index.html")
-    if not os.path.isfile(vue_index):
+    if not os.path.isfile(_VUE_INDEX):
         return _vue_missing_page()
-    return _no_cache(FileResponse(vue_index, media_type="text/html"))
+    return _no_cache(FileResponse(_VUE_INDEX, media_type="text/html"))
+
+
+def _serve_vue_asset(directory, filename):
+    """产物静态资源：目录钳制（防路径穿越）+ immutable 长缓存。"""
+    full = os.path.abspath(os.path.join(directory, filename))
+    if not full.startswith(os.path.abspath(directory) + os.sep):
+        return Response(status_code=404)
+    if not os.path.isfile(full):
+        return Response(status_code=404)
+    resp = FileResponse(full)
+    resp.headers["Cache-Control"] = _ASSET_CACHE_CONTROL
+    return resp
+
+
+@router.get("/assets/{filepath:path}")
+def vue_assets(filepath: str):
+    """产物 assets/ 资源（hashed chunk）。
+
+    相对路径 ./assets/* 的解析落点随入口 URL 而定，这里覆盖其中不带 vue 前缀的：
+      /                      → /assets/*
+      /vue（无尾斜杠）        → /assets/*
+      网关 index.cgi/        → 转发为 /assets/*
+      网关 index.cgi/vue     → 转发为 /assets/*
+    """
+    return _serve_vue_asset(_VUE_ASSETS_DIR, filepath)
 
 
 @router.get("/")
@@ -88,10 +125,24 @@ def index():
 
 # ===================== /vue/（阶段 1a 旧链接兼容） =====================
 # 阶段 2 起 /vue/ 与 / 同物，保留该路径只为让阶段 1a 的旧链接继续可用。
+# 注意：/vue、/vue/ 必须先于下方 /vue/{filepath:path} 注册，否则空 filepath
+# 会被 path 通配吃掉，旧入口直接 404。
 @router.get("/vue")
 @router.get("/vue/")
 def vue_pilot():
     return _serve_vue_app()
+
+
+@router.get("/vue/{filepath:path}")
+def vue_app_under_vue(filepath: str):
+    """/vue/ 入口（尾斜杠）下的 ./assets/* 解析为 /vue/assets/*，落到这里。
+
+    filepath 指向 index.html 时（如直接请求 /vue/index.html）按入口页处理
+    （no-store），其余按 hashed 资源处理（immutable）。
+    """
+    if filepath.replace("\\", "/") == "index.html":
+        return _serve_vue_app()
+    return _serve_vue_asset(_VUE_DIR, filepath)
 
 
 # ===================== 操作手册（/manual 路由，离线可读） =====================

@@ -1,0 +1,1 @@
+import{b as t}from"./index-DJrtPLyT.js";function i(e={}){var o;return t("/api/version",{timeout:(o=e.timeout)!=null?o:15e3,query:e.force?{force:1}:void 0})}function u(e={}){var o;return t("/api/system",{timeout:(o=e.timeout)!=null?o:3e4,query:e.force?{force:1}:void 0})}export{i as a,u as g};

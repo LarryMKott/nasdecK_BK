@@ -1,7 +1,7 @@
 {
   "source": "/vol1/1000/apps/zcode/nasdeck/app.py",
-  "generated_by": "scripts/extract_routes.py（正则静态抽取，不 import）",
-  "route_count": 58,
+  "generated_by": "scripts/extract_routes.py（正则静态抽取，不 import）；2026-09-29 手工补录两条静态资源路由 /assets/{filepath}、/vue/{filepath}（前端拆包新增，见 backend/presentation/staticpages.py）",
+  "route_count": 60,
   "routes": [
     {
       "path": "/",
@@ -273,6 +273,12 @@
       ]
     },
     {
+      "path": "/assets/{filepath}",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
       "path": "/manual",
       "methods": [
         "GET"
@@ -292,6 +298,12 @@
     },
     {
       "path": "/vue/",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "path": "/vue/{filepath}",
       "methods": [
         "GET"
       ]

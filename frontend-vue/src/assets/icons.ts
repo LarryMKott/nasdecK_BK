@@ -1,23 +1,25 @@
 /**
- * 图标单一数据源 —— 与 templates/index.html 同源：
- * - 彩色插画 PNG（ui/images/icon-*.png）用 `?inline` 内联成 base64 data URL，
- *   与老页面一致，避免飞牛网关对静态资源返回 302。
+ * 图标单一数据源：
+ * - 彩色插画 PNG（ui/images/icon-*.png）常规导入，由 Vite 发成 assets/ 下
+ *   带内容 hash 的独立文件（多文件产物，见 vite.config.ts）：随用随取 + immutable
+ *   长缓存，不再 `?inline` 内联——12 张插画内联曾把入口 chunk 撑到 1.4MB。
+ *   （旧版内联是为绕开网关对旧静态路径的 302；现产物资源走 FastAPI 直出，无 302。）
  * - 线性 SVG 走 24x24 viewBox 的 path 数据，由 <AppIcon> 渲染成 <svg>。
  */
-import iconDetect from '../../../ui/images/icon-detect.png?inline'
-import iconSystem from '../../../ui/images/icon-system.png?inline'
-import iconHistory from '../../../ui/images/icon-history.png?inline'
-import iconHdd from '../../../ui/images/icon-hdd.png?inline'
-import iconStorage from '../../../ui/images/icon-storage.png?inline'
-import iconFan from '../../../ui/images/icon-fan.png?inline'
-import iconDocker from '../../../ui/images/icon-docker.png?inline'
-import iconPorts from '../../../ui/images/icon-ports.png?inline'
-import iconAutomation from '../../../ui/images/icon-automation.png?inline'
-import iconManual from '../../../ui/images/icon-manual.png?inline'
-import iconAbout from '../../../ui/images/icon-about.png?inline'
-import iconRaid from '../../../ui/images/icon-raid.png?inline'
+import iconDetect from '../../../ui/images/icon-detect.png'
+import iconSystem from '../../../ui/images/icon-system.png'
+import iconHistory from '../../../ui/images/icon-history.png'
+import iconHdd from '../../../ui/images/icon-hdd.png'
+import iconStorage from '../../../ui/images/icon-storage.png'
+import iconFan from '../../../ui/images/icon-fan.png'
+import iconDocker from '../../../ui/images/icon-docker.png'
+import iconPorts from '../../../ui/images/icon-ports.png'
+import iconAutomation from '../../../ui/images/icon-automation.png'
+import iconManual from '../../../ui/images/icon-manual.png'
+import iconAbout from '../../../ui/images/icon-about.png'
+import iconRaid from '../../../ui/images/icon-raid.png'
 
-/** 彩色插画图标（PNG data URL） */
+/** 彩色插画图标（hash 文件 URL） */
 export const ICON_PNG: Record<string, string> = {
   detect: iconDetect,
   system: iconSystem,

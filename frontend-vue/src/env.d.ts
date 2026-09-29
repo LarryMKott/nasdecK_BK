@@ -6,8 +6,5 @@ declare module '*.vue' {
   export default component
 }
 
-// 彩色插画图标以 base64 data URL 内联（`?inline` 强制内联，避免网关静态资源 302）
-declare module '*.png?inline' {
-  const src: string
-  export default src
-}
+// PNG 导入类型由 vite/client 的 declare module '*.png' 提供；
+// 旧版 `*.png?inline` 声明已随图标去内联（见 assets/icons.ts）一并移除。

@@ -1107,6 +1107,44 @@
    "summary": "Api Version"
   }
  },
+ "/assets/{filepath}": {
+  "get": {
+   "description": "产物 assets/ 资源（hashed chunk）。\n\n相对路径 ./assets/* 的解析落点随入口 URL 而定，这里覆盖其中不带 vue 前缀的：\n  /                      → /assets/*\n  /vue（无尾斜杠）        → /assets/*\n  网关 index.cgi/        → 转发为 /assets/*\n  网关 index.cgi/vue     → 转发为 /assets/*",
+   "operationId": "vue_assets_assets__filepath__get",
+   "parameters": [
+    {
+     "in": "path",
+     "name": "filepath",
+     "required": true,
+     "schema": {
+      "title": "Filepath",
+      "type": "string"
+     }
+    }
+   ],
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    },
+    "422": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/HTTPValidationError"
+       }
+      }
+     },
+     "description": "Validation Error"
+    }
+   },
+   "summary": "Vue Assets"
+  }
+ },
  "/manual": {
   "get": {
    "operationId": "manual_manual_get",
@@ -1191,6 +1229,44 @@
     }
    },
    "summary": "Vue Pilot"
+  }
+ },
+ "/vue/{filepath}": {
+  "get": {
+   "description": "/vue/ 入口（尾斜杠）下的 ./assets/* 解析为 /vue/assets/*，落到这里。\n\nfilepath 指向 index.html 时（如直接请求 /vue/index.html）按入口页处理\n（no-store），其余按 hashed 资源处理（immutable）。",
+   "operationId": "vue_app_under_vue_vue__filepath__get",
+   "parameters": [
+    {
+     "in": "path",
+     "name": "filepath",
+     "required": true,
+     "schema": {
+      "title": "Filepath",
+      "type": "string"
+     }
+    }
+   ],
+   "responses": {
+    "200": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "description": "Successful Response"
+    },
+    "422": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/HTTPValidationError"
+       }
+      }
+     },
+     "description": "Validation Error"
+    }
+   },
+   "summary": "Vue App Under Vue"
   }
  }
 }
