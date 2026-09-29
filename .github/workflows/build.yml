@@ -1,23 +1,57 @@
 name: Build nasdeck fpk
 
+# 默认分支是 master（此前写成 main 导致 push 从不触发），PR 与手动触发同走此流程
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Set up Python 3.11
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: '3.11'
+
+      # pnpm 版本读 frontend-vue/package.json 的 packageManager 字段（pnpm@9.15.4）
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+          cache-dependency-path: frontend-vue/pnpm-lock.yaml
+
+      # 前端必须在打包含内重建：templates/vue 虽随仓库提交，但 CI 从源码重建，
+      # 避免「改了 frontend-vue/src 忘了重新构建就提交」导致 fpk 带过期前端
+      - name: Install frontend deps
+        working-directory: frontend-vue
+        run: pnpm install --frozen-lockfile
+
+      - name: Frontend typecheck (vue-tsc)
+        working-directory: frontend-vue
+        run: pnpm typecheck
+
+      - name: Frontend unit tests (vitest)
+        working-directory: frontend-vue
+        run: pnpm test
+
+      - name: Build frontend -> templates/vue
+        working-directory: frontend-vue
+        run: pnpm build
 
       - name: Make build scripts executable
         run: chmod +x build.sh scripts/verify.sh scripts/test.sh scripts/local_smoke.sh

@@ -1,0 +1,102 @@
+name: Release nasdeck fpk
+
+# 发版流程（与 scripts/release.py 末尾提示对齐，最后一步由本 workflow 接管）：
+#   ./scripts/release.py <版本> <要点>  →  git commit  →  git tag vX.Y.Z && git push --tags
+#   → 本 workflow 构建【带向导发布版】fpk 并自动创建 GitHub Release 挂上 nasdeck.fpk
+on:
+  push:
+    tags: [ 'v*' ]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      # tag 必须与 manifest 版本一致，防止漏跑 release.py 就打 tag 发出错版包
+      - name: Verify tag matches manifest version
+        run: |
+          python3 - <<'PY'
+          import os, re
+          tag = os.environ['GITHUB_REF_NAME'].lstrip('vV')
+          ver = re.search(r'^version\s*=\s*(\S+)', open('manifest').read(), re.M).group(1)
+          assert tag == ver, f"tag v{tag} 与 manifest 版本 {ver} 不一致 —— 请先跑 scripts/release.py {tag} <要点> 更新版本号再打 tag"
+          print(f"OK: tag v{tag} == manifest {ver}")
+          PY
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+          cache-dependency-path: frontend-vue/pnpm-lock.yaml
+
+      - name: Install frontend deps
+        working-directory: frontend-vue
+        run: pnpm install --frozen-lockfile
+
+      - name: Frontend typecheck (vue-tsc)
+        working-directory: frontend-vue
+        run: pnpm typecheck
+
+      - name: Frontend unit tests (vitest)
+        working-directory: frontend-vue
+        run: pnpm test
+
+      - name: Build frontend -> templates/vue
+        working-directory: frontend-vue
+        run: pnpm build
+
+      - name: Make build scripts executable
+        run: chmod +x build.sh scripts/verify.sh scripts/test.sh scripts/local_smoke.sh
+
+      - name: Python syntax check (app.py + backend/)
+        run: python3 -m compileall -q app.py backend
+
+      - name: Parser unit tests (pytest)
+        run: ./scripts/test.sh
+
+      # 发布版必须带 wizard（应用中心 Web UI 安装/卸载向导页）
+      - name: Build release fpk (with wizard) + consistency verify
+        run: ./build.sh --with-wizard
+
+      # 发布说明取 README「更新日志」里对应版本的 ### vX.Y.Z 小节
+      - name: Extract release notes from README
+        run: |
+          python3 - <<'PY'
+          import os, re
+          ver = os.environ['GITHUB_REF_NAME'].lstrip('vV')
+          readme = open('README.md', encoding='utf-8').read()
+          m = re.search(rf'(?ms)^### v{re.escape(ver)}\s*$(.*?)(?=^### |^## |\Z)', readme)
+          body = m.group(1).strip() if m else ''
+          assert body, f"README.md 更新日志里找不到 ### v{ver} 小节"
+          notes = (
+            f"nasdeck v{ver}\n\n"
+            f"{body}\n\n"
+            "---\n\n"
+            "安装：飞牛 fnOS 应用中心手动安装本 fpk，或参考 README.md 的完整安装说明。"
+          )
+          path = os.path.join(os.environ['RUNNER_TEMP'], 'release-notes.md')
+          open(path, 'w', encoding='utf-8').write(notes)
+          print(notes)
+          PY
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: nasdeck ${{ github.ref_name }}
+          body_path: ${{ runner.temp }}/release-notes.md
+          files: nasdeck.fpk
+          fail_on_unmatched_files: true
