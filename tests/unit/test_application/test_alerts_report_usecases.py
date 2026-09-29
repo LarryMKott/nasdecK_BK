@@ -51,6 +51,11 @@ class FakeCollector(IHardwareCollector):
     def get_load_avg(self): return [0.1, 0.2, 0.3]
     def get_cpu_freq_mhz(self): return None
     def is_standalone_disk(self, dev): return (True, "")
+    def get_temp_snapshot(self): return {}
+    def disk_friendly_info(self, dev): return {"name": dev, "model": "", "category": "", "is_system": False}
+    def get_disk_temps_cached(self, devs): return {}
+    def list_all_disk_devs(self): return []
+    def invalidate_system_cache(self): pass
 
 
 class FakeAlertRepo(IAlertRepo):
@@ -100,11 +105,13 @@ class FakeHealth(IHealthService):
     def build_diagnostics(self): return {"diag": 1}
     def render_diagnostics_text(self, diag): return "== diag text =="
     def render_report_html(self, rep): return "<html>report</html>"
+    def clear_error_ring(self): pass
 
 
 class FakeInfo(IAppInfo):
     def nasdeck_version(self): return "v2.4.0"
     def fnos_version(self): return "fnOS 1.0"
+    def check_latest_version(self, force=False): return {"current": "v1", "latest": None, "update_available": False, "url": None, "error": None}
 
 
 def _uc(**kw):

@@ -87,3 +87,25 @@ class IHardwareCollector(ABC):
     @abstractmethod
     def is_standalone_disk(self, dev: str) -> tuple:
         """dev 是否「独立盘」（整块/未挂载/未被持有），返回 (ok, reason)；决定能否跑破坏性 badblocks。"""
+
+    # ---- 阶段 3 批 B 扩展（fan_control_usecase 需要）----
+
+    @abstractmethod
+    def get_temp_snapshot(self) -> dict:
+        """统一温度快照（cpu/mb/disks/raid/sensors/gpus，后台采集循环 ~2s 刷新）。"""
+
+    @abstractmethod
+    def disk_friendly_info(self, dev: str) -> dict:
+        """单盘友好信息（name/model/category/is_system）。"""
+
+    @abstractmethod
+    def get_disk_temps_cached(self, devs: list) -> dict:
+        """指定盘的实时温度/休眠状态（TTL 缓存）。"""
+
+    @abstractmethod
+    def list_all_disk_devs(self) -> list:
+        """本机全部物理盘 dev 路径（未设监控盘白名单时的自动温度源）。"""
+
+    @abstractmethod
+    def invalidate_system_cache(self) -> None:
+        """使系统总览缓存失效（风扇改名后卡片立即显示新名字）。"""

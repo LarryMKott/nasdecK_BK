@@ -6,7 +6,10 @@
 from backend.domain.interfaces.collector_repo import IHardwareCollector
 from backend.infrastructure.collectors.board import get_board, get_memory_modules
 from backend.infrastructure.collectors.cpuusage import get_cpu_usage
-from backend.infrastructure.collectors.disks import _disks_meta_map, _is_standalone_disk, get_disks
+from backend.infrastructure.collectors.cputemp import _temp_snapshot_read
+from backend.infrastructure.collectors.disks import (_disks_meta_map, _disk_friendly_info,
+                                      _is_standalone_disk, _list_all_disk_devs,
+                                      get_disk_temps_cached, get_disks)
 from backend.infrastructure.collectors.dockermod import get_docker
 from backend.infrastructure.collectors.gpu import _get_gpu_live
 from backend.infrastructure.collectors.metrics import get_realtime_metrics
@@ -14,7 +17,8 @@ from backend.infrastructure.collectors.ports import get_listening_ports
 from backend.infrastructure.collectors.raid import get_raid_card
 from backend.infrastructure.collectors.storage import get_storage, get_volume_map
 from backend.infrastructure.collectors.system import (get_cpu_freq_mhz, get_live_mem, get_load_avg,
-                                      get_network_nics, get_rapl_power, get_system)
+                                      get_network_nics, get_rapl_power, get_system,
+                                      _SYSTEM_CACHE)
 
 
 class HardwareCollectorRepo(IHardwareCollector):
@@ -76,3 +80,22 @@ class HardwareCollectorRepo(IHardwareCollector):
 
     def is_standalone_disk(self, dev: str) -> tuple:
         return _is_standalone_disk(dev)
+
+    # ---- 阶段 3 批 B 扩展 ----
+
+    def get_temp_snapshot(self) -> dict:
+        return _temp_snapshot_read()
+
+    def disk_friendly_info(self, dev: str) -> dict:
+        return _disk_friendly_info(dev)
+
+    def get_disk_temps_cached(self, devs: list) -> dict:
+        return get_disk_temps_cached(devs)
+
+    def list_all_disk_devs(self) -> list:
+        return _list_all_disk_devs()
+
+    def invalidate_system_cache(self) -> None:
+        # 与 network_service.py 的失效写法一致（写空缓存，下轮 get_system 重算）
+        _SYSTEM_CACHE["v"] = None
+        _SYSTEM_CACHE["t"] = 0.0

@@ -10,3 +10,8 @@ class IAppInfo(ABC):
     @abstractmethod
     def fnos_version(self) -> str:
         """飞牛OS 版本（读系统文件，_fnos_version）。"""
+
+    @abstractmethod
+    def check_latest_version(self, force: bool = False) -> dict:
+        """检查 GitHub 最新版本（6h 缓存；force=True 使缓存失效重查）。
+        返回 {current, latest, update_available, url, error}（阶段 3 批 B 增补）。"""

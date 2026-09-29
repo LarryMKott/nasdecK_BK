@@ -198,3 +198,18 @@ def _query_metric_points(start, bucket):
             (bucket, bucket, start)).fetchall()
         con.close()
     return rows
+
+
+def _query_fan_points(start):
+    """风扇明细历史查询（/api/fan/history 查询核，SQL 自端点逐字搬迁，阶段 3 批 B）。
+
+    返回 (ts, fan_detail) 行列表，ts 升序、fan_detail 非空；
+    读取走 sqlite3 直连 + _db_lock，与写路径互斥语义不变。
+    """
+    with _db_lock:
+        con = _sqlite3.connect(_DB_PATH)
+        rows = con.execute(
+            "SELECT ts, fan_detail FROM samples WHERE ts>=? AND fan_detail IS NOT NULL ORDER BY ts",
+            (start,)).fetchall()
+        con.close()
+    return rows

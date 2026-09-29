@@ -16,16 +16,21 @@ from backend.application.usecases.history_query_usecase import HistoryQueryUseCa
 from backend.application.usecases.metrics_usecase import MetricsUseCase
 from backend.application.usecases.network_usecase import NetworkUseCase
 from backend.application.usecases.ports_usecase import PortsUseCase
+from backend.application.usecases.raid_usecase import RaidUseCase
 from backend.application.usecases.storage_usecase import StorageUseCase
+from backend.application.usecases.fan_control_usecase import FanControlUseCase
 from backend.infrastructure.collectors.disktest_service import DiskTestService
 from backend.infrastructure.collectors.network_service import NetworkService
 from backend.infrastructure.collectors.repo import HardwareCollectorRepo
 from backend.infrastructure.command import cmd_runner
 from backend.infrastructure.fans.driver import HwmonFanDriver
+from backend.infrastructure.fans.labels_repo_impl import FanLabelsRepoImpl
+from backend.infrastructure.fans.rules_repo_impl import FanRulesRepoImpl
 from backend.infrastructure.health.alert_repo_impl import AlertRepoImpl
 from backend.infrastructure.health.disknames_repo_impl import DiskNamesRepoImpl
 from backend.infrastructure.health.service import HealthService
 from backend.infrastructure.persistence.history_repo_impl import HistoryRepoImpl
+from backend.infrastructure.raid_control import RaidControl
 from backend.infrastructure.version import AppInfo
 
 
@@ -42,6 +47,9 @@ class Container:
         self.fan_driver = HwmonFanDriver()
         self.disk_names = DiskNamesRepoImpl()
         self.disktest = DiskTestService()
+        self.fan_labels = FanLabelsRepoImpl()
+        self.fan_rules = FanRulesRepoImpl()
+        self.raid_ctl = RaidControl()
         # ---- UseCase ----
         self.dashboard = DashboardUseCase(self.collector, self.health, self.app_info)
         self.storage = StorageUseCase(self.collector, log=cmd_runner.log)
@@ -54,6 +62,9 @@ class Container:
         self.history_uc = HistoryQueryUseCase(self.history)
         self.disks = DisksUseCase(self.collector, self.health, self.disk_names)
         self.selftest = DiskSelftestUseCase(self.collector, self.disktest)
+        self.fan_uc = FanControlUseCase(self.fan_driver, self.collector,
+                                        self.fan_labels, self.fan_rules, self.history)
+        self.raid_uc = RaidUseCase(self.collector, self.raid_ctl)
 
 
 _container: Container | None = None

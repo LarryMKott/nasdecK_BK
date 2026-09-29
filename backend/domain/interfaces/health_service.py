@@ -39,3 +39,7 @@ class IHealthService(ABC):
     @abstractmethod
     def render_report_html(self, rep: dict):
         """报告 HTML 渲染（整函数平移不拆）；返回现成的 HTML 响应对象（含 Content-Type 头），端点直接透传。"""
+
+    @abstractmethod
+    def clear_error_ring(self) -> None:
+        """清空错误历史圈（阶段 3 批 B 增补；问题解决后用户手动清掉，不必等重启）。"""

@@ -62,6 +62,12 @@ class FakeCollector(IHardwareCollector):
     def is_standalone_disk(self, dev):
         return self._kw.get("standalone", {}).get(dev, (True, ""))
 
+    def get_temp_snapshot(self): return {}
+    def disk_friendly_info(self, dev): return {"name": dev, "model": "", "category": "", "is_system": False}
+    def get_disk_temps_cached(self, devs): return {}
+    def list_all_disk_devs(self): return []
+    def invalidate_system_cache(self): pass
+
     def get_system(self, force=False): return {}
     def get_docker(self): return {}
     def get_board(self): return {}
@@ -90,6 +96,7 @@ class FakeHealth(IHealthService):
     def build_diagnostics(self): return {}
     def render_diagnostics_text(self, diag): return ""
     def render_report_html(self, rep): return None
+    def clear_error_ring(self): pass
 
 
 class FakeHistoryRepo(IHistoryRepo):
@@ -99,6 +106,7 @@ class FakeHistoryRepo(IHistoryRepo):
         self.fail = fail
         self.calls = []
 
+    def fan_points(self, start): return []
     def metric_points(self, start, bucket):
         self.calls.append((start, bucket))
         if self.fail:

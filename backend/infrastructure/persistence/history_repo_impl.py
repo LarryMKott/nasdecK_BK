@@ -18,3 +18,6 @@ class HistoryRepoImpl(IHistoryRepo):
 
     def metric_points(self, start: int, bucket: int) -> list:
         return db._query_metric_points(start, bucket)
+
+    def fan_points(self, start: int) -> list:
+        return db._query_fan_points(start)

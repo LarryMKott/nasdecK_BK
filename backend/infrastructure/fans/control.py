@@ -16,7 +16,7 @@ from backend.infrastructure.fans.labels import _apply_fan_aliases
 from backend.infrastructure.fans.labels import _dedup_fan_names
 from backend.infrastructure.fans.labels import _fan_label_for
 from backend.infrastructure.fans.labels import _load_fan_labels
-from backend.infrastructure.fans.modes import _FAN_CTRL_ENABLED
+from backend.infrastructure.fans import modes
 from backend.infrastructure.fans.rules import _disk_source_state
 from backend.infrastructure.fans.rules import _effective_fan_rules
 from backend.infrastructure.fans.rules import _fan_auto_pwm
@@ -44,7 +44,7 @@ def _fan_ensure_all_claimed():
     解决硬重启时序（hwmon 晚于 nasdeck 自启注册、启动期枚举不全）与 fan_mode.json 不完整
     导致的「部分风扇失控、开机狂转」。已显式设为 manual 的风扇在 FAN_TARGETS 中会被跳过，不被覆盖。"""
     try:
-        if not _FAN_CTRL_ENABLED:
+        if not modes._FAN_CTRL_ENABLED:
             return
         # 同上：FCS 没真配置时不视为「系统在控」，nasdeck 该接管就接管，否则风扇会全速。
         if _fcs_running_cached() and _fcs_has_board_config():
@@ -61,7 +61,7 @@ def fan_smooth_loop():
     # daemon 线程：每 ~0.6s 把风扇当前 pwm 朝目标平滑过渡（常驻线程 tick + 缓变）
     while True:
         try:
-            if not _FAN_CTRL_ENABLED:
+            if not modes._FAN_CTRL_ENABLED:
                 # 接管关闭：优先把控制权交还 fnOS 原生 FanControlServer（FCS）。
                 # FCS 使用 enable=1 + pwm 手动控速；若我们再写 enable=2 会覆盖 FCS，
                 # 使风扇被卡在最后的高位。因此 FCS 真的配置了风扇参数时只启动/保持它，

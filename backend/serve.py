@@ -73,6 +73,8 @@ def main():
     _migrate_legacy_configs()                 # 原 L187：旧配置迁移
     from backend.infrastructure.persistence.db import _init_history_db
     _init_history_db()                        # 原 L6851：历史库建表/补列
+    from backend.infrastructure.fans.modes import _load_fan_control_enabled
+    _load_fan_control_enabled()               # 原 L1206 import 期执行：恢复接管开关（漏掉则重启后自动复活控温）
     from backend.infrastructure.fans.modes import _restore_fan_modes
     _restore_fan_modes()                      # 原 L1428：启动即恢复风扇模式，避免重启后全速
     from backend.daemon import start_background_workers

@@ -110,3 +110,9 @@ class AppInfo(IAppInfo):
 
     def fnos_version(self) -> str:
         return _fnos_version()
+
+    def check_latest_version(self, force: bool = False) -> dict:
+        # 原 /api/version 端点内联逻辑：force=1 使缓存失效触发重查
+        if force:
+            _VERSION_CHECK["checked_at"] = 0
+        return _check_latest_version()

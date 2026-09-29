@@ -53,6 +53,11 @@ class BaseCollector(IHardwareCollector):
     def get_load_avg(self): return [0.1, 0.2, 0.3]
     def get_cpu_freq_mhz(self): return None
     def is_standalone_disk(self, dev): return (True, "")
+    def get_temp_snapshot(self): return {}
+    def disk_friendly_info(self, dev): return {"name": dev, "model": "", "category": "", "is_system": False}
+    def get_disk_temps_cached(self, devs): return {}
+    def list_all_disk_devs(self): return []
+    def invalidate_system_cache(self): pass
 
 
 class FakeNetwork(INetworkService):

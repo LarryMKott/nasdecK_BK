@@ -23,6 +23,15 @@ class IHistoryRepo(ABC):
         """风扇改名同步：该扇全部历史记录零残留改名（等价现 _rename_history_fan）。"""
 
     @abstractmethod
+    def fan_points(self, start: int) -> list:
+        """风扇明细历史行（/api/fan/history 查询核，阶段 3 批 B 增补）。
+
+        参数：start = 起始 unix 秒。
+        返回 (ts, fan_detail_json_text) 行列表，ts 升序——与现 /api/fan/history
+        的 SQL 逐字等价（fan_detail 为空的行不返回）。
+        """
+
+    @abstractmethod
     def metric_points(self, start: int, bucket: int) -> list:
         """按时间桶聚合的指标降采样行（/api/history 查询核）。
 
