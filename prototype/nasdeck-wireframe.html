@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<!--
+  nasdeck 界面原型 · 阶段1 低保真线框（Web + 手机端）
+  ============================================================
+  依据: docs/NasDeck前端界面重设计方案.md（现代专业监控风，2026-09-29 定稿）
+  范围: 应用壳（顶栏/侧栏/移动抽屉）+ 12 页线框 + 页头/弹窗/抽屉/确认气泡
+  交互: hash 换页、侧栏折叠(rail)、移动抽屉、页面搜索、主题三态(占位)、
+        新鲜度告警演示、页签切换、弹窗/抽屉、确认气泡、分区折叠
+  说明: 黑白线框，无配色（高保真阶段再做）；数据全部 mock，无任何后端调用。
+        浏览器窗口缩窄到 <768px 即呈现手机端布局（侧栏转抽屉、栅格纵排、
+        硬盘页表格转卡片）。右下角有当前视口指示。
+  页面清单（与现网 12 页 IA 一一对应）:
+    #/detect   硬件配置检测    #/system  系统资源     #/temps    温度监控
+    #/sys-hist 历史趋势        #/disks   硬盘 SMART   #/storage  存储卷
+    #/fan      风扇控制        #/docker  Docker       #/ports    端口占用
+    #/automation 控制与自动化  #/manual  操作手册     #/about    关于 nasdeck
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>nasdeck 界面原型 · 低保真线框</title>
+<style>
+/* ============ 线框令牌（灰阶，对应高保真阶段的 tokens.css 槽位） ============ */
+:root{
+  --bg:#f2f3f5; --surface:#ffffff; --surface-2:#f7f8fa;
+  --border:#d4d7dc; --border-strong:#b8bcc4;
+  --t0:#26282b; --t1:#5c6470; --t2:#9aa1ab; --t3:#c2c7cf;
+  --fill:#eef0f2; --fill-2:#e4e7eb;
+  --r-sm:4px; --r-md:6px; --r-lg:10px;
+  --gap:12px; --t:150ms;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+  font-size:13px;line-height:1.6;color:var(--t0);background:var(--bg);
+}
+.num{font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+input,select{font:inherit;color:var(--t0)}
+.muted{color:var(--t2)}
+.small{font-size:12px}
+.hairline{border-top:1px solid var(--border);margin:var(--gap) 0}
+
+/* ============ 应用壳 ============ */
+.app{min-height:100vh;display:flex;flex-direction:column}
+.topbar{
+  height:52px;position:sticky;top:0;z-index:50;flex:none;
+  display:flex;align-items:center;gap:12px;padding:0 16px;
+  background:var(--surface);border-bottom:1px solid var(--border);
+}
+.brand{display:flex;align-items:center;gap:8px;font-weight:600;font-size:15px;flex:none}
+.brand .logo{width:18px;height:18px;border:2px solid var(--t0);transform:rotate(45deg);border-radius:3px}
+.search{
+  display:flex;align-items:center;gap:6px;width:260px;height:30px;padding:0 10px;
+  border:1px solid var(--border-strong);border-radius:var(--r-sm);background:var(--surface-2);color:var(--t2);
+}
+.search input{border:none;outline:none;background:none;flex:1;color:var(--t0)}
+.top-spacer{flex:1}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;
+  border:1px solid var(--border);border-radius:999px;background:var(--surface);color:var(--t1);
+}
+.chip .dot{width:7px;height:7px;border-radius:50%;background:var(--t0)}
+.icon-btn{
+  width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;
+  border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface);color:var(--t1);
+}
+.icon-btn:hover{background:var(--fill)}
+.hamburger{display:none}
+/* 新鲜度告警横条（演示态，默认隐藏） */
+.stale-strip{
+  display:none;padding:7px 16px;background:var(--fill-2);border-bottom:1px solid var(--border-strong);
+  color:var(--t0);font-size:12px;
+}
+body.stale .stale-strip{display:block}
+
+.body-row{flex:1;display:flex;min-height:0}
+/* 侧栏（桌面） */
+.sidenav{
+  width:208px;flex:none;position:sticky;top:52px;height:calc(100vh - 52px);overflow-y:auto;
+  background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;padding:10px 8px;gap:2px;
+  transition:width var(--t) ease-out;
+}
+.nav-group{margin:8px 0 2px;padding:0 10px;font-size:11px;letter-spacing:.08em;color:var(--t2)}
+.nav-item{
+  display:flex;align-items:center;gap:10px;height:34px;padding:0 10px;border-radius:var(--r-md);
+  color:var(--t1);width:100%;text-align:left;
+}
+.nav-item:hover{background:var(--fill)}
+.nav-item.active{background:var(--fill);color:var(--t0);font-weight:600;box-shadow:inset 2px 0 0 var(--t0)}
+.nav-ico{width:18px;height:18px;flex:none;border:1.5px solid currentColor;border-radius:4px;opacity:.85}
+.nav-item .lbl{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav-item .lv{font-size:11px;color:var(--t2)}
+.rail-toggle{
+  margin-top:auto;display:flex;align-items:center;gap:10px;height:34px;padding:0 10px;
+  border-radius:var(--r-md);color:var(--t2);
+}
+.rail-toggle:hover{background:var(--fill)}
+/* 折叠为 60px 图标栏（仅桌面） */
+body.rail .sidenav{width:60px;padding:10px 6px}
+body.rail .nav-group,body.rail .nav-item .lbl,body.rail .nav-item .lv,body.rail .rail-toggle .lbl{display:none}
+body.rail .nav-item,body.rail .rail-toggle{justify-content:center;padding:0}
+body.rail .nav-item.active{box-shadow:inset 0 -2px 0 var(--t0)}
+.nav-overlay{display:none}
+
+.content{flex:1;min-width:0;padding:16px 20px 48px}
+.page{display:none;max-width:1600px;margin:0 auto}
+.page.active{display:block}
+
+/* ============ 紧凑页头 PageHeader（取代大 hero） ============ */
+.ph{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.ph .tt{font-size:15px;font-weight:600}
+.ph .sub{color:var(--t2)}
+.ph .tag{
+  display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;
+  border:1px solid var(--border);border-radius:999px;font-size:12px;color:var(--t1);background:var(--surface);
+}
+.ph .tag .dot{width:6px;height:6px;border-radius:50%;background:var(--t0)}
+.ph .stats{display:flex;gap:14px;color:var(--t1);font-size:12px}
+.ph .right{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+/* ============ 通用组件线框 ============ */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg)}
+.card-h{
+  display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border);
+  font-size:14px;font-weight:600;
+}
+.card-h .right{margin-left:auto;display:flex;gap:8px;align-items:center;font-weight:400}
+.card-b{padding:14px 16px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--gap)}
+.c3{grid-column:span 3}.c4{grid-column:span 4}.c6{grid-column:span 6}.c8{grid-column:span 8}.c12{grid-column:span 12}
+
+.btn{
+  display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;
+  border:1px solid var(--border-strong);border-radius:var(--r-md);background:var(--surface);color:var(--t0);
+}
+.btn:hover{background:var(--fill)}
+.btn.primary{background:#2b2f36;border-color:#2b2f36;color:#fff}
+.btn.primary:hover{background:#3d424b}
+.btn.sm{height:26px;padding:0 8px;font-size:12px}
+.btn:disabled{color:var(--t3);border-color:var(--border);background:var(--surface);cursor:not-allowed}
+
+.kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px 20px}
+.kv>div{display:flex;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px dashed var(--border)}
+.kv .k{color:var(--t2);flex:none}
+.kv .v{color:var(--t0);text-align:right}
+
+.statcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:12px 14px}
+.statcard .lb{font-size:12px;color:var(--t2)}
+.statcard .big{font-size:22px;font-weight:600;line-height:1.3}
+.statcard .big small{font-size:13px;font-weight:400;color:var(--t1)}
+.spark{height:26px;margin-top:6px;border-bottom:1px solid var(--border);
+  background:repeating-linear-gradient(90deg,var(--fill) 0 2px,transparent 2px 14px);
+  background-size:auto 60%;background-position:bottom;background-repeat:repeat-x}
+
+.tag-st{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--t1)}
+.tag-st .dot{width:6px;height:6px;border-radius:50%;border:1px solid var(--t1);background:var(--t0)}
+.tag-st.warn .dot{background:var(--fill-2)}
+.tag-st.err .dot{background:var(--t0)}
+
+/* 图表占位（高保真阶段 → ECharts） */
+.chart-ph{
+  height:180px;border:1px dashed var(--border-strong);border-radius:var(--r-md);
+  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;color:var(--t2);
+  background:
+    repeating-linear-gradient(0deg,var(--fill) 0 1px,transparent 1px 36px),
+    repeating-linear-gradient(90deg,var(--fill) 0 1px,transparent 1px 48px),
+    var(--surface-2);
+}
+.chart-ph.tall{height:300px}
+.zoombar{height:22px;border:1px dashed var(--border-strong);border-radius:var(--r-sm);margin-top:8px;
+  display:flex;align-items:center;justify-content:center;color:var(--t2);font-size:11px;background:var(--surface-2)}
+
+/* 表格（桌面） */
+.table-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{font-weight:600;color:var(--t2);text-align:left;padding:8px 12px;border-bottom:1px solid var(--border);background:var(--surface-2);white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid var(--border);white-space:nowrap;vertical-align:middle}
+tr:hover td{background:var(--surface-2)}
+
+/* 开关 / 单选组 / 页签 / 下拉（交互控件线框） */
+.switch{display:inline-flex;align-items:center;gap:8px;cursor:pointer;color:var(--t1)}
+.switch .tr{width:34px;height:19px;border:1.5px solid var(--border-strong);border-radius:999px;position:relative;background:var(--surface-2)}
+.switch .tr::after{content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--t2);transition:left var(--t) ease-out}
+.switch.on .tr{background:#2b2f36;border-color:#2b2f36}
+.switch.on .tr::after{left:17px;background:#fff}
+.radios{display:inline-flex;border:1px solid var(--border-strong);border-radius:var(--r-md);overflow:hidden}
+.radios button{height:28px;padding:0 12px;color:var(--t1);border-right:1px solid var(--border)}
+.radios button:last-child{border-right:none}
+.radios button.on{background:#2b2f36;color:#fff}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border)}
+.tabs button{padding:7px 14px;color:var(--t1);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button.on{color:var(--t0);font-weight:600;border-bottom-color:#2b2f36}
+select,input[type=text]{height:30px;padding:0 8px;border:1px solid var(--border-strong);border-radius:var(--r-sm);background:var(--surface)}
+input[type=range]{accent-color:#2b2f36;width:100%}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chips button{height:26px;padding:0 10px;border:1px solid var(--border-strong);border-radius:999px;color:var(--t1);background:var(--surface)}
+.chips button.on{background:#2b2f36;border-color:#2b2f36;color:#fff}
+
+/* 进度条占位 */
+.bar{height:8px;border:1px solid var(--border-strong);border-radius:999px;background:var(--surface-2);overflow:hidden}
+.bar i{display:block;height:100%;width:60%;background:repeating-linear-gradient(90deg,#2b2f36 0 6px,#4a505b 6px 8px)}
+
+/* 温度墙 tile（线框：灰阶三档） */
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:8px}
+.tile{border:1px solid var(--border);border-radius:var(--r-md);padding:8px 10px;background:var(--surface-2)}
+.tile .nm{font-size:11px;color:var(--t2)}
+.tile .tv{font-size:16px;font-weight:600}
+.tile.warm{background:var(--fill-2)}
+.tile.hot{background:#c9ccd2}
+.legend{display:flex;gap:14px;font-size:11px;color:var(--t2);margin-top:10px;flex-wrap:wrap}
+.legend i{display:inline-block;width:10px;height:10px;border:1px solid var(--border);border-radius:2px;vertical-align:-1px;margin-right:4px}
+
+/* 拓扑树（存储卷映射） */
+.tree{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;line-height:2}
+.tree .n0{padding-left:0}.tree .n1{padding-left:24px}.tree .n2{padding-left:48px}
+.tree .nd{color:var(--t1)}
+
+/* 分区折叠（Detect Section 组件族线框） */
+.sec{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);margin-bottom:10px}
+.sec-h{display:flex;align-items:center;gap:10px;width:100%;padding:11px 16px;font-size:14px;font-weight:600;text-align:left}
+.sec-h .ico{width:16px;height:16px;border:1.5px solid var(--t1);border-radius:4px;flex:none}
+.sec-h .arr{margin-left:auto;color:var(--t2);transition:transform var(--t) ease-out}
+.sec.open .sec-h .arr{transform:rotate(90deg)}
+.sec-b{display:none;padding:0 16px 14px}
+.sec.open .sec-b{display:block}
+
+/* 盘位/DIMM 小格子 */
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+.slot{border:1px solid var(--border);border-radius:var(--r-md);padding:8px 10px;background:var(--surface-2);cursor:pointer;text-align:left}
+.slot:hover{background:var(--fill)}
+.slot .sn{font-size:11px;color:var(--t2)}
+.slot .sv{font-weight:600}
+.slot .sd{font-size:11px;color:var(--t1)}
+
+/* 移动端专用卡片（桌面隐藏） */
+.m-cards{display:none}
+
+/* ============ 弹窗 / 抽屉 / 确认气泡 ============ */
+.modal-mask,.drawer-mask{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:90;display:none}
+.modal-mask.show,.drawer-mask.show{display:block}
+.modal{
+  position:fixed;z-index:95;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:min(520px,calc(100vw - 32px));max-height:80vh;overflow:auto;
+  background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--r-lg);
+  box-shadow:0 12px 40px rgba(0,0,0,.18);display:none;
+}
+.modal.show{display:block}
+.modal .card-h{font-size:14px}
+.drawer{
+  position:fixed;z-index:95;top:0;right:0;bottom:0;width:min(300px,84vw);overflow:auto;
+  background:var(--surface);border-left:1px solid var(--border-strong);
+  box-shadow:-8px 0 32px rgba(0,0,0,.12);transform:translateX(100%);transition:transform var(--t) ease-out;
+}
+.drawer.show{transform:none}
+.drawer .card-h{position:sticky;top:0;background:var(--surface)}
+.drawer a,.drawer .toc-item{display:block;padding:8px 16px;color:var(--t1);border-bottom:1px dashed var(--border)}
+.drawer .toc-item:hover{background:var(--fill);color:var(--t0)}
+.pop{
+  position:absolute;z-index:80;width:220px;padding:12px;background:var(--surface);
+  border:1px solid var(--border-strong);border-radius:var(--r-md);box-shadow:0 8px 24px rgba(0,0,0,.14);display:none;
+}
+.pop.show{display:block}
+.pop .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}
+
+/* 视口指示（评审辅助，非界面元素） */
+.vp-ind{
+  position:fixed;right:12px;bottom:12px;z-index:60;padding:3px 10px;border-radius:999px;
+  background:#2b2f36;color:#fff;font-size:11px;opacity:.85;
+}
+
+/* 表单布局 */
+.frm{display:grid;grid-template-columns:160px 1fr;gap:10px 14px;align-items:center;max-width:640px}
+.frm label{color:var(--t2);text-align:right}
+@media (max-width:560px){.frm{grid-template-columns:1fr}.frm label{text-align:left}}
+
+/* ============ 移动端 <768px：侧栏转抽屉、栅格纵排 ============ */
+@media (max-width:767px){
+  .search{display:none}
+  .hamburger{display:inline-flex}
+  .ph .stats{width:100%;order:3}
+  .ph .right{margin-left:0;width:100%;order:4}
+  .sidenav{
+    position:fixed;top:0;left:0;bottom:0;height:100vh;z-index:96;width:min(300px,84vw);
+    transform:translateX(-100%);transition:transform var(--t) ease-out;box-shadow:8px 0 32px rgba(0,0,0,.12);
+  }
+  body.drawer-open .sidenav{transform:none}
+  body.drawer-open .nav-overlay{display:block;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:90}
+  body.rail .sidenav{width:min(300px,84vw);padding:10px 8px}
+  body.rail .nav-group,body.rail .nav-item .lbl,body.rail .nav-item .lv{display:block}
+  body.rail .nav-item{justify-content:flex-start;padding:0 10px}
+  body.rail .nav-item.active{box-shadow:inset 2px 0 0 var(--t0)}
+  .content{padding:12px 12px 56px}
+  .c3,.c4{grid-column:span 12}
+  .c6{grid-column:span 12}
+  /* 硬盘页：表格退场，卡片登场（其余表格页横向滚动） */
+  .m-hide{display:none}
+  .m-cards{display:block}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===== 顶栏 ===== -->
+  <header class="topbar">
+    <button class="icon-btn hamburger" id="btnDrawer" title="打开导航">☰</button>
+    <div class="brand"><span class="logo"></span>nasdeck</div>
+    <div class="search">🔎<input id="navSearch" type="text" placeholder="搜索页面（桌面端）" style="height:auto;border:none;padding:0"></div>
+    <div class="top-spacer"></div>
+    <button class="chip" id="btnFresh" title="点击演示数据新鲜度告警"><span class="dot"></span><span id="freshTxt">实时</span></button>
+    <button class="chip" id="btnTheme" title="主题三态：浅色 → 深色 → 跟随系统（线框占位）">主题：跟随</button>
+  </header>
+  <div class="stale-strip">⚠ 新鲜度告警（演示）：以下页面数据超过阈值未更新 —— 系统资源 · 温度监控 · Docker（点击顶栏“实时”可取消）</div>
+
+  <div class="body-row">
+
+    <!-- ===== 侧栏（分组 NAV / 桌面可折叠 / 移动抽屉） ===== -->
+    <div class="nav-overlay" id="navOverlay"></div>
+    <aside class="sidenav" id="sidenav">
+      <!-- 无分组 -->
+      <button class="nav-item" data-nav="/detect"><span class="nav-ico"></span><span class="lbl">硬件配置检测</span></button>
+      <div class="nav-group">资源监控</div>
+      <button class="nav-item" data-nav="/system"><span class="nav-ico"></span><span class="lbl">系统资源</span></button>
+      <button class="nav-item" data-nav="/temps"><span class="nav-ico"></span><span class="lbl">温度监控</span></button>
+      <button class="nav-item" data-nav="/sys-hist"><span class="nav-ico"></span><span class="lbl">历史趋势</span></button>
+      <div class="nav-group">存储</div>
+      <button class="nav-item" data-nav="/disks"><span class="nav-ico"></span><span class="lbl">硬盘 SMART</span><span class="lv">6</span></button>
+      <button class="nav-item" data-nav="/storage"><span class="nav-ico"></span><span class="lbl">存储卷</span></button>
+      <div class="nav-group">其他</div>
+      <button class="nav-item" data-nav="/fan"><span class="nav-ico"></span><span class="lbl">风扇控制</span></button>
+      <button class="nav-item" data-nav="/docker"><span class="nav-ico"></span><span class="lbl">Docker</span><span class="lv">4</span></button>
+      <button class="nav-item" data-nav="/ports"><span class="nav-ico"></span><span class="lbl">端口占用</span></button>
+      <button class="nav-item" data-nav="/automation"><span class="nav-ico"></span><span class="lbl">控制与自动化</span><span class="lv">2</span></button>
+      <button class="nav-item" data-nav="/manual"><span class="nav-ico"></span><span class="lbl">操作手册</span></button>
+      <button class="nav-item" data-nav="/about"><span class="nav-ico"></span><span class="lbl">关于 nasdeck</span></button>
+      <button class="rail-toggle" id="btnRail"><span>▥</span><span class="lbl">折叠侧栏</span></button>
+    </aside>
+
+    <!-- ===== 内容区 ===== -->
+    <main class="content">
+
+      <!-- ============ #/detect 硬件配置检测 ============ -->
+      <section class="page" id="p-detect">
+        <div class="ph">
+          <span class="tt">硬件配置检测</span><span class="sub">主板 · CPU · 内存 · GPU · 网络 · RAID · 硬盘</span>
+          <span class="tag"><span class="dot"></span>正常</span>
+          <div class="right">
+            <span class="small muted num">最后更新 10:32:08</span>
+            <label class="switch on"><span class="tr"></span>自动刷新</label>
+            <button class="btn sm">立即刷新</button>
+          </div>
+        </div>
+
+        <div class="sec open">
+          <button class="sec-h"><span class="ico"></span>系统信息<span class="arr">›</span></button>
+          <div class="sec-b"><div class="kv">
+            <div><span class="k">操作系统</span><span class="v">fnOS 0.9.20</span></div>
+            <div><span class="k">内核</span><span class="v num">6.1.0-x86_64</span></div>
+            <div><span class="k">运行时长</span><span class="v num">23 天 4 小时</span></div>
+            <div><span class="k">负载 (1/5/15m)</span><span class="v num">0.42 / 0.38 / 0.35</span></div>
+          </div></div>
+        </div>
+
+        <div class="sec open">
+          <button class="sec-h"><span class="ico"></span>主板<span class="arr">›</span></button>
+          <div class="sec-b"><div class="kv">
+            <div><span class="k">厂商</span><span class="v">Supermicro</span></div>
+            <div><span class="k">型号</span><span class="v">X11SSH-LN4F</span></div>
+            <div><span class="k">BIOS</span><span class="v num">2.4 2023-06-01</span></div>
+            <div><span class="k">主板温度</span><span class="v num">38 °C</span></div>
+          </div></div>
+        </div>
+
+        <div class="sec open">
+          <button class="sec-h"><span class="ico"></span>CPU<span class="arr">›</span></button>
+          <div class="sec-b"><div class="kv">
+            <div><span class="k">型号</span><span class="v">Xeon E3-1245 v5</span></div>
+            <div><span class="k">核心 / 线程</span><span class="v num">4 核 8 线程</span></div>
+            <div><span class="k">实时频率</span><span class="v"><span class="tag-st"><span class="dot"></span><span class="num">3.49 GHz</span></span></span></div>
+            <div><span class="k">温度 / 使用率</span><span class="v num">45 °C · 23%</span></div>
+          </div></div>
+        </div>
+
+        <div class="sec open">
+          <button class="sec-h"><span class="ico"></span>内存（点击格子看详情弹窗）<span class="arr">›</span></button>
+          <div class="sec-b">
+            <div class="slots">
+              <button class="slot" data-modal="mDimm"><div class="sn">DIMM_A1</div><div class="sv">16 GB</div><div class="sd">DDR4-2400 · 正常</div></button>
+              <button class="slot" data-modal="mDimm"><div class="sn">DIMM_A2</div><div class="sv">16 GB</div><div class="sd">DDR4-2400 · 正常</div></button>
+              <button class="slot" data-modal="mDimm"><div class="sn">DIMM_B1</div><div class="sv">16 GB</div><div class="sd">DDR4-2400 · 正常</div></button>
+              <button class="slot" data-modal="mDimm"><div class="sn">DIMM_B2</div><div class="sv">空</div><div class="sd">—</div></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="sec open">
+          <button class="sec-h"><span class="ico"></span>网络<span class="arr">›</span></button>
+          <div class="sec-b"><div class="kv">
+            <div><span class="k">eth0</span><span class="v num">1000 Mb · 192.168.1.10 · 已连接</span></div>
+            <div><span class="k">eth1</span><span class="v">未连接</span></div>
+            <div><span class="k">eth2</span><span class="v">未连接</span></div>
+            <div><span class="k">eth3</span><span class="v">未连接</span></div>
+          </div></div>
+        </div>
+
+        <div class="sec open">
+          <button class="sec-h"><span class="ico"></span>RAID 阵列卡<span class="arr">›</span></button>
+          <div class="sec-b">
+            <div class="kv" style="margin-bottom:10px">
+              <div><span class="k">型号</span><span class="v">LSI 9361-8i</span></div>
+              <div><span class="k">固件</span><span class="v num">4.680.00</span></div>
+              <div><span class="k">BBU</span><span class="v">正常</span></div>
+              <div><span class="k">温度</span><span class="v num">36 °C</span></div>
+            </div>
+            <div class="chips">
+              <button class="btn sm">CC 调度：关</button>
+              <button class="btn sm">热备：无</button>
+              <button class="btn sm">CopyBack：开</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="sec open">
+          <button class="sec-h"><span class="ico"></span>硬盘概览（6 盘位）<span class="arr">›</span></button>
+          <div class="sec-b">
+            <div class="slots" style="margin-bottom:10px">
+              <div class="slot" style="cursor:default"><div class="sn">盘位 1</div><div class="sv">4 TB</div><div class="sd">● 正常</div></div>
+              <div class="slot" style="cursor:default"><div class="sn">盘位 2</div><div class="sv">4 TB</div><div class="sd">● 正常</div></div>
+              <div class="slot" style="cursor:default"><div class="sn">盘位 3</div><div class="sv">8 TB</div><div class="sd">◐ 警告</div></div>
+              <div class="slot" style="cursor:default"><div class="sn">盘位 4</div><div class="sv">8 TB</div><div class="sd">● 正常</div></div>
+              <div class="slot" style="cursor:default"><div class="sn">盘位 5</div><div class="sv">SSD 480G</div><div class="sd">● 正常</div></div>
+              <div class="slot" style="cursor:default"><div class="sn">盘位 6</div><div class="sv">空</div><div class="sd">—</div></div>
+            </div>
+            <div class="chips">
+              <button class="btn sm">网络唤醒 WoL：开</button>
+              <button class="btn sm">盘定位：关</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ #/system 系统资源 ============ -->
+      <section class="page" id="p-system">
+        <div class="ph">
+          <span class="tt">系统资源</span><span class="sub">CPU · 内存 · 网络 · 磁盘 IO · GPU</span>
+          <span class="tag"><span class="dot"></span>正常</span>
+          <div class="right"><span class="small muted num">最后更新 10:32:11</span><label class="switch on"><span class="tr"></span>1s</label><button class="btn sm">立即刷新</button></div>
+        </div>
+        <div class="grid" style="margin-bottom:12px">
+          <div class="statcard c3"><div class="lb">CPU 使用率</div><div class="big num">23<small>%</small></div><div class="spark"></div></div>
+          <div class="statcard c3"><div class="lb">内存</div><div class="big num">41<small>% · 26.2/64 GB</small></div><div class="spark"></div></div>
+          <div class="statcard c3"><div class="lb">网络</div><div class="big num">12.3<small>MB/s ↓ · 3.1 ↑</small></div><div class="spark"></div></div>
+          <div class="statcard c3"><div class="lb">磁盘 IO</div><div class="big num">86<small>读 · 42 写 MB/s</small></div><div class="spark"></div></div>
+          <div class="statcard c4"><div class="lb">GPU 使用率</div><div class="big num">15<small>%</small></div><div class="spark"></div></div>
+          <div class="card c8">
+            <div class="card-h">RAPL 功耗</div>
+            <div class="card-b"><div class="kv">
+              <div><span class="k">CPU Package</span><span class="v num">32.1 W</span></div>
+              <div><span class="k">DRAM</span><span class="v num">8.4 W</span></div>
+              <div><span class="k">合计</span><span class="v num">40.5 W</span></div>
+            </div></div>
+          </div>
+        </div>
+        <div class="grid">
+          <div class="card c6"><div class="card-h">CPU 使用率 · 60s 窗口</div><div class="card-b"><div class="chart-ph"><span>折线图占位 → ECharts（tooltip + 十字线）</span></div></div></div>
+          <div class="card c6"><div class="card-h">内存</div><div class="card-b"><div class="chart-ph"><span>折线图占位</span></div></div></div>
+          <div class="card c6">
+            <div class="card-h">网络<div class="right radios" data-tabs="nic"><button class="on">eth0</button><button>eth1</button></div></div>
+            <div class="card-b"><div class="chart-ph" data-panel="nic-eth0"><span>eth0 折线占位（↓实线 ↑虚线）</span></div><div class="chart-ph" data-panel="nic-eth1" style="display:none"><span>eth1 折线占位</span></div></div>
+          </div>
+          <div class="card c6"><div class="card-h">磁盘 IO</div><div class="card-b"><div class="chart-ph"><span>读/写折线占位</span></div></div></div>
+        </div>
+      </section>
+
+      <!-- ============ #/temps 温度监控 ============ -->
+      <section class="page" id="p-temps">
+        <div class="ph">
+          <span class="tt">温度监控</span><span class="sub">关键传感器速览 + 温度墙</span>
+          <span class="tag"><span class="dot"></span>正常</span>
+          <div class="right"><span class="small muted num">最后更新 10:32:10</span><label class="switch on"><span class="tr"></span>5s</label><button class="btn sm">立即刷新</button></div>
+        </div>
+        <div class="grid" style="margin-bottom:12px">
+          <div class="statcard c3"><div class="lb">CPU</div><div class="big num">45<small>°C</small></div></div>
+          <div class="statcard c3"><div class="lb">主板</div><div class="big num">38<small>°C</small></div></div>
+          <div class="statcard c3"><div class="lb">NVMe</div><div class="big num">41<small>°C</small></div></div>
+          <div class="statcard c3"><div class="lb">阵列卡</div><div class="big num">36<small>°C</small></div></div>
+        </div>
+        <div class="card">
+          <div class="card-h">温度墙<div class="right small muted">全部传感器 · 按温度分档着色</div></div>
+          <div class="card-b">
+            <div class="tiles">
+              <div class="tile"><div class="nm">CPU Package</div><div class="tv num">45 °C</div></div>
+              <div class="tile"><div class="nm">CPU Core 1</div><div class="tv num">44 °C</div></div>
+              <div class="tile warm"><div class="nm">CPU Core 3</div><div class="tv num">52 °C</div></div>
+              <div class="tile"><div class="nm">主板</div><div class="tv num">38 °C</div></div>
+              <div class="tile"><div class="nm">PCH</div><div class="tv num">41 °C</div></div>
+              <div class="tile"><div class="nm">NVMe 盘 5</div><div class="tv num">41 °C</div></div>
+              <div class="tile"><div class="nm">阵列卡</div><div class="tv num">36 °C</div></div>
+              <div class="tile"><div class="nm">盘 1</div><div class="tv num">34 °C</div></div>
+              <div class="tile warm"><div class="nm">盘 3</div><div class="tv num">47 °C</div></div>
+              <div class="tile hot"><div class="nm">机箱后部</div><div class="tv num">61 °C</div></div>
+              <div class="tile"><div class="nm">进风</div><div class="tv num">28 °C</div></div>
+              <div class="tile"><div class="nm">PSU</div><div class="tv num">33 °C</div></div>
+            </div>
+            <div class="legend">
+              <span><i style="background:var(--surface-2)"></i>&lt; 45 正常</span>
+              <span><i style="background:var(--fill-2)"></i>45 – 60 偏高</span>
+              <span><i style="background:#c9ccd2"></i>&gt; 60 过热</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ #/sys-hist 历史趋势 ============ -->
+      <section class="page" id="p-sys-hist">
+        <div class="ph">
+          <span class="tt">历史趋势</span><span class="sub">六维度历史数据回看 · 报告导出</span>
+          <div class="right">
+            <div class="radios" data-tabs="rng"><button>24h</button><button class="on">7d</button><button>30d</button></div>
+            <button class="btn">报告导出 ▾</button>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="card-b">
+            <div class="chips" style="margin-bottom:12px" data-tabs="dim">
+              <button class="on">CPU</button><button>内存</button><button>温度</button><button>网络</button><button>磁盘 IO</button><button>GPU</button>
+            </div>
+            <div class="chart-ph tall"><span>多系列折线占位 → ECharts</span><span class="small">tooltip 十字线 · 框选缩放（dataZoom）</span></div>
+            <div class="zoombar">dataZoom 滑块占位</div>
+          </div>
+        </div>
+        <div class="grid">
+          <div class="card c4"><div class="card-h">区间统计</div><div class="card-b"><div class="kv">
+            <div><span class="k">均值 / 峰值</span><span class="v num">23% / 61%</span></div>
+            <div><span class="k">采样点</span><span class="v num">1680</span></div>
+          </div></div></div>
+          <div class="card c8"><div class="card-h">导出格式</div><div class="card-b"><div class="chips">
+            <button class="btn sm">Markdown</button><button class="btn sm">HTML</button><button class="btn sm">CSV</button>
+          </div><div class="small muted" style="margin-top:8px">导出为当前维度 × 当前区间的历史报告</div></div></div>
+        </div>
+      </section>
+
+      <!-- ============ #/disks 硬盘 SMART ============ -->
+      <section class="page" id="p-disks">
+        <div class="ph">
+          <span class="tt">硬盘 SMART</span><span class="sub">健康状态 · 自检 · 定位</span>
+          <span class="tag warn"><span class="dot"></span>1 块警告</span>
+          <div class="right"><span class="small muted num">最后更新 10:32:06</span><label class="switch on"><span class="tr"></span>15s</label><button class="btn sm">立即刷新</button></div>
+        </div>
+
+        <!-- 桌面表格 -->
+        <div class="card m-hide">
+          <div class="table-scroll">
+            <table>
+              <tr><th>盘位</th><th>型号</th><th>容量</th><th>转速</th><th>温度</th><th>通电时间</th><th>健康</th><th>操作</th></tr>
+              <tr><td class="num">1</td><td>WDC WD40EFRX</td><td class="num">4 TB</td><td class="num">5400</td><td class="num">34 °C</td><td class="num">18240 h</td><td><span class="tag-st"><span class="dot"></span>正常</span></td>
+                  <td><button class="btn sm">自检 ▾</button> <button class="btn sm">改名</button> <button class="btn sm">定位</button></td></tr>
+              <tr><td class="num">2</td><td>WDC WD40EFRX</td><td class="num">4 TB</td><td class="num">5400</td><td class="num">35 °C</td><td class="num">18238 h</td><td><span class="tag-st"><span class="dot"></span>正常</span></td>
+                  <td><button class="btn sm">自检 ▾</button> <button class="btn sm">改名</button> <button class="btn sm">定位</button></td></tr>
+              <tr><td class="num">3</td><td>ST8000VN0022</td><td class="num">8 TB</td><td class="num">7200</td><td class="num">47 °C</td><td class="num">29511 h</td><td><span class="tag-st warn"><span class="dot"></span>警告 (05)</span></td>
+                  <td><button class="btn sm">自检 ▾</button> <button class="btn sm">改名</button> <button class="btn sm">定位</button></td></tr>
+              <tr><td class="num">5</td><td>Samsung PM883</td><td class="num">480 G</td><td class="num">SSD</td><td class="num">41 °C</td><td class="num">9310 h</td><td><span class="tag-st"><span class="dot"></span>正常</span></td>
+                  <td><button class="btn sm">自检 ▾</button> <button class="btn sm">改名</button> <button class="btn sm">定位</button></td></tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- 移动端卡片（<768px 显示） -->
+        <div class="m-cards">
+          <div class="card" style="margin-bottom:10px"><div class="card-b">
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+              <strong>盘位 1 · WD40EFRX</strong><span class="tag-st"><span class="dot"></span>正常</span>
+            </div>
+            <div class="kv">
+              <div><span class="k">容量 / 转速</span><span class="v num">4 TB · 5400</span></div>
+              <div><span class="k">温度 / 通电</span><span class="v num">34 °C · 18240 h</span></div>
+            </div>
+            <div class="chips" style="margin-top:10px"><button class="btn sm">自检 ▾</button><button class="btn sm">改名</button><button class="btn sm">定位</button></div>
+          </div></div>
+          <div class="card"><div class="card-b">
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+              <strong>盘位 3 · ST8000VN0022</strong><span class="tag-st warn"><span class="dot"></span>警告 (05)</span>
+            </div>
+            <div class="kv">
+              <div><span class="k">容量 / 转速</span><span class="v num">8 TB · 7200</span></div>
+              <div><span class="k">温度 / 通电</span><span class="v num">47 °C · 29511 h</span></div>
+            </div>
+            <div class="chips" style="margin-top:10px"><button class="btn sm">自检 ▾</button><button class="btn sm">改名</button><button class="btn sm">定位</button></div>
+          </div></div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <div class="card-h">进行中的自检<div class="right"><button class="btn sm">停止</button></div></div>
+          <div class="card-b">
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span>盘位 3 · 短自检（B）</span><span class="num">62%</span></div>
+            <div class="bar"></div>
+            <div class="small muted" style="margin-top:8px">自检类型：A 短修 / B 短检 / C 长检 · 启停均需二次确认（NPopconfirm）</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ #/storage 存储卷 ============ -->
+      <section class="page" id="p-storage">
+        <div class="ph">
+          <span class="tt">存储卷</span><span class="sub">阵列 · 卷 · 卷映射拓扑</span>
+          <span class="tag"><span class="dot"></span>正常</span>
+          <div class="right"><span class="small muted num">最后更新 10:32:06</span><button class="btn sm">立即刷新</button></div>
+        </div>
+        <div class="grid" style="margin-bottom:12px">
+          <div class="card c6"><div class="card-h">阵列 md126<div class="right"><span class="tag-st"><span class="dot"></span>正常</span></div></div>
+            <div class="card-b"><div class="kv">
+              <div><span class="k">RAID 级别</span><span class="v">RAID 6</span></div>
+              <div><span class="k">成员</span><span class="v num">4 盘 + 0 热备</span></div>
+              <div><span class="k">总容量</span><span class="v num">21.8 TB</span></div>
+              <div><span class="k">重建 / 校验</span><span class="v">无活动</span></div>
+            </div></div>
+          </div>
+          <div class="card c6"><div class="card-h">卷 vol1<div class="right"><span class="tag-st"><span class="dot"></span>挂载</span></div></div>
+            <div class="card-b">
+              <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span class="num">8.2 / 10.9 TB</span><span class="num">75%</span></div>
+              <div class="bar"></div>
+              <div class="kv" style="margin-top:10px">
+                <div><span class="k">文件系统</span><span class="v">Btrfs</span></div>
+                <div><span class="k">挂载点</span><span class="v num">/vol1</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="card c6"><div class="card-h">云盘 backup<div class="right"><span class="tag-st"><span class="dot"></span>已连接</span></div></div>
+            <div class="card-b"><div class="kv">
+              <div><span class="k">类型</span><span class="v">阿里云 OSS</span></div>
+              <div><span class="k">用途</span><span class="v">异地备份</span></div>
+            </div></div>
+          </div>
+          <div class="card c6"><div class="card-h">卷映射拓扑</div>
+            <div class="card-b"><div class="tree">
+              <div class="n0 nd">▣ 阵列 md126（RAID6 · 21.8TB）</div>
+              <div class="n1">├ ▤ 卷 vol1（Btrfs · 10.9TB）</div>
+              <div class="n2">│&nbsp;&nbsp;├ ● sda（盘位1 · 4TB）</div>
+              <div class="n2">│&nbsp;&nbsp;├ ● sdb（盘位2 · 4TB）</div>
+              <div class="n2">│&nbsp;&nbsp;├ ● sdc（盘位3 · 8TB）</div>
+              <div class="n2">│&nbsp;&nbsp;└ ● sdd（盘位4 · 8TB）</div>
+              <div class="n1">└ ☁ 云盘 backup（OSS）</div>
+            </div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ #/fan 风扇控制 ============ -->
+      <section class="page" id="p-fan">
+        <div class="ph">
+          <span class="tt">风扇控制</span><span class="sub">接管 · 手动调速 · 温控规则 · 曲线编辑</span>
+          <span class="tag"><span class="dot"></span>接管中</span>
+          <div class="right"><span class="small muted num">最后更新 10:32:09</span><label class="switch on"><span class="tr"></span>2s</label><button class="btn sm">立即刷新</button></div>
+        </div>
+
+        <div class="card" style="margin-bottom:12px">
+          <div class="card-b" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+            <label class="switch on"><span class="tr"></span></label>
+            <div>
+              <strong>风扇接管总开关</strong>
+              <div class="small muted">开启后由 nasdeck 接管全部风扇（自动停止 FCS / 关闭时恢复）；启停均需二次确认</div>
+            </div>
+            <button class="btn sm" style="margin-left:auto">停用接管</button>
+          </div>
+        </div>
+
+        <div class="grid" style="margin-bottom:12px">
+          <div class="card c4"><div class="card-h">CPU_FAN<div class="right"><button class="btn sm">重命名</button><button class="btn sm">隐藏</button></div></div>
+            <div class="card-b">
+              <div style="display:flex;gap:20px;align-items:baseline;margin-bottom:6px">
+                <span class="big num" style="font-size:22px;font-weight:600">1220<small class="small muted"> RPM</small></span>
+                <span class="num">占空比 46%</span>
+              </div>
+              <input type="range" min="0" max="100" value="46">
+              <div style="display:flex;justify-content:space-between;margin-top:8px">
+                <label class="switch on"><span class="tr"></span>PWM</label>
+                <span class="small muted">DC 12V</span>
+              </div>
+            </div>
+          </div>
+          <div class="card c4"><div class="card-h">前板_FAN<div class="right"><button class="btn sm">重命名</button><button class="btn sm">隐藏</button></div></div>
+            <div class="card-b">
+              <div style="display:flex;gap:20px;align-items:baseline;margin-bottom:6px">
+                <span class="big num" style="font-size:22px;font-weight:600">980<small class="small muted"> RPM</small></span>
+                <span class="num">占空比 38%</span>
+              </div>
+              <input type="range" min="0" max="100" value="38">
+              <div style="display:flex;justify-content:space-between;margin-top:8px">
+                <label class="switch"><span class="tr"></span>PWM</label>
+                <span class="small muted">DC 12V</span>
+              </div>
+            </div>
+          </div>
+          <div class="card c4"><div class="card-h">后板_FAN<div class="right"><button class="btn sm">重命名</button><button class="btn sm">隐藏</button></div></div>
+            <div class="card-b">
+              <div style="display:flex;gap:20px;align-items:baseline;margin-bottom:6px">
+                <span class="big num" style="font-size:22px;font-weight:600">1450<small class="small muted"> RPM</small></span>
+                <span class="num">占空比 52%</span>
+              </div>
+              <input type="range" min="0" max="100" value="52">
+              <div style="display:flex;justify-content:space-between;margin-top:8px">
+                <label class="switch on"><span class="tr"></span>PWM</label>
+                <span class="small muted">DC 12V</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="card c8">
+            <div class="card-h">风扇曲线编辑器<div class="right"><button class="btn sm">添加点</button><button class="btn sm">重置</button></div></div>
+            <div class="card-b">
+              <div class="chart-ph tall"><span>温度 → 占空比 曲线占位 → ECharts line + 拖拽圆点编辑</span><span class="small">横轴温度 °C · 纵轴占空比 % · 圆点可拖拽</span></div>
+            </div>
+          </div>
+          <div class="card c4">
+            <div class="card-h">温控规则</div>
+            <div class="card-b">
+              <div class="small" style="font-weight:600;margin-bottom:8px">规则 A（CPU 传感器）</div>
+              <div class="frm" style="margin-bottom:14px">
+                <label>传感器</label><select><option>CPU Package</option></select>
+                <label>曲线</label><select><option>曲线 1（静音优先）</option></select>
+                <label>迟滞</label><input type="text" value="3 °C">
+              </div>
+              <div class="small" style="font-weight:600;margin-bottom:8px">规则 B（硬盘传感器）</div>
+              <div class="frm">
+                <label>传感器</label><select><option>盘位 3</option></select>
+                <label>曲线</label><select><option>曲线 2（散热优先）</option></select>
+                <label>迟滞</label><input type="text" value="4 °C">
+              </div>
+              <button class="btn primary" style="margin-top:14px">保存规则</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ #/docker Docker ============ -->
+      <section class="page" id="p-docker">
+        <div class="ph">
+          <span class="tt">Docker</span><span class="sub">容器运行状态 · 资源占用</span>
+          <span class="tag"><span class="dot"></span>4 个运行中</span>
+          <div class="right"><span class="small muted num">最后更新 10:32:10</span><label class="switch on"><span class="tr"></span>8s</label><button class="btn sm">立即刷新</button></div>
+        </div>
+        <div class="card">
+          <div class="table-scroll">
+            <table>
+              <tr><th>容器</th><th>状态</th><th>内存</th><th>CPU</th><th>网速</th><th>端口映射</th><th>运行时长</th></tr>
+              <tr><td>plex</td><td><span class="tag-st"><span class="dot"></span>运行中</span></td><td class="num">1.2 GB</td><td class="num">3.4%</td><td class="num">↓2.1 ↑0.4 MB/s</td><td class="num">32400→32400</td><td class="num">6 天</td></tr>
+              <tr><td>qBittorrent</td><td><span class="tag-st"><span class="dot"></span>运行中</span></td><td class="num">420 MB</td><td class="num">1.1%</td><td class="num">↓8.9 ↑1.2 MB/s</td><td class="num">6881→6881</td><td class="num">2 天</td></tr>
+              <tr><td>homeassistant</td><td><span class="tag-st"><span class="dot"></span>运行中</span></td><td class="num">660 MB</td><td class="num">0.8%</td><td class="num">↓0.1 ↑0.1 MB/s</td><td class="num">8123→8123</td><td class="num">23 天</td></tr>
+              <tr><td>memcached</td><td><span class="tag-st err"><span class="dot"></span>已退出</span></td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td></tr>
+            </table>
+          </div>
+          <div class="card-b small muted">移动端：表格横向滚动（卡片化列入高保真迭代评估）</div>
+        </div>
+      </section>
+
+      <!-- ============ #/ports 端口占用 ============ -->
+      <section class="page" id="p-ports">
+        <div class="ph">
+          <span class="tt">端口占用</span><span class="sub">监听端口 · 进程 · 可达性</span>
+          <div class="right"><span class="small muted num">最后更新 10:32:05</span><label class="switch on"><span class="tr"></span>10s</label><button class="btn sm">立即刷新</button></div>
+        </div>
+        <div class="card">
+          <div class="card-b" style="display:flex;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--border)">
+            <input type="text" placeholder="搜索端口 / 进程 / 应用" style="flex:1;min-width:180px">
+            <select><option>全部可达性</option><option>可达</option><option>受限</option><option>不可达</option></select>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <tr><th>应用</th><th>端口</th><th>协议</th><th>进程 (PID)</th><th>可达性</th><th>操作</th></tr>
+              <tr><td>▣ nasdeck 面板</td><td class="num">9821</td><td>TCP</td><td class="num">uvicorn (2103)</td><td><span class="tag-st"><span class="dot"></span>可达</span></td>
+                  <td style="position:relative"><button class="btn sm" data-pop="pRel1">释放</button>
+                    <div class="pop" id="pRel1">确认释放端口 9821？将向进程发送 SIGTERM。<div class="acts"><button class="btn sm pop-cancel">取消</button><button class="btn sm primary pop-ok">确认</button></div></div>
+                  </td></tr>
+              <tr><td>▣ Plex</td><td class="num">32400</td><td>TCP</td><td class="num">Plex Media Server (2210)</td><td><span class="tag-st"><span class="dot"></span>可达</span></td>
+                  <td style="position:relative"><button class="btn sm" data-pop="pRel2">释放</button>
+                    <div class="pop" id="pRel2">确认释放端口 32400？将向进程发送 SIGTERM。<div class="acts"><button class="btn sm pop-cancel">取消</button><button class="btn sm primary pop-ok">确认</button></div></div>
+                  </td></tr>
+              <tr><td>▣ SMB</td><td class="num">445</td><td>TCP</td><td class="num">smbd (1201)</td><td><span class="tag-st warn"><span class="dot"></span>受限（仅局域网）</span></td>
+                  <td style="position:relative"><button class="btn sm" data-pop="pRel3">释放</button>
+                    <div class="pop" id="pRel3">确认释放端口 445？系统服务释放前需特别确认。<div class="acts"><button class="btn sm pop-cancel">取消</button><button class="btn sm primary pop-ok">确认</button></div></div>
+                  </td></tr>
+              <tr><td>▣ 未知</td><td class="num">9090</td><td>TCP</td><td class="num">python3 (3321)</td><td><span class="tag-st err"><span class="dot"></span>不可达</span></td>
+                  <td style="position:relative"><button class="btn sm" data-pop="pRel4">释放</button>
+                    <div class="pop" id="pRel4">确认释放端口 9090？<div class="acts"><button class="btn sm pop-cancel">取消</button><button class="btn sm primary pop-ok">确认</button></div></div>
+                  </td></tr>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ #/automation 控制与自动化 ============ -->
+      <section class="page" id="p-automation">
+        <div class="ph">
+          <span class="tt">控制与自动化</span><span class="sub">告警 · 通知 · 报告 · 日志</span>
+          <span class="tag warn"><span class="dot"></span>2 条活动告警</span>
+          <div class="right"><span class="small muted num">最后更新 10:32:00</span><label class="switch on"><span class="tr"></span>15s</label><button class="btn sm">立即刷新</button></div>
+        </div>
+
+        <div class="card" style="margin-bottom:12px">
+          <div class="card-b" style="padding-bottom:0">
+            <div class="tabs" data-tabs="auto">
+              <button class="on" data-tab="t1">活动告警</button>
+              <button data-tab="t2">告警规则与通知</button>
+              <button data-tab="t3">报告导出</button>
+            </div>
+            <div data-panel="auto-t1" style="padding:14px 0">
+              <div class="kv" style="grid-template-columns:1fr">
+                <div><span class="k"><span class="tag-st warn"><span class="dot"></span>WARN</span></span><span class="v">盘位 3 SMART 05 重映射扇区增长 · 10:21</span></div>
+                <div><span class="k"><span class="tag-st warn"><span class="dot"></span>WARN</span></span><span class="v">机箱后部温度 61 °C 超过阈值 60 °C · 10:32</span></div>
+              </div>
+            </div>
+            <div data-panel="auto-t2" style="display:none;padding:14px 0">
+              <div class="frm">
+                <label>监控指标</label><select><option>温度</option><option>SMART 属性</option><option>负载</option></select>
+                <label>比较</label><select><option>&gt; 高于</option><option>&lt; 低于</option></select>
+                <label>阈值</label><input type="text" value="60">
+                <label>持续时间</label><input type="text" value="60 s">
+                <label>通知渠道</label>
+                <span class="chips" data-tabs="ch"><button class="on">飞牛通知</button><button>Webhook</button></span>
+                <label></label><span><button class="btn sm">发送测试通知</button></span>
+              </div>
+              <button class="btn primary" style="margin-top:14px">保存规则</button>
+            </div>
+            <div data-panel="auto-t3" style="display:none;padding:14px 0">
+              <div class="frm">
+                <label>导出周期</label><select><option>每日 08:00</option><option>每周一 08:00</option><option>关闭</option></select>
+                <label>格式</label><span class="chips" data-tabs="fmt"><button class="on">MD</button><button class="on">HTML</button><button>CSV</button></span>
+                <label></label><span><button class="btn">立即导出</button></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-h">日志与错误历史<div class="right"><button class="btn sm" data-modal="mLog">查看日志</button><button class="btn sm" data-modal="mLog">错误历史</button></div></div>
+          <div class="card-b small muted">点击右上角按钮弹出日志流弹窗（含“清空错误记录”二次确认）</div>
+        </div>
+      </section>
+
+      <!-- ============ #/manual 操作手册 ============ -->
+      <section class="page" id="p-manual">
+        <div class="ph">
+          <span class="tt">操作手册</span><span class="sub">快速上手 · 页面说明 · 常见问题</span>
+          <div class="right"><button class="btn" data-drawer="drToc">☰ 目录</button></div>
+        </div>
+        <div class="card"><div class="card-b" style="max-width:820px">
+          <h3 style="font-size:14px;margin-bottom:8px">快速上手</h3>
+          <p class="muted" style="margin-bottom:14px">正文占位：内容管道保持后端 `/manual?embed=1` 不变，仅外壳与排版套用新令牌（prose 类）。</p>
+          <div style="border:1px dashed var(--border-strong);border-radius:var(--r-md);padding:14px;color:var(--t2);margin-bottom:14px">
+            段落占位 —— 安装 / 首次配置 / 数据源说明
+          </div>
+          <h3 style="font-size:14px;margin-bottom:8px">页面说明</h3>
+          <div style="border:1px dashed var(--border-strong);border-radius:var(--r-md);padding:14px;color:var(--t2);margin-bottom:14px">
+            段落占位 —— 12 个页面的功能与操作
+          </div>
+          <h3 style="font-size:14px;margin-bottom:8px">常见问题</h3>
+          <div style="border:1px dashed var(--border-strong);border-radius:var(--r-md);padding:14px;color:var(--t2)">
+            段落占位 —— 风扇接管 / 权限 / 反代
+          </div>
+        </div></div>
+      </section>
+
+      <!-- ============ #/about 关于 nasdeck ============ -->
+      <section class="page" id="p-about">
+        <div class="ph">
+          <span class="tt">关于 nasdeck</span><span class="sub">版本 · 更新 · 构建信息</span>
+        </div>
+        <div class="grid">
+          <div class="card c6">
+            <div class="card-b" style="display:flex;gap:16px;align-items:center">
+              <div style="width:96px;height:96px;border:1px dashed var(--border-strong);border-radius:var(--r-lg);display:flex;align-items:center;justify-content:center;color:var(--t2);flex:none">插画 PNG<br>（品牌区保留地）</div>
+              <div>
+                <div style="font-size:18px;font-weight:600">nasdeck</div>
+                <div class="muted">飞牛 fnOS 硬件监控面板</div>
+                <div class="num" style="margin-top:6px">v2.3.0</div>
+              </div>
+            </div>
+          </div>
+          <div class="card c6">
+            <div class="card-h">检查更新</div>
+            <div class="card-b"><div class="kv">
+              <div><span class="k">当前版本</span><span class="v num">v2.3.0</span></div>
+              <div><span class="k">最新版本</span><span class="v num">v2.3.0（已是最新）</span></div>
+            </div>
+            <div class="chips" style="margin-top:10px"><button class="btn sm primary">检查更新</button><button class="btn sm">更新日志</button></div>
+            </div>
+          </div>
+          <div class="card c12">
+            <div class="card-h">构建信息</div>
+            <div class="card-b"><div class="kv">
+              <div><span class="k">构建时间</span><span class="v num">2026-09-29 08:00</span></div>
+              <div><span class="k">Git 提交</span><span class="v num">ed98ead</span></div>
+              <div><span class="k">许可</span><span class="v">MIT</span></div>
+              <div><span class="k">反馈渠道</span><span class="v">GitHub Issues</span></div>
+            </div></div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ===== 弹窗：内存详情 ===== -->
+<div class="modal-mask" id="maskModal"></div>
+<div class="modal" id="mDimm">
+  <div class="card-h">内存详情 · DIMM_A1<button class="icon-btn" data-close style="margin-left:auto">✕</button></div>
+  <div class="card-b"><div class="kv">
+    <div><span class="k">容量</span><span class="v num">16 GB</span></div>
+    <div><span class="k">类型</span><span class="v">DDR4 ECC</span></div>
+    <div><span class="k">频率</span><span class="v num">2400 MT/s</span></div>
+    <div><span class="k">通道</span><span class="v">A</span></div>
+    <div><span class="k">厂商</span><span class="v">Samsung</span></div>
+    <div><span class="k">序列号</span><span class="v num">31D8C4A0</span></div>
+    <div><span class="k">状态</span><span class="v">正常</span></div>
+    <div><span class="k">可校正错误</span><span class="v num">0</span></div>
+  </div></div>
+</div>
+
+<!-- ===== 弹窗：日志流 ===== -->
+<div class="modal" id="mLog">
+  <div class="card-h">日志与错误历史<button class="icon-btn" data-close style="margin-left:auto">✕</button></div>
+  <div class="card-b">
+    <div style="border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface-2);padding:10px 12px;font-family:ui-monospace,Consolas,monospace;font-size:12px;line-height:1.9" class="num">
+      <div>10:21:04 WARN&nbsp; disk3 smart_attr 05 递增 (12 → 13)</div>
+      <div>10:32:11 INFO&nbsp; poll system ok (1s)</div>
+      <div>10:32:10 WARN&nbsp; temp rear 61°C &gt; 60°C</div>
+      <div>10:30:00 INFO&nbsp; report daily exported md/html</div>
+      <div>09:58:41 ERR&nbsp;&nbsp; fan api timeout → 已重试成功</div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
+      <button class="btn sm">清空错误记录（需二次确认）</button>
+      <button class="btn sm primary" data-close>关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 抽屉：手册目录 ===== -->
+<div class="drawer-mask" id="maskDrawer"></div>
+<div class="drawer" id="drToc">
+  <div class="card-h">目录<button class="icon-btn" data-close style="margin-left:auto">✕</button></div>
+  <div class="toc-item">1. 快速上手</div>
+  <div class="toc-item">1.1 安装与首次配置</div>
+  <div class="toc-item">1.2 数据源说明</div>
+  <div class="toc-item">2. 页面说明</div>
+  <div class="toc-item">2.1 硬件配置检测</div>
+  <div class="toc-item">2.2 系统资源 / 温度</div>
+  <div class="toc-item">2.3 硬盘 SMART / 存储卷</div>
+  <div class="toc-item">2.4 风扇控制</div>
+  <div class="toc-item">3. 常见问题</div>
+  <div class="toc-item">4. 版本与更新</div>
+</div>
+
+<div class="vp-ind" id="vpInd">视口：桌面 ≥768px</div>
+
+<script>
+/* ---------- hash 路由（12 页，与现网 IA 对应） ---------- */
+var PAGES = ["/detect","/system","/temps","/sys-hist","/disks","/storage","/fan","/docker","/ports","/automation","/manual","/about"];
+function currentPath(){
+  var h = location.hash.replace(/^#/,"") || "/detect";
+  return PAGES.indexOf(h) >= 0 ? h : "/detect";
+}
+function render(){
+  var p = currentPath();
+  PAGES.forEach(function(x){
+    document.getElementById("p"+x.replace("/","-")).classList.toggle("active", x===p);
+  });
+  document.querySelectorAll("[data-nav]").forEach(function(b){
+    b.classList.toggle("active", b.getAttribute("data-nav")===p);
+  });
+  document.body.classList.remove("drawer-open");
+  window.scrollTo(0,0);
+}
+window.addEventListener("hashchange", render);
+
+/* 导航点击 → 换页 */
+document.querySelectorAll("[data-nav]").forEach(function(b){
+  b.addEventListener("click", function(){ location.hash = "#"+b.getAttribute("data-nav"); });
+});
+
+/* ---------- 页面快速搜索（桌面）：过滤 NAV，回车跳首个命中 ---------- */
+var searchBox = document.getElementById("navSearch");
+searchBox.addEventListener("input", function(){
+  var q = this.value.trim().toLowerCase(), anyVisible=false;
+  document.querySelectorAll("[data-nav]").forEach(function(b){
+    var hit = !q || b.textContent.toLowerCase().indexOf(q) >= 0;
+    b.style.display = hit ? "" : "none";
+    if(hit) anyVisible = true;
+  });
+  document.querySelectorAll(".nav-group").forEach(function(g){ g.style.display = q ? "none" : ""; });
+});
+searchBox.addEventListener("keydown", function(e){
+  if(e.key !== "Enter") return;
+  var first = document.querySelector('[data-nav][style=""], [data-nav]:not([style*="none"])');
+  if(first) location.hash = "#"+first.getAttribute("data-nav");
+  this.value = ""; this.dispatchEvent(new Event("input"));
+});
+
+/* ---------- 侧栏：桌面折叠 rail（localStorage 持久化） / 移动抽屉 ---------- */
+if(localStorage.getItem("proto_rail")==="1") document.body.classList.add("rail");
+document.getElementById("btnRail").addEventListener("click", function(){
+  document.body.classList.toggle("rail");
+  localStorage.setItem("proto_rail", document.body.classList.contains("rail") ? "1" : "0");
+});
+document.getElementById("btnDrawer").addEventListener("click", function(){
+  document.body.classList.toggle("drawer-open");
+});
+document.getElementById("navOverlay").addEventListener("click", function(){
+  document.body.classList.remove("drawer-open");
+});
+
+/* ---------- 主题三态（线框占位：仅切换文案） ---------- */
+var THEMES = ["浅色","深色","跟随"], ti = 2;
+document.getElementById("btnTheme").addEventListener("click", function(){
+  ti = (ti+1) % 3;
+  this.textContent = "主题：" + THEMES[ti];
+});
+
+/* ---------- 数据新鲜度告警演示 ---------- */
+document.getElementById("btnFresh").addEventListener("click", function(){
+  var stale = document.body.classList.toggle("stale");
+  document.getElementById("freshTxt").textContent = stale ? "延迟 18s" : "实时";
+});
+
+/* ---------- 通用：页签 / 单选组（data-tabs → data-panel） ---------- */
+document.querySelectorAll("[data-tabs]").forEach(function(group){
+  var name = group.getAttribute("data-tabs");
+  group.querySelectorAll("button").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var key = btn.getAttribute("data-tab") || btn.textContent.trim();
+      group.querySelectorAll("button").forEach(function(b){ b.classList.toggle("on", b===btn); });
+      document.querySelectorAll('[data-panel^="'+name+'-"]').forEach(function(pn){
+        pn.style.display = pn.getAttribute("data-panel")===name+"-"+key ? "" : "none";
+      });
+    });
+  });
+});
+
+/* ---------- 弹窗（modal） ---------- */
+var openModal = null;
+document.querySelectorAll("[data-modal]").forEach(function(b){
+  b.addEventListener("click", function(){
+    closeFloat();
+    openModal = document.getElementById(b.getAttribute("data-modal"));
+    openModal.classList.add("show");
+    document.getElementById("maskModal").classList.add("show");
+  });
+});
+document.getElementById("maskModal").addEventListener("click", closeFloat);
+
+/* ---------- 抽屉（drawer，手册目录） ---------- */
+var openDrawer = null;
+document.querySelectorAll("[data-drawer]").forEach(function(b){
+  b.addEventListener("click", function(){
+    closeFloat();
+    openDrawer = document.getElementById(b.getAttribute("data-drawer"));
+    openDrawer.classList.add("show");
+    document.getElementById("maskDrawer").classList.add("show");
+  });
+});
+document.getElementById("maskDrawer").addEventListener("click", closeFloat);
+
+/* 抽屉目录项点击 → 关闭（模拟锚点跳转） */
+document.querySelectorAll("#drToc .toc-item").forEach(function(t){
+  t.addEventListener("click", closeFloat);
+});
+
+function closeFloat(){
+  document.querySelectorAll(".modal,.drawer").forEach(function(m){ m.classList.remove("show"); });
+  document.getElementById("maskModal").classList.remove("show");
+  document.getElementById("maskDrawer").classList.remove("show");
+  document.querySelectorAll(".pop").forEach(function(p){ p.classList.remove("show"); });
+  openModal = openDrawer = null;
+}
+document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeFloat(); });
+document.querySelectorAll("[data-close]").forEach(function(b){ b.addEventListener("click", closeFloat); });
+
+/* ---------- 确认气泡（NPopconfirm 线框） ---------- */
+document.querySelectorAll("[data-pop]").forEach(function(b){
+  b.addEventListener("click", function(e){
+    e.stopPropagation();
+    var pop = document.getElementById(b.getAttribute("data-pop")), showing = pop.classList.contains("show");
+    closeFloat();
+    if(!showing) pop.classList.add("show");
+  });
+});
+document.querySelectorAll(".pop-cancel,.pop-ok").forEach(function(b){
+  b.addEventListener("click", function(){ closeFloat(); });
+});
+/* 全局点击只负责收起确认气泡（弹窗/抽屉由各自的遮罩/✕/Esc 关闭） */
+document.addEventListener("click", function(e){
+  if(!e.target.closest(".pop") && !e.target.closest("[data-pop]")) {
+    document.querySelectorAll(".pop").forEach(function(p){ p.classList.remove("show"); });
+  }
+});
+
+/* ---------- 分区折叠（Detect Section） ---------- */
+document.querySelectorAll(".sec-h").forEach(function(h){
+  h.addEventListener("click", function(){ h.parentElement.classList.toggle("open"); });
+});
+
+/* ---------- 开关（线框演示） ---------- */
+document.querySelectorAll(".switch").forEach(function(s){
+  s.addEventListener("click", function(){ s.classList.toggle("on"); });
+});
+
+/* ---------- 视口指示（评审辅助） ---------- */
+function vp(){
+  document.getElementById("vpInd").textContent =
+    window.innerWidth < 768 ? "视口：移动 <768px（侧栏转抽屉）" : "视口：桌面 ≥768px";
+}
+window.addEventListener("resize", vp); vp();
+
+/* ---------- 初始渲染 ---------- */
+if(!location.hash) location.hash = "#/detect";
+render();
+</script>
+</body>
+</html>
